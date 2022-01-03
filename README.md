@@ -16,7 +16,7 @@ This attempts to start hp-toolbox but it must be installed so please do that, if
 ### The "Additional Printer Settings..." Menu
 
 
-This menu does nothing on Fedora just now as `/usr/share/system-config-printer/system-config-printer.py` does not exist seems to be a Ubuntu/Debian thing.
+This menu does nothing on Fedora just now as `/usr/share/system-config-printer/system-config-printer.py` does not exist; seems to be a Ubuntu/Debian thing.
 
 
 ### The "Software Update..." Menu
