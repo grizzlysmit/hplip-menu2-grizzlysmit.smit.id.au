@@ -18,6 +18,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 "use strict";
+/*global imports*/
+/*eslint no-undef: "error"*/
+
 
 const GObject = imports.gi.GObject;
 
@@ -40,9 +43,6 @@ const _ = Gettext.gettext;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const Convenience = Me.imports.convenience;
-const Local = imports.misc.extensionUtils.getCurrentExtension();
-const Settings = Local.imports.settings;
 
 const guuid      = "hplip-menu2";
 let _ext         = null;
@@ -74,6 +74,7 @@ function check_command(cmd){
     if(cmd.length == 0){
         return false;
     }
+    var which = null;
     switch(cmd[0]){
         case "sudo":
         case "/usr/bin/sudo":
@@ -109,8 +110,8 @@ function check_command(cmd){
                             continue;
                     }
                 }else if(cmd[loc].substr(0, 1) != "-"){
-                    var which = GLib.find_program_in_path(cmd[loc]);
-                    //var which = GLib.spawn_command_line_sync("which " + cmd[loc])[1].toString();
+                    which = GLib.find_program_in_path(cmd[loc]);
+                    //which = GLib.spawn_command_line_sync("which " + cmd[loc])[1].toString();
                     return (which != null);
                 }
             }
@@ -119,8 +120,8 @@ function check_command(cmd){
         case "/usr/bin/nohup":
             for(let loc = 1; loc < cmd.length; loc++){
                 if(cmd[loc].substr(0, 1) != "-"){
-                    var which = GLib.find_program_in_path(cmd[loc]);
-                    //var which = GLib.spawn_command_line_sync("which " + cmd[loc])[1].toString();
+                    which = GLib.find_program_in_path(cmd[loc]);
+                    //which = GLib.spawn_command_line_sync("which " + cmd[loc])[1].toString();
                     return (which != null);
                 }
             }
@@ -131,14 +132,14 @@ function check_command(cmd){
                     switch(cmd[loc]){
                         case "-e":
                         case "-E":
-                            var which = GLib.find_program_in_path("perl");
+                            which = GLib.find_program_in_path("perl");
                             return (which != null);
                         default:
                             continue;
                     }
                 }else if(cmd[loc].substr(0, 1) != "-"){
-                    var which = GLib.find_program_in_path(cmd[loc]);
-                    //var which = GLib.spawn_command_line_sync("which " + cmd[loc])[1].toString();
+                    which = GLib.find_program_in_path(cmd[loc]);
+                    //which = GLib.spawn_command_line_sync("which " + cmd[loc])[1].toString();
                     return (which != null);
                 }
             }
@@ -148,7 +149,7 @@ function check_command(cmd){
                 if(cmd[loc].substr(0, 1) == "-"){
                     switch(cmd[loc]){
                         case "-e":
-                            var which = GLib.find_program_in_path("raku");
+                            which = GLib.find_program_in_path("raku");
                             return (which != null);
                         case "-I":
                         case "-M":
@@ -166,14 +167,14 @@ function check_command(cmd){
                             continue;
                     }
                 }else if(cmd[loc].substr(0, 1) != "-"){
-                    var which = GLib.find_program_in_path(cmd[loc]);
-                    //var which = GLib.spawn_command_line_sync("which " + cmd[loc])[1].toString();
+                    which = GLib.find_program_in_path(cmd[loc]);
+                    //which = GLib.spawn_command_line_sync("which " + cmd[loc])[1].toString();
                     return (which != null);
                 }
             }
             return false;
         default:
-            let python = /^python(:?\d+(?:\.\d+))?/i;
+            var python = /^python(:?\d+(?:\.\d+))?/i;
             if(python.test(cmd[0])){
                 for(let loc = 1; loc < cmd.length; loc++){
                     if(cmd[loc].substr(0, 1) == "-"){
@@ -188,30 +189,28 @@ function check_command(cmd){
                                 continue;
                         }
                     }else if(cmd[loc].substr(0, 1) != "-"){
-                        var which = GLib.find_program_in_path(cmd[loc]);
-                        //var which = GLib.spawn_command_line_sync("which " + cmd[loc])[1].toString();
+                        which = GLib.find_program_in_path(cmd[loc]);
+                        //which = GLib.spawn_command_line_sync("which " + cmd[loc])[1].toString();
                         return (which != null);
                     }
                 }
                 return false;
             }
-            var which = GLib.find_program_in_path(cmd[0]);
-            //var which = GLib.spawn_command_line_sync("which " + cmd[0])[1].toString();
+            which = GLib.find_program_in_path(cmd[0]);
+            //which = GLib.spawn_command_line_sync("which " + cmd[0])[1].toString();
             return (which != null);
     }
-    return false;
 }
 
 const ExtensionImpl = GObject.registerClass(
-    { GTypeName: 'hplip-menu2' },    
+    { GTypeName: "hplip-menu2" },    
     class ExtensionImplInt extends PanelMenu.Button {
 
         _init(){
             //super._init(0);
             if(settings == null){
-                Convenience.initTranslations(guuid);
-                settings = Convenience.getSettings();
-                //settings_data = Settings.getSettings(settings);
+                ExtensionUtils.initTranslations(guuid);
+                settings = ExtensionUtils.getSettings();
                 settings_data = JSON.parse(settings.get_string("settings-json"));
             }
             //log("settings_data.icon_name == " + settings_data.icon_name + "\n");
@@ -275,7 +274,7 @@ const ExtensionImpl = GObject.registerClass(
             }
         }
 
-        callback_command(ind, obj){
+        callback_command(ind, _obj){
             //log("obj == " + obj + "\n");
             //log("ind == " + ind + "\n");
             var currentAction = cmds[ind].action;
@@ -292,7 +291,7 @@ const ExtensionImpl = GObject.registerClass(
             // */
         }
 
-        callback_desktop(action, ind, obj){
+        callback_desktop(action, ind, _obj){
             //log("action == " + action + "\n");
             //log("ind == " + ind + "\n");
             //log("obj == " + obj + "\n");
@@ -333,15 +332,12 @@ const ExtensionImpl = GObject.registerClass(
 
 class Extension {
     constructor() {
-        if(settings == null){
-            Convenience.initTranslations(guuid);
-            settings = Convenience.getSettings();
-            //settings_data = Settings.getSettings(settings);
-            settings_data = JSON.parse(settings.get_string("settings-json"));
-        }
     }
 
     enable() {
+        settings = ExtensionUtils.getSettings();
+        settings_data = JSON.parse(settings.get_string("settings-json"));
+        if(settings_data.position < 0 || settings_data.position > 25) settings_data.position = 0;
         _ext = new ExtensionImpl();
         settingsID = settings.connect("changed::settings-json", this.onSettingsChanged.bind(this)); 
         _ext.enable();
@@ -350,10 +346,12 @@ class Extension {
     disable() {
         _ext.destroy();
         settings.disconnect(settingsID);
+        settings = null;
+        settings_data = null;
         _ext = null;
     }
 
-    onSettingsChanged(obj){
+    onSettingsChanged(_obj){
         //log("obj == " + obj + "\n");
         _ext.destroy();
         _ext = null;
@@ -369,10 +367,7 @@ class Extension {
 }
 
 function init() {
-    Convenience.initTranslations(guuid);
-    settings = Convenience.getSettings();
-    settings_data = Settings.getSettings(settings);
-    if(settings_data.position < 0 || settings_data.position > 25) settings_data.position = 0;
+    ExtensionUtils.initTranslations(guuid);
     return new Extension();
 }
 

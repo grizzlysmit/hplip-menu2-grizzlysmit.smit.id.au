@@ -5,6 +5,6 @@
     "package-dir"    : "hplip-menu2@grizzlysmit.smit.id.au", 
     "out-dir"        : "/home/grizzlysmit/Projects/gnome-shell/extensions/", 
     "force"          : true, 
-    "extra-sources"  : [ "convenience.js", "settings.js"]
+    "extra-sources"  : [ ]
 }
 

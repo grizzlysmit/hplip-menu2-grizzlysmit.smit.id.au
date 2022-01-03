@@ -20,17 +20,16 @@
 
 /* exported init */
 "use strict";
+
+/*global imports*/
+/*eslint no-undef: "error"*/
+
 const ExtensionUtils = imports.misc.extensionUtils;
 //const GObject = imports.gi.GObject;
 const Gtk = imports.gi.Gtk;
 
 const Gettext = imports.gettext.domain("gnome-shell-extensions");
 const _ = Gettext.gettext;
-
-const Me = ExtensionUtils.getCurrentExtension();
-const Convenience = Me.imports.convenience;
-//const Local = imports.misc.extensionUtils.getCurrentExtension();
-//const Settings = Local.imports.settings;
 
 let settings = null;
 let frame    = null;
@@ -46,11 +45,9 @@ let guuid = "hplip-menu2";
 let settings_data = null;
 let save_settings_button = null;
 
-function save_clicked(obj){
+function save_clicked(_obj){
     //log("got here\n");
     // get the settings
-    //settings = Convenience.getSettings();
-    //settings_data = Settings.getSettings(settings);
     settings_data = JSON.parse(settings.get_string("settings-json"));
     //log("settings_data == " + JSON.stringify(settings_data) + "\n");
     //log("area == " + area + "\n");
@@ -69,10 +66,10 @@ function save_clicked(obj){
     //log("settings_data == " + JSON.stringify(settings_data) + "\n");
 }
 
-function area_dropdown_clicked(combo, obj){
+function area_dropdown_clicked(combo, _obj){
     let activeItem = combo.get_active();
     //log("area_dropdown_clicked: activeItem == " + activeItem + "\n");
-    //log("area_dropdown_clicked: obj == " + obj + "\n");
+    //log("area_dropdown_clicked: _obj == " + _obj + "\n");
     if(activeItem >= 0){
         if (activeItem==0) area = "left";
         if (activeItem==1) area = "center";
@@ -81,10 +78,10 @@ function area_dropdown_clicked(combo, obj){
     //log("area_dropdown_clicked: area == " + area + "\n");
 }
 
-function icon_dropdown_clicked(combo, obj){
+function icon_dropdown_clicked(combo, _obj){
     let activeItem = combo.get_active();
     //log("icon_dropdown_clicked: activeItem == " + activeItem + "\n");
-    //log("icon_dropdown_clicked: obj == " + obj + "\n");
+    //log("icon_dropdown_clicked: _obj == " + _obj + "\n");
     if(activeItem >= 0){
         if (activeItem == 0) icon_name = "printer";
         if (activeItem == 1) icon_name = "/usr/share/hplip/data/images/16x16/hp_logo.png";
@@ -155,10 +152,9 @@ function _save_settings_box(){
 
 
 function init() {
-    settings = Convenience.getSettings();
-    //settings_data = Settings.getSettings(settings);
+    ExtensionUtils.initTranslations(guuid);
+    settings = ExtensionUtils.getSettings();
     settings_data = JSON.parse(settings.get_string("settings-json"));
-    Convenience.initTranslations(guuid);
 }
 
 function buildPrefsWidget() {

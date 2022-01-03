@@ -15,7 +15,8 @@
     "rules": {
         "indent": [
             "error",
-            4
+            4, 
+            {"SwitchCase" : 1}
         ],
         "linebreak-style": [
             "error",
@@ -28,6 +29,7 @@
         "semi": [
             "error",
             "always"
-        ]
+        ], 
+        "no-unused-vars": ["error", { "varsIgnorePattern": "^(?:init|buildPrefsWidget)$" , "argsIgnorePattern": "^_" }]
     }
 }
