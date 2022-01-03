@@ -1,0 +1,41 @@
+msgid "Area"
+msgstr "Area"
+
+msgid "Left"
+msgstr "Left"
+
+msgid "Center"
+msgstr "Center"
+
+msgid "Right"
+msgstr "Right"
+
+msgid "Icon"
+msgstr "Icon"
+
+msgid "Position"
+msgstr "Position"
+
+msgid "Software center"
+msgstr "Software center"
+
+msgid "Save Settings"
+msgstr "Save Settings"
+
+msgid "About This Computer"
+msgstr "About This Computer"
+
+msgid "User Accounts"
+msgstr "User Accounts"
+
+msgid "System Printers..."
+msgstr "System Printers..."
+
+msgid "Additional Printer Settings..."
+msgstr "Additional Printer Settings..."
+
+msgid "Hp Device Manager..."
+msgstr "Hp Device Manager..."
+
+msgid "Settings..."
+msgstr "Settings..."

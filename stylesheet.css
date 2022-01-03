@@ -1,0 +1,10 @@
+/* Add your custom extension styling here */
+GtkButton {
+    font-size: 36px;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: rgba(10,10,10,0.7);
+    border-radius: 15px;
+    padding: 1.5em;
+    margin-bottom: 10px;
+}

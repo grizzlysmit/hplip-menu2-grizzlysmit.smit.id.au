@@ -1,0 +1,10 @@
+{
+    "schema"         : "schemas/org.gnome.shell.extensions.hplip-menu2.gschema.xml", 
+    "podir"          : "po", 
+    "gettext-domain" : "hplip-menu2", 
+    "package-dir"    : "hplip-menu2@grizzlysmit.smit.id.au", 
+    "out-dir"        : "/home/grizzlysmit/Projects/gnome-shell/extensions/", 
+    "force"          : true, 
+    "extra-sources"  : [ "convenience.js", "settings.js"]
+}
+

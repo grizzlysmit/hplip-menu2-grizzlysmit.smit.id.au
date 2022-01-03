@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schemalist gettext-domain="hplip-menu2">
+    <schema path="/org/gnome/shell/extensions/hplip-menu2/" id="org.gnome.shell.extensions.hplip-menu2">
+        <key type="s" name="settings-json">
+            <default>'
+            {
+                "area": "left",
+                "icon_name": "printer",
+                "position": 0,
+                "software": "org.gnome.Software.desktop",
+                "remove": "yes"
+            }
+            '</default>
+            <summary>JSON settings</summary>
+            <description>Settings for alternate hplip menu2 configuration.</description>
+        </key>
+    </schema>
+</schemalist>
