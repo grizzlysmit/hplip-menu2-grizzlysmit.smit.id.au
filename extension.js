@@ -23,6 +23,7 @@
 
 
 const GObject = imports.gi.GObject;
+//const Clutter = imports.gi.Clutter;
 
 //const Gdk = imports.gi.Gdk;
 //
@@ -61,7 +62,7 @@ const cmds = [
     { type: "separator" },
     { type: "desktop", text: _("Gnome Tweaks..."),                action: "org.gnome.tweaks.desktop",                                                        alt: ["gnome-tweaks"]  },
     { type: "desktop", text: _("Gnome Settings..."),              action: "gnome-control-center.desktop",                                                    alt: ["gnome-control-center"]  },
-    { type: "desktop", text: _("Exetensions..."),                 action: "org.gnome.Extensions.desktop",                                                    alt: ["gnome-extensions"]  },
+    { type: "desktop", text: _("Exetensions..."),                 action: "org.gnome.Extensions.desktop",                                                    alt: ["gnome-extensions-app"]  },
     { type: "separator" },
     { type: "submenu", text: _("Hardware"),                     actions: [
         { type: "separator" },
@@ -255,6 +256,7 @@ function check_command(cmd){
     }
 }
 
+
 const ExtensionImpl = GObject.registerClass(
     { GTypeName: "hplip-menu2" },    
     class ExtensionImplInt extends PanelMenu.Button {
@@ -325,6 +327,7 @@ const ExtensionImpl = GObject.registerClass(
 
                 if (cmds[x].type == "submenu"){
                     let text = cmds[x].text;
+                    //let submenu = new MainPopupSubMenuMenuItem( _(text), true);
                     let submenu = new PopupMenu.PopupSubMenuMenuItem( _(text), true);
                     this.build_menu(submenu, cmds[x].actions);
                     this.menu.addMenuItem(submenu);
@@ -360,10 +363,10 @@ const ExtensionImpl = GObject.registerClass(
                 }
 
                 if (actions[x].type == "submenu"){
-                    let text = actions[x].text;
-                    let submenu = new PopupMenu.PopupSubMenuMenuItem( _(text), true);
-                    this.build_menu(submenu, actions[x].actions);
-                    thesubmenu.menu.addMenuItem(submenu);
+                    //let text = actions[x].text;
+                    //let submenu = new PopupMenu.PopupSubMenuMenuItem( _(text), true);
+                    this.build_menu(thesubmenu, actions[x].actions);
+                    //thesubmenu.menu.addMenuItem(submenu);
                 }
 
                 
