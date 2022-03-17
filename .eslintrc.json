@@ -1,7 +1,8 @@
 {
     "env": {
         "browser": true,
-        "es6": true
+        "es6": true, 
+        "node": true
     },
     "extends": "eslint:recommended",
     "globals": {
@@ -9,22 +10,23 @@
         "SharedArrayBuffer": "readonly"
     },
     "parserOptions": {
-        "ecmaVersion": 2018,
+        "ecmaVersion": 2020,
         "sourceType": "module"
     },
     "rules": {
         "indent": [
             "error",
             4, 
-            {"SwitchCase" : 1}
+            {"SwitchCase" : 1,
+            "FunctionDeclaration" : {"parameters" : "first" },
+            "FunctionExpression": {"parameters": "first"},
+            "CallExpression": {"arguments": "first"},
+            "ArrayExpression": "first",
+            "ObjectExpression": "first" }
         ],
         "linebreak-style": [
             "error",
             "unix"
-        ],
-        "quotes": [
-            "error",
-            "double"
         ],
         "semi": [
             "error",

@@ -5,9 +5,10 @@
   "settings-schema": "org.gnome.shell.extensions.hplip-menu2",
   "shell-version": [
     "40",
-    "41"
+    "41", 
+    "42"
   ],
   "url": "https://github.com/grizzlysmit/hplip-menu2-grizzlysmit.smit.id.au",
   "uuid": "hplip-menu2@grizzlysmit.smit.id.au",
-  "version": 3
+  "version": 4
 }

@@ -24,6 +24,8 @@
 
 const GObject = imports.gi.GObject;
 //const Clutter = imports.gi.Clutter;
+//const BoxPointer = imports.ui.boxpointer;
+//const GrabHelper = imports.ui.grabHelper;
 
 //const Gdk = imports.gi.Gdk;
 //
@@ -44,6 +46,8 @@ const _ = Gettext.gettext;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
+//const HPopupMenu = Me.imports.hPopupMenu;
+//const HPanelMenu = Me.imports.hPanelMenu;
 
 const guuid      = "hplip-menu2";
 let _ext         = null;
@@ -52,13 +56,12 @@ let settings_data = null;
 let settingsID    = null;
 
 const cmds = [
-    { type: "desktop", text: _("About This Computer"),            action: "gnome-info-overview-panel.desktop",                                               alt: ["gnome-control-center", "info-overview"]  },
-    { type: "desktop", text: _("User Accounts"),                  action: "gnome-user-accounts-panel.desktop",                                               alt: ["gnome-control-center", "user-accounts"]  },
-    { type: "separator" },
-    { type: "desktop", text: _("System Printers..."),             action: "gnome-printers-panel.desktop",                                                    alt: ["gnome-control-center", "printers"] },
-    { type: "command", text: _("Additional Printer Settings..."), action: ["/usr/bin/python3", "/usr/share/system-config-printer/system-config-printer.py"], alt: ["x-terminal-emulator", "-e", "echo", "error"]  },
-    { type: "separator" },
-    { type: "desktop", text: _("Hp Device Manager..."),           action: "hplip.desktop",                                                                   alt: ["x-terminal-emulator", "-e", "hp-toolbox"]  },
+    { type: "submenu", text: _("Printers..."),                  actions: [
+        { type: "desktop", text: _("System Printers..."),             action: "gnome-printers-panel.desktop",                                                    alt: ["gnome-control-center", "printers"] },
+        { type: "command", text: _("Additional Printer Settings..."), action: ["/usr/bin/python3", "/usr/share/system-config-printer/system-config-printer.py"], alt: ["x-terminal-emulator", "-e", "echo", "error"]  },
+        { type: "separator" },
+        { type: "desktop", text: _("Hp Device Manager..."),           action: "hplip.desktop",                                                                   alt: ["x-terminal-emulator", "-e", "hp-toolbox"]  },
+    ] }, 
     { type: "separator" },
     { type: "desktop", text: _("Gnome Tweaks..."),                action: "org.gnome.tweaks.desktop",                                                        alt: ["gnome-tweaks"]  },
     { type: "desktop", text: _("Gnome Settings..."),              action: "gnome-control-center.desktop",                                                    alt: ["gnome-control-center"]  },
@@ -112,9 +115,9 @@ const cmds = [
     { type: "submenu", text:_("System"),                        actions: [
         { type: "separator" },
         { type: "desktop", text: _("Notifications..."),              action: "gnome-notifications-panel.desktop",    alt: ["gnome-control-center", "notifications"] },
-        { type: "desktop", text: _("Users..."),                      action: "gnome-user-accounts-panel.desktop",    alt: ["gnome-control-center", "user-accounts"] },
+        { type: "desktop", text: _("User Accounts..."),                      action: "gnome-user-accounts-panel.desktop",    alt: ["gnome-control-center", "user-accounts"] },
         { type: "separator" },
-        { type: "desktop", text: _("About..."),                      action: "gnome-info-overview-panel.desktop",    alt: ["gnome-control-center", "info-overview"] },
+        { type: "desktop", text: _("About This Computer..."),                      action: "gnome-info-overview-panel.desktop",    alt: ["gnome-control-center", "info-overview"] },
     ] }, 
     { type: "separator" },
     { type: "desktop", text: _("Software Update..."),             action: "update-manager.desktop",                                                          alt: ["gnome-software",  "--mode=updates"]  },
@@ -257,6 +260,7 @@ function check_command(cmd){
 }
 
 
+
 const ExtensionImpl = GObject.registerClass(
     { GTypeName: "hplip-menu2" },    
     class ExtensionImplInt extends PanelMenu.Button {
@@ -327,8 +331,8 @@ const ExtensionImpl = GObject.registerClass(
 
                 if (cmds[x].type == "submenu"){
                     let text = cmds[x].text;
-                    //let submenu = new MainPopupSubMenuMenuItem( _(text), true);
-                    let submenu = new PopupMenu.PopupSubMenuMenuItem( _(text), true);
+                    let submenu = new PopupMenu.PopupSubMenuMenuItem( _(text), true, this, 0);
+                    //let submenu = new PopupMenu.PopupSubMenuMenuItem( _(text), true);
                     this.build_menu(submenu, cmds[x].actions);
                     this.menu.addMenuItem(submenu);
                 }
@@ -337,8 +341,9 @@ const ExtensionImpl = GObject.registerClass(
             }
         }
 
-        build_menu(thesubmenu, actions){
+        build_menu(thesubmenu, actions, depth){
             let item = null;
+            depth++;
             for(let x = 0; x < actions.length; x++){
 
                 if (actions[x].type == "command") {
@@ -364,6 +369,7 @@ const ExtensionImpl = GObject.registerClass(
 
                 if (actions[x].type == "submenu"){
                     //let text = actions[x].text;
+                    //let submenu = new PopupMenu.PopupSubMenuMenuItem( _(text), true, thesubmenu, depth);
                     //let submenu = new PopupMenu.PopupSubMenuMenuItem( _(text), true);
                     this.build_menu(thesubmenu, actions[x].actions);
                     //thesubmenu.menu.addMenuItem(submenu);
