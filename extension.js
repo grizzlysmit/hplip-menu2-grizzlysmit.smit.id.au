@@ -65,7 +65,7 @@ const cmds = [
     { type: "separator" },
     { type: "desktop", text: _("Gnome Tweaks..."),                action: "org.gnome.tweaks.desktop",                                                        alt: ["gnome-tweaks"]  },
     { type: "desktop", text: _("Gnome Settings..."),              action: "gnome-control-center.desktop",                                                    alt: ["gnome-control-center"]  },
-    { type: "desktop", text: _("Exetensions..."),                 action: "org.gnome.Extensions.desktop",                                                    alt: ["gnome-extensions-app"]  },
+    { type: "desktop", text: _("Extensions..."),                 action: "org.gnome.Extensions.desktop",                                                    alt: ["gnome-extensions-app"]  },
     { type: "separator" },
     { type: "submenu", text: _("Hardware"),                     actions: [
         { type: "separator" },
