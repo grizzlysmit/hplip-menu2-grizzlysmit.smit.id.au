@@ -58,14 +58,14 @@ let settingsID    = null;
 const cmds = [
     { type: "submenu", text: _("Printers..."),                  actions: [
         { type: "desktop", text: _("System Printers..."),             action: "gnome-printers-panel.desktop",                                                    alt: ["gnome-control-center", "printers"] },
-        { type: "command", text: _("Additional Printer Settings..."), action: ["/usr/bin/python3", "/usr/share/system-config-printer/system-config-printer.py"], alt: ["x-terminal-emulator", "-e", "echo", "error"]  },
+        { type: "command", text: _("Additional Printer Settings..."), action: ["/usr/bin/python3", "/usr/share/system-config-printer/system-config-printer.py"], alt: ["zenity", "--error", "--text='could not run print dialog'", "--title='error running dialog'"]  },
         { type: "separator" },
         { type: "desktop", text: _("Hp Device Manager..."),           action: "hplip.desktop",                                                                   alt: ["x-terminal-emulator", "-e", "hp-toolbox"]  },
     ] }, 
     { type: "separator" },
     { type: "desktop", text: _("Gnome Tweaks..."),                action: "org.gnome.tweaks.desktop",                                                        alt: ["gnome-tweaks"]  },
     { type: "desktop", text: _("Gnome Settings..."),              action: "gnome-control-center.desktop",                                                    alt: ["gnome-control-center"]  },
-    { type: "desktop", text: _("Exetensions..."),                 action: "org.gnome.Extensions.desktop",                                                    alt: ["gnome-extensions-app"]  },
+    { type: "desktop", text: _("Extensions..."),                 action: "org.gnome.Extensions.desktop",                                                    alt: ["gnome-extensions-app"]  },
     { type: "separator" },
     { type: "submenu", text: _("Hardware"),                     actions: [
         { type: "separator" },
