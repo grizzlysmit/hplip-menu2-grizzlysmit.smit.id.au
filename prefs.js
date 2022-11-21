@@ -162,6 +162,7 @@ function buildPrefsWidget() {
         orientation: Gtk.Orientation.VERTICAL,
         spacing: 12,
     });
+    let tab  = new Gtk.Notebook();
     let vbox = new Gtk.Box({
         orientation: Gtk.Orientation.VERTICAL,
         spacing: 12,
@@ -197,6 +198,41 @@ function buildPrefsWidget() {
     let bottom_spacer = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: true, hexpand: true });
     hbox.prepend(bottom_spacer);
     vbox.append(hbox);
-    frame.append(vbox);
+    let label_setings = new Gtk.Label({label: _("Settings"), xalign: 0 });
+    tab.append_page(vbox, label_setings);
+    let label_about = new Gtk.Label({label: _("About"), xalign: 0 });
+    let vbox_about = new Gtk.Box({
+        orientation: Gtk.Orientation.VERTICAL,
+        spacing: 12,
+        margin_top: 10,
+    });
+    let credits_Grid = new Gtk.Grid();
+    credits_Grid.set_column_homogeneous(false);
+    credits_Grid.attach(new Gtk.Label({label: "Copyright: ©2022 Francis Grizzly Smit", xalign: 0 }), 0, 0, 2, 1);
+    let licence = new Gtk.LinkButton({uri: "https://www.gnu.org/licenses/gpl-2.0.en.html", label: "Licence GPL v2+" });
+    licence.set_use_underline(true);
+    licence.set_halign(Gtk.Align.START);
+    credits_Grid.attach(licence, 2, 0, 1, 1);
+    credits_Grid.attach(new Gtk.Label({label: "url:", xalign: 0 }), 0, 1, 1, 1);
+    let link0 = new Gtk.LinkButton({uri: "https://github.com/grizzlysmit/hplip-menu2-grizzlysmit.smit.id.au#readme", label: "https://github.com/grizzlysmit/hplip-menu2-grizzlysmit.smit.id.au#readme" });
+    link0.set_use_underline(true);
+    link0.set_halign(Gtk.Align.START);
+    credits_Grid.attach(link0, 1, 1, 2, 1);
+    credits_Grid.attach(new Gtk.Label({label: "", xalign: 0 }), 0, 3, 1, 1);
+    credits_Grid.attach(new Gtk.Label({label: "", xalign: 0 }), 1, 3, 1, 1);
+    credits_Grid.attach(new Gtk.Label({label: "Author: Francis Grizzly Smit©", xalign: 0 }), 0, 4, 2, 1);
+    let link1 = new Gtk.LinkButton({uri: "https://github.com/grizzlysmit", label: "https://github.com/grizzlysmit" });
+    link1.set_use_underline(true);
+    link1.set_halign(Gtk.Align.START);
+    credits_Grid.attach(link1, 2, 4, 1, 1);
+    credits_Grid.attach(new Gtk.Label({label: "Dutch localization: Vistaus (Heimen Stoffels)", xalign: 0 }), 0, 5, 2, 1);
+    let link2 = new Gtk.LinkButton({uri: "https://github.com/Vistaus", label: "https://github.com/Vistaus" });
+    link2.set_use_underline(true);
+    link2.set_halign(Gtk.Align.START);
+    credits_Grid.attach(link2, 2, 5, 1, 1);
+    vbox_about.append(credits_Grid);
+    tab.append_page(vbox_about, label_about);
+    tab.set_current_page(0);
+    frame.append(tab);
     return frame;
 }

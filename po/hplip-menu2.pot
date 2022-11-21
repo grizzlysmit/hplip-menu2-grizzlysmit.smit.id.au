@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-27 15:12+1100\n"
+"POT-Creation-Date: 2022-10-26 20:43+1100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,70 +17,206 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: prefs.js:95
+#: prefs.js:94
 msgid "Area"
 msgstr ""
 
-#: prefs.js:97
+#: prefs.js:96
 msgid "Left"
 msgstr ""
 
-#: prefs.js:97
+#: prefs.js:96
 msgid "Center"
 msgstr ""
 
-#: prefs.js:97
+#: prefs.js:96
 msgid "Right"
 msgstr ""
 
-#: prefs.js:111
+#: prefs.js:110
 msgid "Icon"
 msgstr ""
 
-#: prefs.js:127
+#: prefs.js:126
 msgid "Position"
 msgstr ""
 
-#: prefs.js:144
+#: prefs.js:143
 msgid "Save Settings"
 msgstr ""
 
-#: extension.js:52
-msgid "About This Computer"
+#: extension.js:59
+msgid "Printers..."
 msgstr ""
 
-#: extension.js:53
-msgid "User Accounts"
-msgstr ""
-
-#: extension.js:55
+#: extension.js:60
 msgid "System Printers..."
 msgstr ""
 
-#: extension.js:56
+#: extension.js:61
 msgid "Additional Printer Settings..."
 msgstr ""
 
-#: extension.js:58
+#: extension.js:63
 msgid "Hp Device Manager..."
 msgstr ""
 
-#: extension.js:61
+#: extension.js:66
 msgid "Gnome Tweaks..."
 msgstr ""
 
-#: extension.js:62
+#: extension.js:67
 msgid "Gnome Settings..."
 msgstr ""
 
-#: extension.js:66
+#: extension.js:68
+msgid "Extensions..."
+msgstr ""
+
+#: extension.js:70
+msgid "Hardware"
+msgstr ""
+
+#: extension.js:72
+msgid "Power..."
+msgstr ""
+
+#: extension.js:74
+msgid "Display..."
+msgstr ""
+
+#: extension.js:75
+msgid "Keyboard..."
+msgstr ""
+
+#: extension.js:76
+msgid "Color..."
+msgstr ""
+
+#: extension.js:77
+msgid "Sound..."
+msgstr ""
+
+#: extension.js:79
+msgid "Removable Media..."
+msgstr ""
+
+#: extension.js:81
+msgid "Input"
+msgstr ""
+
+#: extension.js:82
+msgid "Mouse..."
+msgstr ""
+
+#: extension.js:83
+msgid "Wacom..."
+msgstr ""
+
+#: extension.js:85
+msgid "Private"
+msgstr ""
+
+#: extension.js:86
+msgid "Connectivity..."
+msgstr ""
+
+#: extension.js:88
+msgid "Location Services..."
+msgstr ""
+
+#: extension.js:89
+msgid "File History & Rubbish Bin..."
+msgstr ""
+
+#: extension.js:90
+msgid "Screen Lock..."
+msgstr ""
+
+#: extension.js:93
+msgid "Connections"
+msgstr ""
+
+#: extension.js:95
+msgid "Wifi..."
+msgstr ""
+
+#: extension.js:96
+msgid "Bluetooth..."
+msgstr ""
+
+#: extension.js:97
+msgid "Network..."
+msgstr ""
+
+#: extension.js:99
+msgid "Misc"
+msgstr ""
+
+#: extension.js:101
+msgid "Search..."
+msgstr ""
+
+#: extension.js:102
+msgid "Acceessibility..."
+msgstr ""
+
+#: extension.js:103
+msgid "Sharing..."
+msgstr ""
+
+#: extension.js:104
+msgid "Default Apps..."
+msgstr ""
+
+#: extension.js:106
+msgid "Asorted"
+msgstr ""
+
+#: extension.js:107
+msgid "Background..."
+msgstr ""
+
+#: extension.js:108
+msgid "Applications..."
+msgstr ""
+
+#: extension.js:110
+msgid "Locale"
+msgstr ""
+
+#: extension.js:112
+msgid "Datetime..."
+msgstr ""
+
+#: extension.js:113
+msgid "Language and Region..."
+msgstr ""
+
+#: extension.js:115
+msgid "System"
+msgstr ""
+
+#: extension.js:117
+msgid "Notifications..."
+msgstr ""
+
+#: extension.js:118
+msgid "User Accounts..."
+msgstr ""
+
+#: extension.js:120
+msgid "About This Computer..."
+msgstr ""
+
+#: extension.js:123
 msgid "Software Update..."
 msgstr ""
 
-#: extension.js:68
+#: extension.js:124
 msgid "Gnome Software..."
 msgstr ""
 
-#: extension.js:69
+#: extension.js:126
 msgid "Settings..."
 msgstr ""
