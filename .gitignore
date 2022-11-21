@@ -2,3 +2,5 @@
 .*.swp
 hPanelMenu.js
 hPopupMenu.js
+*.ui
+*.ui~
