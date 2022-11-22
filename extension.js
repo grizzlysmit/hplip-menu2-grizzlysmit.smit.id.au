@@ -123,12 +123,12 @@ const cmds = [
     { type: "desktop", text: _("Software Update..."),             action: "update-manager.desktop",                                                alt: ["gnome-software",  "--mode=updates"]  },
     { type: "desktop", text: _("Gnome Software..."),              action: "org.gnome.Software.desktop",                                            alt: ["gnome-software", "--mode=overview"] },
     { type: "separator" },
-    { type: "command", text: _("Settings..."),                    action: ["gnome-extensions", "prefs", "hplip-menu2@grizzlysmit.smit.id.au"] ,    alt: ["x-terminal-emulator", "-e", "echo", "error"] },
-    {}
+    { type: "command", text: _("Settings..."),                    action: ["gnome-extensions", "prefs", "hplip-menu2@grizzlysmit.smit.id.au"] ,    alt: ["x-terminal-emulator", "-e", "echo", "error"] }
 ];
 
-function check_command(cmd){
-    if(cmd.length == 0){
+function check_command_(cmd){
+    //log('[EXTENSION_LOG]', "cmd == " + cmd + "\n");
+    if(cmd == null || cmd.length == 0){
         return false;
     }
     var which = null;
@@ -255,9 +255,10 @@ function check_command(cmd){
             }
             which = GLib.find_program_in_path(cmd[0]);
             //which = GLib.spawn_command_line_sync("which " + cmd[0])[1].toString();
+            //log('[EXTENSION_LOG]', "check_command_[258]: which == " + which + "\n");
             return (which != null);
-    }
-}
+    } // switch(cmd[0]) //
+} // check_command_(cmd) //
 
 
 
@@ -313,7 +314,7 @@ const ExtensionImpl = GObject.registerClass(
                     //let action = cmds[x].action;
                     //log("x == " + x + "\n");
                     //log("action == " + action + "\n");
-                    item.connect("activate", this.callback_command.bind(item, x));
+                    item.connect("activate", this.callback_command.bind(item, cmds, x));
                     this.menu.addMenuItem(item);
                 }
 
@@ -341,9 +342,9 @@ const ExtensionImpl = GObject.registerClass(
             }
         }
 
-        build_menu(thesubmenu, actions, depth){
+        build_menu(thesubmenu, actions/*, depth*/){
             let item = null;
-            depth++;
+            //depth++;
             for(let x = 0; x < actions.length; x++){
 
                 if (actions[x].type == "command") {
@@ -351,7 +352,7 @@ const ExtensionImpl = GObject.registerClass(
                     //let action = actions[x].action;
                     //log("x == " + x + "\n");
                     //log("action == " + action + "\n");
-                    item.connect("activate", this.callback_command.bind(item, x));
+                    item.connect("activate", this.callback_command.bind(item, actions, x));
                     thesubmenu.menu.addMenuItem(item);
                 }
 
@@ -379,15 +380,20 @@ const ExtensionImpl = GObject.registerClass(
             }
         }
 
-        callback_command(ind, _obj){
-            //log("obj == " + obj + "\n");
-            //log("ind == " + ind + "\n");
-            var currentAction = cmds[ind].action;
-            //log("currentAction == " + currentAction + "\n");
+        callback_command(sub, ind, _obj){
+            //log('[EXTENSION_LOG]', "_obj == " + _obj + "\n");
+            //log('[EXTENSION_LOG]', "ind == " + ind + "\n");
+            //log('[EXTENSION_LOG]', "sub == " + sub + "\n");
+            var currentAction = sub[ind].action;
+            //log('[EXTENSION_LOG]', "currentAction == " + currentAction + "\n");
+            if(currentAction == undefined || currentAction == null || currentAction.length == 0){
+                //log('[EXTENSION_LOG]', "cmds[" + ind + "] == " + sub[ind] + "\n");
+                return false;
+            }
             /* Save context variable for binding */
             //return Util.spawn(currentAction);
             //* temporarily disable
-            if(check_command(currentAction)){
+            if(check_command_(currentAction)){
                 return Util.spawn(currentAction);
             }else{
                 currentAction = cmds[ind].alt;
@@ -397,9 +403,9 @@ const ExtensionImpl = GObject.registerClass(
         }
 
         callback_desktop(action, ind, _obj){
-            //log("action == " + action + "\n");
-            //log("ind == " + ind + "\n");
-            //log("obj == " + obj + "\n");
+            //log('[EXTENSION_LOG]', "action == " + action + "\n");
+            //log('[EXTENSION_LOG]', "ind == " + ind + "\n");
+            //log('[EXTENSION_LOG]', "obj == " + _obj + "\n");
             var currentAction = action;
             // Save context variable for binding //
             let def = Shell.AppSystem.get_default();

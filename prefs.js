@@ -208,7 +208,7 @@ function buildPrefsWidget() {
     });
     let credits_Grid = new Gtk.Grid();
     credits_Grid.set_column_homogeneous(false);
-    credits_Grid.attach(new Gtk.Label({label: "Copyright: ©2022 Francis Grizzly Smit", xalign: 0 }), 0, 0, 2, 1);
+    credits_Grid.attach(new Gtk.Label({label: _("Copyright") + ": ©2022 Francis Grizzly Smit", xalign: 0 }), 0, 0, 2, 1);
     let licence = new Gtk.LinkButton({uri: "https://www.gnu.org/licenses/gpl-2.0.en.html", label: "Licence GPL v2+" });
     licence.set_use_underline(true);
     licence.set_halign(Gtk.Align.START);
@@ -220,12 +220,12 @@ function buildPrefsWidget() {
     credits_Grid.attach(link0, 1, 1, 2, 1);
     credits_Grid.attach(new Gtk.Label({label: "", xalign: 0 }), 0, 3, 1, 1);
     credits_Grid.attach(new Gtk.Label({label: "", xalign: 0 }), 1, 3, 1, 1);
-    credits_Grid.attach(new Gtk.Label({label: "Author: Francis Grizzly Smit©", xalign: 0 }), 0, 4, 2, 1);
+    credits_Grid.attach(new Gtk.Label({label: _("Author") + ": Francis Grizzly Smit©", xalign: 0 }), 0, 4, 2, 1);
     let link1 = new Gtk.LinkButton({uri: "https://github.com/grizzlysmit", label: "https://github.com/grizzlysmit" });
     link1.set_use_underline(true);
     link1.set_halign(Gtk.Align.START);
     credits_Grid.attach(link1, 2, 4, 1, 1);
-    credits_Grid.attach(new Gtk.Label({label: "Dutch localization: Vistaus (Heimen Stoffels)", xalign: 0 }), 0, 5, 2, 1);
+    credits_Grid.attach(new Gtk.Label({label: _("Dutch localisation") + ": Vistaus (Heimen Stoffels)", xalign: 0 }), 0, 5, 2, 1);
     let link2 = new Gtk.LinkButton({uri: "https://github.com/Vistaus", label: "https://github.com/Vistaus" });
     link2.set_use_underline(true);
     link2.set_halign(Gtk.Align.START);

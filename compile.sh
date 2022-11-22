@@ -5,7 +5,7 @@ glib-compile-schemas schemas
 DIR="po"
 SUFFIX="po"
 
-xgettext -k_ -kN_ -o $DIR/hplip-menu2.pot prefs.js extension.js
+xgettext --from-code='utf-8' -k_ -kN_ -o $DIR/hplip-menu2.pot prefs.js extension.js
 
 for file in $DIR/*.$SUFFIX
 do 
