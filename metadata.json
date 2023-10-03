@@ -5,13 +5,10 @@
   "credits": "(C) Francis Grizzly Smit\n\nDutch translation Vistaus (Heimen Stoffels) https://github.com/Vistaus\n\nLicence GPL v2+\n\n", 
   "settings-schema": "org.gnome.shell.extensions.hplip-menu2",
   "shell-version": [
-    "40",
-    "41", 
-    "42",
-    "43", 
-    "44"
+    "45"
   ],
   "url": "https://github.com/grizzlysmit/hplip-menu2-grizzlysmit.smit.id.au",
   "uuid": "hplip-menu2@grizzlysmit.smit.id.au",
-  "version": 10
+  "version": 12,
+  "gettext-domain": "hplip-menu2"
 }
