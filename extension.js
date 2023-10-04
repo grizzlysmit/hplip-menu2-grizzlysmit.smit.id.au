@@ -5,7 +5,7 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 import GObject from 'gi://GObject';
 import Shell from 'gi://Shell';
-import St from 'gi://St';
+//import St from 'gi://St';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 //import Adw from 'gi://Adw';
@@ -39,11 +39,12 @@ class ExtensionImpl extends PanelMenu.Button {
             this.icon_name = "printer";
         }
         // */
-        let gicon, icon;
+        let gicon/*, icon*/;
         let re = /^.*\.png$/;
         let re2 = /^\/.*\.png$/;
         if (!re.test(this.icon_name) ){
-            icon = new St.Icon({ icon_name: this.icon_name, style_class: "system-status-icon" });
+            //icon = new St.Icon({ icon_name: this.icon_name, style_class: "system-status-icon" });
+            gicon = Gio.icon_new_for_string(this.icon_name);
         } else if (re2.test(this.icon_name)) {
             try {
                 gicon = Gio.icon_new_for_string(this.icon_name);
@@ -51,23 +52,25 @@ class ExtensionImpl extends PanelMenu.Button {
                 gicon = false;
             }
             if (gicon) {
-                icon = new St.Icon({ gicon: gicon, style_class: "system-status-icon"  });
+                //icon = new St.Icon({ gicon: gicon, style_class: "system-status-icon"  });
             } else {
                 this.icon_name = "printer";
-                icon = new St.Icon({ icon_name: this.icon_name, style_class: "system-status-icon" });
+                //icon = new St.Icon({ icon_name: this.icon_name, style_class: "system-status-icon" });
+                gicon = Gio.icon_new_for_string(this.icon_name);
             }
         } else {
             gicon = Gio.icon_new_for_string(this._caller.path + "/icons/" + this.icon_name);
-            icon = new St.Icon({ gicon: gicon });
+            //icon = new St.Icon({ gicon: gicon });
         }
         //let label = new St.Label({ text: "Hplip_menu2" });
-        this.icon = icon;
+        this.icon.gicon = gicon;
         //super.actor.add_actor(icon);
         //this.add_actor(this.icon);
         //this.hide();
         //let cont = new Adw.ButtonContent({ "icon-name": this.icon_name} )
         //this.add_actor(label);
-        //this.add_child(cont);
+        this.icon.size = 25;
+        this.add_child(this.icon);
         //this.button.icon = this.icon;
         //this.show();
 
@@ -478,6 +481,7 @@ export default class Hplip_menu2_Extension extends Extension {
         if(this.settings_data.position < 0 || this.settings_data.position > 25) this.settings_data.position = 0;
         this.icon_name = this.settings_data.icon;
         this.settings.set_string("settings-json", JSON.stringify(this.settings_data));
+        this.settings.apply();
         this._ext = new ExtensionImpl(this, this.cmds);
         let id = this.uuid;
         let indx = id.indexOf('@');
