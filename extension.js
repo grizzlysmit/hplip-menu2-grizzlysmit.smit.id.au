@@ -8,6 +8,7 @@ import Shell from 'gi://Shell';
 import St from 'gi://St';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
+import Adw from 'gi://Adw';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
@@ -30,7 +31,7 @@ class ExtensionImpl extends PanelMenu.Button {
             this._caller.set_settings(this._caller.getSettings());
             this._caller.set_settings_data(JSON.parse(this._caller.get_settings().get_string("settings-json")));
         }
-        this.button = new St.Button({ label:"Hplip-menu2", icon: 'printer' });
+        //this.button = new St.Button({ label:"Hplip-menu2", icon: 'printer' });
         //console.log("this._caller.get_settings_data().icon_name === " + this._caller.get_settings_data().icon_name + "\n");
         if (this._caller.get_settings_data().icon_name) {
             this.icon_name = this._caller.get_settings_data().icon_name;
@@ -59,14 +60,15 @@ class ExtensionImpl extends PanelMenu.Button {
             gicon = Gio.icon_new_for_string(this._caller.path + "/icons/" + this.icon_name);
             icon = new St.Icon({ gicon: gicon });
         }
-        let label = new St.Label({ text: "" });
-        this.add_actor(label);
+        //let label = new St.Label({ text: "" });
         this.icon = icon;
         //super.actor.add_actor(icon);
         //this.add_actor(this.icon);
         //this.hide();
-        //this.add_child(this.icon);
-        this.button.icon = this.icon;
+        let cont = new Adw.ButtonContent({ "icon-name": this.icon_name} )
+        //this.add_actor(cont);
+        this.add_child(cont);
+        //this.button.icon = this.icon;
         //this.show();
 
         let item = null;
