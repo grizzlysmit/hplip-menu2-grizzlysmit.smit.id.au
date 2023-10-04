@@ -72,7 +72,7 @@ class ExtensionImpl extends PanelMenu.Button {
         //this.hide();
         //let cont = new Adw.ButtonContent({ "icon-name": this.icon_name} )
         //this.add_actor(label);
-        this.icon.size = 25;
+        this.icon.size = 17;
         this.add_child(this.icon);
         //this.button.icon = this.icon;
         //this.show();
