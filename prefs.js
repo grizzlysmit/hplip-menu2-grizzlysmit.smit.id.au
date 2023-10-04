@@ -195,7 +195,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         const page2 = Adw.PreferencesPage.new();
         page2.set_title(_("Credits"));
         page2.set_name("hplip_menu2_page2");
-        page2.set_icon_name("preferences-other-symbolic");
+        page2.set_icon_name("info-symbolic");
 
         // group2
         const group2 = Adw.PreferencesGroup.new();
