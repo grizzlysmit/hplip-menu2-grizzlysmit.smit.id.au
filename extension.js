@@ -489,7 +489,7 @@ export default class Hplip_menu2_Extension extends Extension {
         let id = this.uuid;
         let indx = id.indexOf('@');
         //console.log("[Hplip_menu2_Extension] id.substring(0, indx) == `" + id.substring(0, indx) +"'");
-        Main.panel.addToStatusArea(id.substring(0, indx), this._ext, this.settings_data.position, this.settings_data.area);
+        Main.panel.addToStatusArea(id.substr(0, indx), this._ext, this.settings_data.position, this.settings_data.area);
         //Main.panel.addToStatusArea('hplip-menu2', this._ext, this.settings_data.position, this.settings_data.area);
         this.settingsID = this.settings.connect("changed::settings-json", this.onSettingsChanged.bind(this)); 
         //this._ext.enable();
