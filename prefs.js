@@ -143,7 +143,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         const page1 = Adw.PreferencesPage.new();
         page1.set_title(_("Alternate Menu for Hplip2 Settings"));
         page1.set_name("hplips_menu2_page1");
-        page1.set_icon_name("preferences-system");
+        page1.set_icon_name("preferences-system-symbolic");
 
         // group1
         const group1 = Adw.PreferencesGroup.new();
@@ -195,7 +195,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         const page2 = Adw.PreferencesPage.new();
         page2.set_title(_("Credits"));
         page2.set_name("hplip_menu2_page2");
-        page2.set_icon_name("help-about");
+        page2.set_icon_name("help-about-symbolic");
 
         // group2
         const group2 = Adw.PreferencesGroup.new();
