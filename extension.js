@@ -491,7 +491,7 @@ export default class Hplip_menu2_Extension extends Extension {
         console.log("[Hplip_menu2_Extension] id.substring(0, indx) == `" + id.substring(0, indx) +"'");
         //Main.panel.addToStatusArea(id.substring(0, indx), this._ext, this.settings_data.position, this.settings_data.area);
         Main.panel.addToStatusArea('hplip-menu2', this._ext, this.settings_data.position, this.settings_data.area);
-        this.settingsID = this.settings.connectObject("changed::settings-json", () => this.onSettingsChanged(), this); 
+        this.settingsID = this.settings.connect("changed::settings-json", this.onSettingsChanged.bind(this)); 
         //this._ext.enable();
     }
 
@@ -506,19 +506,6 @@ export default class Hplip_menu2_Extension extends Extension {
     onSettingsChanged(){
         this.disable();
         this.enable();
-        /*
-        //console.log("obj === " + obj + "\n");
-        this._ext?.destroy();
-        this._ext = null;
-        this.settings_data = JSON.parse(this.settings.get_string("settings-json"));
-        //console.log("this.settings_data.icon_name === " + this.settings_data.icon_name + "\n");
-        //console.log("this.settings_data.area === " + this.settings_data.area + "\n");
-        //console.log("this.settings_data.position === " + this.settings_data.position + "\n");
-        this._ext = new ExtensionImpl(this, this.cmds);
-        //Main.panel.addToStatusArea(this.settings.get_string('uuid'), this._ext, this.settings_data.position, this.settings_data.area);
-        //settingsID = this.settings.connect("changed::settings-json", this.onSettingsChanged.bind(this)); 
-        this._ext.enable();
-        // */
     }
 }
 
