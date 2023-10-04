@@ -60,8 +60,12 @@ class ExtensionImpl extends PanelMenu.Button {
         }
         let label = new St.Label({ text: "" });
         this.add_actor(label);
+        this.icon = icon;
         //super.actor.add_actor(icon);
-        super.add_child(icon);
+        //this.add_actor(this.icon);
+        this.hide();
+        this.add_child(this.icon);
+        this.show();
 
         let item = null;
         for(let x = 0; x < this.cmds.length; x++){
@@ -95,7 +99,6 @@ class ExtensionImpl extends PanelMenu.Button {
                 this.menu.addMenuItem(submenu);
             }
 
-            
         }
     } // constructor(caller, _cmds) //
 
@@ -318,10 +321,20 @@ class ExtensionImpl extends PanelMenu.Button {
         //return GLib.spawn(currentAction);
         //* temporarily disable
         if(this.check_command_(currentAction)){
-            return GLib.spawn(currentAction);
+            //console.log('[EXTENSION_LOG]', "currentAction === " + currentAction + "\n");
+            if(typeof currentAction === 'string'){
+                return GLib.spawn(currentAction);
+            }else{
+                return GLib.spawn_async(null, currentAction, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
+            }
         }else{
             currentAction = this.cmds[ind].alt;
-            return GLib.spawn(currentAction);
+            //console.log('[EXTENSION_LOG]', "currentAction === " + currentAction + "\n");
+            if(typeof currentAction === 'string'){
+                return GLib.spawn(currentAction);
+            }else{
+                return GLib.spawn_async(null, currentAction, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
+            }
         }
         // */
     }
@@ -338,7 +351,11 @@ class ExtensionImpl extends PanelMenu.Button {
             app.activate();
         }else{
             let alt = this._caller.get_cmds()[ind].alt;
-            GLib.spawn(alt);
+            if(typeof alt === 'string'){
+                GLib.spawn(alt);
+            }else{
+                GLib.spawn_async(null, alt, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
+            }
         }
     }
 
@@ -352,10 +369,34 @@ class ExtensionImpl extends PanelMenu.Button {
 export default class Hplip_menu2_Extension extends Extension {
     constructor(metadata) {
         super(metadata);
-        this._ext         = null;
-        this.settings     = null;
+        this._ext          = null;
+        this.settings      = null;
         this.settings_data = null;
         this.settingsID    = null;
+        this.cmds          = null;
+    } // constructor(metadata) //
+
+    get_cmds(){
+        return this.cmds;
+    }
+
+    get_settings(){
+        return this.settings;
+    }
+
+    set_settings(s){
+        this.settings = s;
+    }
+
+    get_settings_data(){
+        return this.settings_data;
+    }
+
+    set_settings_data(sd){
+        this.settings_data = sd;
+    }
+
+    enable() {
 
         this.cmds = [
             { type: "submenu", text: _("Printers..."),                  actions: [
@@ -427,36 +468,13 @@ export default class Hplip_menu2_Extension extends Extension {
             { type: "separator" },
             { type: "command", text: _("Settings..."),                    action: ["gnome-extensions", "prefs", "hplip-menu2@grizzlysmit.smit.id.au"] ,    alt: ["x-terminal-emulator", "-e", "echo", "error"] }
         ];
-    } // constructor(metadata) //
 
-    get_cmds(){
-        return this.cmds;
-    }
-
-    get_settings(){
-        return this.settings;
-    }
-
-    set_settings(s){
-        this.settings = s;
-    }
-
-    get_settings_data(){
-        return this.settings_data;
-    }
-
-    set_settings_data(sd){
-        this.settings_data = sd;
-    }
-
-    enable() {
         this.settings = this.getSettings();
         this.settings_data = JSON.parse(this.settings.get_string("settings-json"));
         if(this.settings_data.position < 0 || this.settings_data.position > 25) this.settings_data.position = 0;
         this._ext = new ExtensionImpl(this, this.cmds);
         this.icon_name = this.settings_data.icon;
-        if(this.settings_data.position < 0 || this.settings_data.position > 25) this.settings_data.position = 0;
-        let id = this.settings.get_string('uuid');
+        let id = this.uuid;
         let indx = id.indexOf('@');
         Main.panel.addToStatusArea(id.substring(0, indx), this._ext, this.settings_data.position, this.settings_data.area);
         this.settingsID = this.settings.connect("changed::settings-json", this.onSettingsChanged); 

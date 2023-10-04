@@ -74,7 +74,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         }
 
         this._window._settings.set_string("settings-json", JSON.stringify(this.settings_data));
-        //this._window._settings.apply()
+        this._window._settings.apply();
         //console.log("this.settings_data === " + JSON.stringify(this.settings_data) + "\n");
     }
 
@@ -142,12 +142,12 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
 
         const page1 = Adw.PreferencesPage.new();
         page1.set_title(_("Alternate Menu for Hplip2 Settings"));
-        page1.set_name("settingscenter_page1");
+        page1.set_name("hplips_menu2_page1");
         page1.set_icon_name("preferences-system-symbolic");
 
         // group1
         const group1 = Adw.PreferencesGroup.new();
-        group1.set_title(_("Global"));
+        group1.set_title(_("Hplip menu2 settings"));
         group1.set_name("HpLip_menu2_global");
         page1.add(group1);
         //*
@@ -193,8 +193,8 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
 
                 //page2
         const page2 = Adw.PreferencesPage.new();
-        page2.set_title(_("Settings Center"));
-        page2.set_name("settingscenter_page2");
+        page2.set_title(_("Credits"));
+        page2.set_name("hplip_menu2_page2");
         page2.set_icon_name("preferences-other-symbolic");
 
         // group2
