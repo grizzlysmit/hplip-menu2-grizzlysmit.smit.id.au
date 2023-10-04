@@ -74,7 +74,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         }
 
         this._window._settings.set_string("settings-json", JSON.stringify(this.settings_data));
-        this._window._settings.apply();
+        //this._window._settings.apply();
         //console.log("this.settings_data === " + JSON.stringify(this.settings_data) + "\n");
     }
 
