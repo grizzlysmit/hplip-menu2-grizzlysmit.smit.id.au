@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2023 Francis Grizzly Smit <grizzly@smit.id.au>
 //
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: GPL-2.0-or-later
 
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 import GObject from 'gi://GObject';
