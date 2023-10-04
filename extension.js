@@ -30,7 +30,8 @@ class ExtensionImpl extends PanelMenu.Button {
             this._caller.set_settings(this._caller.getSettings());
             this._caller.set_settings_data(JSON.parse(this._caller.get_settings().get_string("settings-json")));
         }
-        console.log("this._caller.get_settings_data().icon_name === " + this._caller.get_settings_data().icon_name + "\n");
+        this.button = new Button(0.0, _("an extension"));
+        //console.log("this._caller.get_settings_data().icon_name === " + this._caller.get_settings_data().icon_name + "\n");
         if (this._caller.get_settings_data().icon_name) {
             this.icon_name = this._caller.get_settings_data().icon_name;
         } else {
