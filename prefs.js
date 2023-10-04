@@ -143,7 +143,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         const page1 = Adw.PreferencesPage.new();
         page1.set_title(_("Alternate Menu for Hplip2 Settings"));
         page1.set_name("hplips_menu2_page1");
-        page1.set_icon_name("preferences-system-symbolic");
+        page1.set_icon_name("preferences-system");
 
         // group1
         const group1 = Adw.PreferencesGroup.new();
