@@ -5,7 +5,7 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 import GObject from 'gi://GObject';
 import Shell from 'gi://Shell';
-//import St from 'gi://St';
+import St from 'gi://St';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 //import Adw from 'gi://Adw';
@@ -38,6 +38,9 @@ class ExtensionImpl extends PanelMenu.Button {
         } else {
             this.icon_name = "printer";
         }
+        this.icon = new St.Icon({
+            style_class: 'menu-button',
+        });
         // */
         let gicon/*, icon*/;
         let re = /^.*\.png$/;
