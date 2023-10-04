@@ -23,7 +23,7 @@ class ExtensionImpl extends PanelMenu.Button {
     }
 
     constructor(caller, _cmds){
-        super(1.0, null, false);
+        super(0.5, "Hplip-menu2");
         this._caller = caller;
         this.cmds = _cmds;
 
@@ -60,13 +60,13 @@ class ExtensionImpl extends PanelMenu.Button {
             gicon = Gio.icon_new_for_string(this._caller.path + "/icons/" + this.icon_name);
             icon = new St.Icon({ gicon: gicon });
         }
-        let label = new St.Label({ text: "Hplip_menu2" });
+        //let label = new St.Label({ text: "Hplip_menu2" });
         this.icon = icon;
         //super.actor.add_actor(icon);
         //this.add_actor(this.icon);
         //this.hide();
         //let cont = new Adw.ButtonContent({ "icon-name": this.icon_name} )
-        this.add_actor(label);
+        //this.add_actor(label);
         //this.add_child(cont);
         //this.button.icon = this.icon;
         //this.show();
