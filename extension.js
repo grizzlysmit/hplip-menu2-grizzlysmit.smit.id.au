@@ -64,9 +64,10 @@ class ExtensionImpl extends PanelMenu.Button {
         this.icon = icon;
         //super.actor.add_actor(icon);
         //this.add_actor(this.icon);
-        this.hide();
-        this.add_child(this.icon);
-        this.show();
+        //this.hide();
+        //this.add_child(this.icon);
+        this.button.icon = this.icon;
+        //this.show();
 
         let item = null;
         for(let x = 0; x < this.cmds.length; x++){
