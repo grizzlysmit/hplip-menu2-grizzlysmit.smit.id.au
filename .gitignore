@@ -1,6 +1,4 @@
 # vim buffer files
 .*.swp
-hPanelMenu.js
-hPopupMenu.js
 *.ui
 *.ui~
