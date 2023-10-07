@@ -65,17 +65,9 @@ class ExtensionImpl extends PanelMenu.Button {
             gicon = Gio.icon_new_for_string(this._caller.path + "/icons/" + this.icon_name);
             //icon = new St.Icon({ gicon: gicon });
         }
-        //let label = new St.Label({ text: "Hplip_menu2" });
         this.icon.gicon = gicon;
-        //super.actor.add_actor(icon);
-        //this.add_actor(this.icon);
-        //this.hide();
-        //let cont = new Adw.ButtonContent({ "icon-name": this.icon_name} )
-        //this.add_actor(label);
         this.icon.icon_size = 17;
         this.add_child(this.icon);
-        //this.button.icon = this.icon;
-        //this.show();
 
         let item = null;
         for(let x = 0; x < this.cmds.length; x++){
@@ -104,7 +96,6 @@ class ExtensionImpl extends PanelMenu.Button {
             if (this.cmds[x].type === "submenu"){
                 let text = this.cmds[x].text;
                 let submenu = new PopupMenu.PopupSubMenuMenuItem(text, true, this, 0);
-                //let submenu = new PopupMenu.PopupSubMenuMenuItem(text, true);
                 this.build_menu(submenu, this.cmds[x].actions);
                 this.menu.addMenuItem(submenu);
             }
@@ -138,184 +129,14 @@ class ExtensionImpl extends PanelMenu.Button {
                 thesubmenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
             }
 
+            // this is redundant these menus do not handle sub sub menus etc //
             if (actions[x].type === "submenu"){
-                //let text = actions[x].text;
-                //let submenu = new PopupMenu.PopupSubMenuMenuItem(text, true, thesubmenu, depth);
-                //let submenu = new PopupMenu.PopupSubMenuMenuItem(text, true);
                 this.build_menu(thesubmenu, actions[x].actions);
-                //thesubmenu.menu.addMenuItem(submenu);
             }
 
             
         }
     }
-
-    check_sudo_1(cmd_arr, loc) {
-        switch(cmd_arr[loc]){
-            case "-C":
-            case "-D":
-            case "-g":
-            case "-h":
-            case "-p":
-            case "-R":
-            case "-r":
-            case "-t":
-            case "-T":
-            case "-U":
-            case "-u":
-                return true;
-        }
-        return false;
-    } // check_sudo_1(cmd_arr, loc) //
-
-    check_sudo_2(cmd_arr, loc) {
-        switch(cmd_arr[loc]){
-            case "--close-from":
-            case "--chdir":
-            case "--preserve-env":
-            case "--group":
-            case "--host":
-            case "--prompt":
-            case "--chroot":
-            case "--role":
-            case "--type":
-            case "--command-timeout":
-            case "--other-user":
-            case "--user":
-                return true;
-        }
-        return false;
-    } // check_sudo_2(cmd_arr, loc) //
-
-    check_sudo(cmd_arr) {
-        for(let loc = 1; loc < cmd_arr.length; loc++){
-            if(cmd_arr[loc].substr(0, 2) === "--"){
-                if(this.check_sudo_2(cmd_arr, loc)){
-                    loc++;
-                    continue;
-                }else{
-                    return false;
-                }
-            }else if(cmd_arr[loc].substr(0, 1) === "-"){
-                if(this.check_sudo_1(cmd_arr, loc)){
-                    loc++;
-                    continue;
-                }else{
-                    return false;
-                }
-            }else if(cmd_arr[loc].substr(0, 1) !== "-"){
-                let which = GLib.find_program_in_path(cmd_arr[loc]);
-                //which = GLib.spawn_command_line_sync("which " + cmd[loc])[1].toString();
-                return (which !== null);
-            }
-        }
-        return false;
-    } // sub_sudo(cmd_arr) //
-
-    check_nohup(cmd_arr) {
-        for(let loc = 1; loc < cmd_arr.length; loc++){
-            if(cmd_arr[loc].substr(0, 1) !== "-"){
-                let which = GLib.find_program_in_path(cmd_arr[loc]);
-                //which = GLib.spawn_command_line_sync("which " + cmd[loc])[1].toString();
-                return (which !== null);
-            }
-        }
-        return false;
-    } // check_nohup(cmd_arr) //
-
-    check_raku(cmd_arr, loc){
-        switch(cmd_arr[loc]){
-            case "-I":
-            case "-M":
-            case "--target":
-            case "--optimize":
-            case "--rakudo-home":
-            case "--doc":
-            case "--repl-mode":
-            case "--profile-filename":
-            case "--profile-stage":
-            case "--debug-port":
-                return true;
-        }
-        return false;
-    } // check_raku(cmd_arr, loc)  //
-
-    check_python(cmd_arr, loc){
-        switch(cmd_arr[loc]){
-            case "-m":
-            case "-W":
-            case "-X":
-            case "--check-hash-based-pycs":
-                return true;
-        }
-        return false;
-    } // check_python(cmd_arr, loc) //
-
-    check_command_(cmd){
-        //console.log('[EXTENSION_LOG]', "cmd === " + cmd + "\n");
-        let which, python;
-        if(cmd === null || cmd.length === 0){
-            return false;
-        }
-        let cmd_arr;
-        if(typeof cmd === 'string'){
-            cmd_arr = cmd.split(' ');
-        }else if(typeof cmd === 'object'){
-            cmd_arr = cmd;
-        }else{
-            return false;
-        }
-        switch(cmd_arr[0]){
-            case "sudo":
-            case "/usr/bin/sudo":
-                return this.check_sudo(cmd_arr);
-            case "nohup":
-            case "/usr/bin/nohup":
-                return this.check_nohup(cmd_arr);
-            case "perl":
-                which = GLib.find_program_in_path(cmd_arr[1]);
-                return (which !== null);
-            case "raku":
-                for(let loc = 1; loc < cmd_arr.length; loc++){
-                    if(cmd_arr[loc].substr(0, 1) === "-"){
-                        if(this.check_raku(cmd_arr, loc)){
-                            loc++;
-                            continue;
-                        }else{
-                            return false;
-                        }
-                    }else if(cmd_arr[loc].substr(0, 1) !== "-"){
-                        which = GLib.find_program_in_path(cmd_arr[loc]);
-                        //which = GLib.spawn_command_line_sync("which " + cmd[loc])[1].toString();
-                        return (which !== null);
-                    }
-                }
-                return false;
-            default:
-                python = /^python(:?\d+(?:\.\d+))?/i;
-                if(python.test(cmd_arr[0])){
-                    for(let loc = 1; loc < cmd_arr.length; loc++){
-                        if(cmd_arr[loc].substr(0, 1) === "-"){
-                            if(this.check_python(cmd_arr, loc)){
-                                loc++;
-                                continue;
-                            }else{
-                                return false;
-                            }
-                        }else if(cmd_arr[loc].substr(0, 1) !== "-"){
-                            which = GLib.find_program_in_path(cmd[loc]);
-                            //which = GLib.spawn_command_line_sync("which " + cmd[loc])[1].toString();
-                            return (which !== null);
-                        }
-                    }
-                    return false;
-                }
-                which = GLib.find_program_in_path(cmd_arr[0]);
-                //which = GLib.spawn_command_line_sync("which " + cmd[0])[1].toString();
-                //console.log('[EXTENSION_LOG]', "check_command_[258]: which === " + which + "\n");
-                return (which !== null);
-        } // switch(cmd[0]) //
-    } // check_command_(cmd) //
 
     callback_command(item, sub, ind){
         //console.log('[EXTENSION_LOG]', "_obj === " + _obj + "\n");
@@ -330,20 +151,30 @@ class ExtensionImpl extends PanelMenu.Button {
         /* Save context variable for binding */
         //return GLib.spawn(currentAction);
         //* temporarily disable
-        if(this.check_command_(currentAction)){
-            //console.log('[EXTENSION_LOG]', "currentAction === " + currentAction + "\n");
-            if(typeof currentAction === 'string'){
-                return GLib.spawn(currentAction);
+        //console.log('[EXTENSION_LOG]', "currentAction === " + currentAction + "\n");
+        if(typeof currentAction === 'string'){
+            if(GLib.spawn(currentAction)){
+                return true;
             }else{
-                return GLib.spawn_async(null, currentAction, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
+                currentAction = this.cmds[ind].alt;
+                //console.log('[EXTENSION_LOG]', "currentAction === " + currentAction + "\n");
+                if(typeof currentAction === 'string'){
+                    return GLib.spawn(currentAction);
+                }else{
+                    return GLib.spawn_async(null, currentAction, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
+                }
             }
         }else{
-            currentAction = this.cmds[ind].alt;
-            //console.log('[EXTENSION_LOG]', "currentAction === " + currentAction + "\n");
-            if(typeof currentAction === 'string'){
-                return GLib.spawn(currentAction);
+            if(GLib.spawn_async(null, currentAction, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){})){
+                return true;
             }else{
-                return GLib.spawn_async(null, currentAction, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
+                currentAction = this.cmds[ind].alt;
+                //console.log('[EXTENSION_LOG]', "currentAction === " + currentAction + "\n");
+                if(typeof currentAction === 'string'){
+                    return GLib.spawn(currentAction);
+                }else{
+                    return GLib.spawn_async(null, currentAction, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
+                }
             }
         }
         // */
@@ -359,12 +190,13 @@ class ExtensionImpl extends PanelMenu.Button {
         let app = def.lookup_app(currentAction);
         if(app !== null){
             app.activate();
+            return true;
         }else{
             let alt = this._caller.get_cmds()[ind].alt;
             if(typeof alt === 'string'){
-                GLib.spawn(alt);
+                return GLib.spawn(alt);
             }else{
-                GLib.spawn_async(null, alt, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
+                return GLib.spawn_async(null, alt, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
             }
         }
     }

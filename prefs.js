@@ -150,14 +150,11 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         group1.set_title(_("Hplip menu2 settings"));
         group1.set_name("HpLip_menu2_global");
         page1.add(group1);
-        //*
         let vbox = new Gtk.Box({
             orientation: Gtk.Orientation.VERTICAL,
             spacing: 12,
             margin_top: 10,
         });
-        // */
-        //let vbox = new St.BoxLayout( { vertical: true } );
         this.area_token_box = this._area_token_box();
         // set the saved area token value
         this.settings_data = JSON.parse(window._settings.get_string("settings-json"));
