@@ -8,7 +8,6 @@ import Shell from 'gi://Shell';
 import St from 'gi://St';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
-//import Adw from 'gi://Adw';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
@@ -31,8 +30,6 @@ class ExtensionImpl extends PanelMenu.Button {
             this._caller.set_settings(this._caller.getSettings());
             this._caller.set_settings_data(JSON.parse(this._caller.get_settings().get_string("settings-json")));
         }
-        //this.button = new St.Button({ label:"Hplip-menu2", icon: 'printer' });
-        //console.log("this._caller.get_settings_data().icon_name === " + this._caller.get_settings_data().icon_name + "\n");
         if (this._caller.get_settings_data().icon_name) {
             this.icon_name = this._caller.get_settings_data().icon_name;
         } else {
@@ -46,7 +43,6 @@ class ExtensionImpl extends PanelMenu.Button {
         let re = /^.*\.png$/;
         let re2 = /^\/.*\.png$/;
         if (!re.test(this.icon_name) ){
-            //icon = new St.Icon({ icon_name: this.icon_name, style_class: "system-status-icon" });
             gicon = Gio.icon_new_for_string(this.icon_name);
         } else if (re2.test(this.icon_name)) {
             try {
@@ -54,16 +50,12 @@ class ExtensionImpl extends PanelMenu.Button {
             } catch(err) {
                 gicon = false;
             }
-            if (gicon) {
-                //icon = new St.Icon({ gicon: gicon, style_class: "system-status-icon"  });
-            } else {
+            if (!gicon) {
                 this.icon_name = "printer";
-                //icon = new St.Icon({ icon_name: this.icon_name, style_class: "system-status-icon" });
                 gicon = Gio.icon_new_for_string(this.icon_name);
             }
         } else {
             gicon = Gio.icon_new_for_string(this._caller.path + "/icons/" + this.icon_name);
-            //icon = new St.Icon({ gicon: gicon });
         }
         this.icon.gicon = gicon;
         this.icon.icon_size = 17;
@@ -74,9 +66,6 @@ class ExtensionImpl extends PanelMenu.Button {
 
             if (this.cmds[x].type === "command") {
                 item = new PopupMenu.PopupMenuItem(this.cmds[x].text);
-                //let action = this.cmds[x].action;
-                //console.log("x === " + x + "\n");
-                //console.log("action === " + action + "\n");
                 item.connect("activate", this.callback_command.bind(this, item, this.cmds, x));
                 this.menu.addMenuItem(item);
             }
@@ -110,9 +99,6 @@ class ExtensionImpl extends PanelMenu.Button {
 
             if (actions[x].type === "command") {
                 item = new PopupMenu.PopupMenuItem(actions[x].text);
-                //let action = actions[x].action;
-                //console.log("x === " + x + "\n");
-                //console.log("action === " + action + "\n");
                 item.connect("activate", this.callback_command.bind(this, item, actions, x));
                 thesubmenu.menu.addMenuItem(item);
             }
@@ -129,35 +115,21 @@ class ExtensionImpl extends PanelMenu.Button {
                 thesubmenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
             }
 
-            // this is redundant these menus do not handle sub sub menus etc //
-            if (actions[x].type === "submenu"){
-                this.build_menu(thesubmenu, actions[x].actions);
-            }
-
             
         }
     }
 
     callback_command(item, sub, ind){
-        //console.log('[EXTENSION_LOG]', "_obj === " + _obj + "\n");
-        //console.log('[EXTENSION_LOG]', "ind === " + ind + "\n");
-        //console.log('[EXTENSION_LOG]', "sub === " + sub + "\n");
         let currentAction = sub[ind].action;
-        //console.log('[EXTENSION_LOG]', "currentAction === " + currentAction + "\n");
         if(currentAction === undefined || currentAction === null || currentAction.length === 0){
-            //console.log('[EXTENSION_LOG]', "this.cmds[" + ind + "] === " + sub[ind] + "\n");
             return false;
         }
         /* Save context variable for binding */
-        //return GLib.spawn(currentAction);
-        //* temporarily disable
-        //console.log('[EXTENSION_LOG]', "currentAction === " + currentAction + "\n");
         if(typeof currentAction === 'string'){
             if(GLib.spawn(currentAction)){
                 return true;
             }else{
                 currentAction = this.cmds[ind].alt;
-                //console.log('[EXTENSION_LOG]', "currentAction === " + currentAction + "\n");
                 if(typeof currentAction === 'string'){
                     return GLib.spawn(currentAction);
                 }else{
@@ -169,7 +141,6 @@ class ExtensionImpl extends PanelMenu.Button {
                 return true;
             }else{
                 currentAction = this.cmds[ind].alt;
-                //console.log('[EXTENSION_LOG]', "currentAction === " + currentAction + "\n");
                 if(typeof currentAction === 'string'){
                     return GLib.spawn(currentAction);
                 }else{
@@ -177,13 +148,9 @@ class ExtensionImpl extends PanelMenu.Button {
                 }
             }
         }
-        // */
     }
 
     callback_desktop(item, action, ind){
-        //console.log('[EXTENSION_LOG]', "action === " + action + "\n");
-        //console.log('[EXTENSION_LOG]', "ind === " + ind + "\n");
-        //console.log('[EXTENSION_LOG]', "obj === " + _obj + "\n");
         let currentAction = action;
         // Save context variable for binding //
         let def = Shell.AppSystem.get_default();
@@ -243,9 +210,11 @@ export default class Hplip_menu2_Extension extends Extension {
         this.cmds = [
             { type: "submenu", text: _("Printers..."),                  actions: [
                 { type: "desktop", text: _("System Printers..."),             action: "gnome-printers-panel.desktop",                                      alt: ["gnome-control-center", "printers"] },
-                { type: "command", text: _("Additional Printer Settings..."), action: ["/usr/share/system-config-printer/system-config-printer.py"],       alt: ["zenity", "--error", "--text='could not run print dialog'", "--title='error running dialog'"]  },
+                { type: "command", text: _("Additional Printer Settings..."), action: ["/usr/share/system-config-printer/system-config-printer.py"],       alt: ["gnome-terminal", "--", "/usr/bin/zenity", "--error", "--title='could not run the old printer settings'", 
+                                                                                                                                                                 "--text='error running /usr/share/system-config-printer/system-config-printer.py check if the relevant package is installed'"]  },
                 { type: "separator" },
-                { type: "desktop", text: _("Hp Device Manager..."),           action: "hplip.desktop",                                                     alt: ["x-terminal-emulator", "-e", "hp-toolbox"]  },
+                { type: "desktop", text: _("Hp Device Manager..."),           action: "hplip.desktop",                                                     alt: ["gnome-terminal", "--", "/usr/bin/zenity", "--error", "--title='could not run hp-toolbox'", 
+                                                                                                                                                                 "--text='error running hp-toolbox it may not be installed you may need to install the hplips packages.'"]  },
             ] }, 
             { type: "separator" },
             { type: "desktop", text: _("Gnome Tweaks..."),                action: "org.gnome.tweaks.desktop",                                              alt: ["gnome-tweaks"]  },
@@ -308,7 +277,8 @@ export default class Hplip_menu2_Extension extends Extension {
             { type: "desktop", text: _("Software Update..."),             action: "update-manager.desktop",                                                alt: ["gnome-software",  "--mode=updates"]  },
             { type: "desktop", text: _("Gnome Software..."),              action: "org.gnome.Software.desktop",                                            alt: ["gnome-software", "--mode=overview"] },
             { type: "separator" },
-            { type: "command", text: _("Settings..."),                    action: ["gnome-extensions", "prefs", "hplip-menu2@grizzlysmit.smit.id.au"] ,    alt: ["x-terminal-emulator", "-e", "echo", "error"] }
+            { type: "command", text: _("Settings..."),                    action: ["gnome-extensions", "prefs", "hplip-menu2@grizzlysmit.smit.id.au"] ,    alt: ["gnome-terminal", "--", "/usr/bin/zenity", "--error", "--title='could not run gnome-extensions prefs'", 
+                                                                                                                                                                 "--text='error running gnome-extensions prefs check if the relevant package is installed'"] }
         ];
 
         this.settings = this.getSettings();
@@ -320,14 +290,12 @@ export default class Hplip_menu2_Extension extends Extension {
         this._ext = new ExtensionImpl(this, this.cmds);
         let id = this.uuid;
         let indx = id.indexOf('@');
-        //console.log("[Hplip_menu2_Extension] id.substring(0, indx) == `" + id.substring(0, indx) +"'");
         Main.panel.addToStatusArea(id.substr(0, indx), this._ext, this.settings_data.position, this.settings_data.area);
-        //Main.panel.addToStatusArea('hplip-menu2', this._ext, this.settings_data.position, this.settings_data.area);
         this.settingsID = this.settings.connect("changed::settings-json", this.onSettingsChanged.bind(this)); 
-        //this._ext.enable();
     }
 
     disable() {
+        this.cmds = null;
         this._ext?.destroy();
         this.settings.disconnect(this.settingsID);
         delete this.settings;

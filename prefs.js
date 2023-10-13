@@ -7,21 +7,8 @@
 /*eslint no-undef: "error"*/
 
 import Adw from 'gi://Adw';
-//import Gio from 'gi://Gio';
-//import GLib from 'gi://GLib';
-//import GObject from 'gi://GObject';
 import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
-//import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
-//const ExtensionUtils = imports.misc.extensionUtils;
-//const GObject = imports.gi.GObject;
-//const Gtk = imports.gi.Gtk;
-import Gtk from 'gi://Gtk?version=4.0';
-//import St from 'gi://St';
-
-//const Gettext = imports.gettext.domain("gnome-shell-extensions");
-//const _ = Gettext.gettext;
-
-
+import Gtk from 'gi://Gtk';
 
 export default class HpExtensionPreferences extends ExtensionPreferences {
 
@@ -58,13 +45,8 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
     }
 
     save_clicked(){
-        //console.log("got here\n");
         // get the settings
         this.settings_data = JSON.parse(this._window._settings.get_string("settings-json"));
-        //console.log("settings_data === " + JSON.stringify(this.settings_data) + "\n");
-        //console.log("this.area === " + this.area + "\n");
-        //console.log("this.icon_name === " + this.icon_name + "\n");
-        //console.log("this.position_input.get_value() === " + this.position_input.get_value() + "\n");
 
         // update the values
         this.settings_data.area = this.area;
@@ -80,23 +62,19 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
 
     area_dropdown_clicked(combo){
         let activeItem = combo.get_active();
-        //console.log("area_dropdown_clicked: activeItem === " + activeItem + "\n");
         if(activeItem >= 0){
             if (activeItem === 0) this.area = "left";
             if (activeItem === 1) this.area = "center";
             if (activeItem === 2) this.area = "right";
         }
-        //console.log("area_dropdown_clicked: this.area === " + this.area + "\n");
     }
 
     icon_dropdown_clicked(combo){
         let activeItem = combo.get_active();
-        //console.log("icon_dropdown_clicked: activeItem === " + activeItem + "\n");
         if(activeItem >= 0){
             if (activeItem === 0) this.icon_name = "printer";
             if (activeItem === 1) this.icon_name = "/usr/share/hplip/data/images/16x16/hp_logo.png";
         }
-        //console.log("icon_dropdown_clicked: this.icon_name === " + this.icon_name + "\n");
     }
 
     _position_box(){
@@ -126,6 +104,19 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         hbox.set_spacing(15);
 
         return hbox;
+    }
+
+    _on_destroy(){
+        this.area = null;
+        this.icon_name = null;
+        this.area_token_box = null;
+        this.icon_token_box = null;
+        this.icon_token_input = null;
+        this.position_input = null;
+        this.save_settings_button = null;
+        this._window = null;
+        this.area_token_input = null;
+        this.settings_data = null;
     }
 
     fillPreferencesWindow(window) {
@@ -205,7 +196,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         });
         let credits_Grid = new Gtk.Grid();
         credits_Grid.set_column_homogeneous(false);
-        credits_Grid.attach(new Gtk.Label({label: _("Copyright") + ": ©2022 Francis Grizzly Smit", xalign: 0 }), 0, 0, 2, 1);
+        credits_Grid.attach(new Gtk.Label({label: _("Copyright") + ": ©2022 & ©2023 Francis Grizzly Smit", xalign: 0 }), 0, 0, 2, 1);
         let licence = new Gtk.LinkButton({uri: "https://www.gnu.org/licenses/gpl-2.0.en.html", label: "Licence GPL v2+" });
         licence.set_use_underline(true);
         licence.set_halign(Gtk.Align.START);
@@ -230,6 +221,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         vbox_about.append(credits_Grid);
         group2.add(vbox_about);
         page2.add(group2);
+        window.connect("destroy", this._on_destroy.bind(this));
         window.set_default_size(675, 655);
         window.add(page1);
         window.add(page2);
