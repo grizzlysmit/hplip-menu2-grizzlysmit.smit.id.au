@@ -38,7 +38,6 @@ class ExtensionImpl extends PanelMenu.Button {
         this.icon = new St.Icon({
             style_class: 'menu-button',
         });
-        // */
         let gicon/*, icon*/;
         let re = /^.*\.png$/;
         let re2 = /^\/.*\.png$/;
@@ -65,16 +64,25 @@ class ExtensionImpl extends PanelMenu.Button {
         for(let x = 0; x < this.cmds.length; x++){
 
             if (this.cmds[x].type === "command") {
+                let action = this.cmds[x].action;
+                let alt    = this.cmds[x].alt;
                 item = new PopupMenu.PopupMenuItem(this.cmds[x].text);
-                item.connect("activate", this.callback_command.bind(this, item, this.cmds, x));
+                item.connect("activate", this.callback_command.bind(this, item, action, alt));
                 this.menu.addMenuItem(item);
             }
 
             if (this.cmds[x].type === "desktop") {
                 let action = this.cmds[x].action;
+                let alt    = this.cmds[x].alt;
 
                 item = new PopupMenu.PopupMenuItem(this.cmds[x].text);
-                item.connect("activate", this.callback_desktop.bind(this, item, action, x));
+                item.connect("activate", this.callback_desktop.bind(this, item, action, alt));
+                this.menu.addMenuItem(item);
+            }
+
+            if(this.cmds[x].type === "settings"){
+                item = new PopupMenu.PopupMenuItem(this.cmds[x].text);
+                item.connect("activate", () => { this._caller.openPreferences(); });
                 this.menu.addMenuItem(item);
             }
 
@@ -94,20 +102,28 @@ class ExtensionImpl extends PanelMenu.Button {
 
     build_menu(thesubmenu, actions/*, depth*/){
         let item = null;
-        //depth++;
         for(let x = 0; x < actions.length; x++){
 
             if (actions[x].type === "command") {
+                let action = actions[x].action;
+                let alt    = actions[x].alt;
                 item = new PopupMenu.PopupMenuItem(actions[x].text);
-                item.connect("activate", this.callback_command.bind(this, item, actions, x));
+                item.connect("activate", this.callback_command.bind(this, item, action, alt));
                 thesubmenu.menu.addMenuItem(item);
             }
 
             if (actions[x].type === "desktop") {
                 let action = actions[x].action;
+                let alt    = this.cmds[x].alt;
 
                 item = new PopupMenu.PopupMenuItem(actions[x].text);
-                item.connect("activate", this.callback_desktop.bind(this, item, action, x));
+                item.connect("activate", this.callback_desktop.bind(this, item, action, alt));
+                thesubmenu.menu.addMenuItem(item);
+            }
+
+            if(actions[x].type === "settings"){
+                item = new PopupMenu.PopupMenuItem(this.actions[x].text);
+                item.connect("activate", () => { this._caller.openPreferences(); });
                 thesubmenu.menu.addMenuItem(item);
             }
 
@@ -119,38 +135,63 @@ class ExtensionImpl extends PanelMenu.Button {
         }
     }
 
-    callback_command(item, sub, ind){
-        let currentAction = sub[ind].action;
-        if(currentAction === undefined || currentAction === null || currentAction.length === 0){
-            return false;
-        }
-        /* Save context variable for binding */
-        if(typeof currentAction === 'string'){
-            if(GLib.spawn(currentAction)){
-                return true;
-            }else{
-                currentAction = this.cmds[ind].alt;
-                if(typeof currentAction === 'string'){
-                    return GLib.spawn(currentAction);
-                }else{
-                    return GLib.spawn_async(null, currentAction, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
+    launch(action, alt){
+        if(typeof action === 'string'){
+            let path = GLib.find_program_in_path(action);
+            if(path === null){
+                if(alt === null){
+                    return false;
                 }
+                return this.launch(alt, null);
+            }else{
+                return GLib.spawn(path);
             }
         }else{
-            if(GLib.spawn_async(null, currentAction, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){})){
-                return true;
-            }else{
-                currentAction = this.cmds[ind].alt;
-                if(typeof currentAction === 'string'){
-                    return GLib.spawn(currentAction);
-                }else{
-                    return GLib.spawn_async(null, currentAction, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
+            let path = GLib.find_program_in_path(action[0]);
+            if(path === null){
+                if(alt === null){
+                    return false;
                 }
+                return this.launch(alt,  null);
             }
+            return GLib.spawn_async(null, action, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
         }
     }
 
-    callback_desktop(item, action, ind){
+    callback_command(item, action, _alt){
+        let currentAction = action;
+        let alt           = _alt;
+        if((currentAction === undefined || currentAction === null || currentAction.length === 0) && (alt === undefined || alt === null || alt.length === 0)){
+            let name = "no defined action.";
+            let fallback = ["gnome-terminal", "--", "/usr/bin/zenity", "--error", `--title='could not run ${name}'`, 
+                                 `--text='error running ${name} it may not be installed you may need to install the ${name} packages.'`];
+            GLib.spawn_async(null, fallback, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
+            return false;
+        }
+        if(this.launch(currentAction, alt)){
+            return true;
+        }else{
+            let name = '<unknown>';
+            if(currentAction === undefined || currentAction === null || currentAction.length === 0){
+                if(typeof currentAction === 'string'){
+                    name = currentAction;
+                }else{
+                    name = currentAction[0];
+                }
+            }else{
+                if(typeof alt === 'string'){
+                    name = alt;
+                }else{
+                    name = alt[0];
+                }
+            }
+            let fallback = ["gnome-terminal", "--", "/usr/bin/zenity", "--error", `--title='could not run ${name}'`, 
+                                 `--text='error running ${name} it may not be installed you may need to install the ${name} packages.'`];
+            return GLib.spawn_async(null, fallback, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
+        }
+    }
+
+    callback_desktop(item, action, alt){
         let currentAction = action;
         // Save context variable for binding //
         let def = Shell.AppSystem.get_default();
@@ -158,13 +199,16 @@ class ExtensionImpl extends PanelMenu.Button {
         if(app !== null){
             app.activate();
             return true;
-        }else{
-            let alt = this._caller.get_cmds()[ind].alt;
+        }else{ // could not launch by action so use alt //
+            let name = '<unknown>';
             if(typeof alt === 'string'){
-                return GLib.spawn(alt);
+                name = alt;
             }else{
-                return GLib.spawn_async(null, alt, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
+                name = alt[0];
             }
+            let fallback = ["gnome-terminal", "--", "/usr/bin/zenity", "--error", `--title='could not run ${name}'`, 
+                                 `--text='error running ${name} it may not be installed you may need to install the ${name} packages.'`];
+            return this.launch(alt, fallback);
         }
     }
 
@@ -277,8 +321,7 @@ export default class Hplip_menu2_Extension extends Extension {
             { type: "desktop", text: _("Software Update..."),             action: "update-manager.desktop",                                                alt: ["gnome-software",  "--mode=updates"]  },
             { type: "desktop", text: _("Gnome Software..."),              action: "org.gnome.Software.desktop",                                            alt: ["gnome-software", "--mode=overview"] },
             { type: "separator" },
-            { type: "command", text: _("Settings..."),                    action: ["gnome-extensions", "prefs", "hplip-menu2@grizzlysmit.smit.id.au"] ,    alt: ["gnome-terminal", "--", "/usr/bin/zenity", "--error", "--title='could not run gnome-extensions prefs'", 
-                                                                                                                                                                 "--text='error running gnome-extensions prefs check if the relevant package is installed'"] }
+            { type: "settings", text: _("Settings..."),                   action: [] ,                                                                     alt: [] }
         ];
 
         this.settings = this.getSettings();

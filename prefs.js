@@ -57,7 +57,6 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
 
         this._window._settings.set_string("settings-json", JSON.stringify(this.settings_data));
         this._window._settings.apply();
-        //console.log("this.settings_data === " + JSON.stringify(this.settings_data) + "\n");
     }
 
     area_dropdown_clicked(combo){
@@ -82,8 +81,6 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         let position_label = new Gtk.Label({label: _("Position"), xalign: 0});
         this.position_input = new Gtk.Scale({ orientation: Gtk.Orientation.HORIZONTAL, vexpand: false, hexpand: true });
         this.position_input.set_range(0, 25);
-        //this.position_input.set_max(25);
-        //this.position_input.set_step(1);
         this.position_input.set_digits(2);
         this.position_input.set_draw_value(true);
         hbox.prepend(position_label);
@@ -104,19 +101,6 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         hbox.set_spacing(15);
 
         return hbox;
-    }
-
-    _on_destroy(){
-        this.area = null;
-        this.icon_name = null;
-        this.area_token_box = null;
-        this.icon_token_box = null;
-        this.icon_token_input = null;
-        this.position_input = null;
-        this.save_settings_button = null;
-        this._window = null;
-        this.area_token_input = null;
-        this.settings_data = null;
     }
 
     fillPreferencesWindow(window) {
@@ -160,10 +144,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         if (this.settings_data.icon_name === "/usr/share/hplip/data/images/16x16/hp_logo.png") this.icon_token_input.set_active(1);
         vbox.append(this.icon_token_box);
         this.position_box = this._position_box();
-        //console.log("this.settings_data.position === " + this.settings_data.position + "\n");
         if(0 <= this.settings_data.position && this.settings_data.position <= 25){
-            //this.position_input.set_value_pos(0);
-            //this.position_input.set_value_pos(3*(this.settings_data.position/25));
             this.position_input.set_value(this.settings_data.position);
         }else{
             this.position_input.set_value_pos(0);
@@ -221,8 +202,19 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         vbox_about.append(credits_Grid);
         group2.add(vbox_about);
         page2.add(group2);
-        window.connect("destroy", this._on_destroy.bind(this));
-        window.set_default_size(675, 655);
+        window.connect("close-request", () => {
+            this.area = null;
+            this.icon_name = null;
+            this.area_token_box = null;
+            this.icon_token_box = null;
+            this.icon_token_input = null;
+            this.position_input = null;
+            this.save_settings_button = null;
+            this._window = null;
+            this.area_token_input = null;
+            this.settings_data = null;
+        });
+        window.set_default_size(750, 725);
         window.add(page1);
         window.add(page2);
     }
