@@ -8,6 +8,7 @@ import Shell from 'gi://Shell';
 import St from 'gi://St';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
+import * as Gzz from './gzzDialog.js';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
@@ -64,19 +65,21 @@ class ExtensionImpl extends PanelMenu.Button {
         for(let x = 0; x < this.cmds.length; x++){
 
             if (this.cmds[x].type === "command") {
-                let action = this.cmds[x].action;
-                let alt    = this.cmds[x].alt;
+                let action       = this.cmds[x].action;
+                let alt          = this.cmds[x].alt;
+                let errorMessage = this.cmds[x].errorMessage;
                 item = new PopupMenu.PopupMenuItem(this.cmds[x].text);
-                item.connect("activate", this.callback_command.bind(this, item, action, alt));
+                item.connect("activate", this.callback_command.bind(this, item, action, alt, errorMessage));
                 this.menu.addMenuItem(item);
             }
 
             if (this.cmds[x].type === "desktop") {
                 let action = this.cmds[x].action;
                 let alt    = this.cmds[x].alt;
+                let errorMessage = this.cmds[x].errorMessage;
 
                 item = new PopupMenu.PopupMenuItem(this.cmds[x].text);
-                item.connect("activate", this.callback_desktop.bind(this, item, action, alt));
+                item.connect("activate", this.callback_desktop.bind(this, item, action, alt, errorMessage));
                 this.menu.addMenuItem(item);
             }
 
@@ -100,24 +103,26 @@ class ExtensionImpl extends PanelMenu.Button {
         }
     } // constructor(caller, _cmds) //
 
-    build_menu(thesubmenu, actions/*, depth*/){
+    build_menu(thesubmenu, actions){
         let item = null;
         for(let x = 0; x < actions.length; x++){
 
             if (actions[x].type === "command") {
-                let action = actions[x].action;
-                let alt    = actions[x].alt;
+                let action       = actions[x].action;
+                let alt          = actions[x].alt;
+                let errorMessage = actions[x].errorMessage;
                 item = new PopupMenu.PopupMenuItem(actions[x].text);
-                item.connect("activate", this.callback_command.bind(this, item, action, alt));
+                item.connect("activate", this.callback_command.bind(this, item, action, alt, errorMessage));
                 thesubmenu.menu.addMenuItem(item);
             }
 
             if (actions[x].type === "desktop") {
-                let action = actions[x].action;
-                let alt    = this.cmds[x].alt;
+                let action       = actions[x].action;
+                let alt          = actions[x].alt;
+                let errorMessage = actions[x].errorMessage;
 
                 item = new PopupMenu.PopupMenuItem(actions[x].text);
-                item.connect("activate", this.callback_desktop.bind(this, item, action, alt));
+                item.connect("activate", this.callback_desktop.bind(this, item, action, alt, errorMessage));
                 thesubmenu.menu.addMenuItem(item);
             }
 
@@ -158,14 +163,20 @@ class ExtensionImpl extends PanelMenu.Button {
         }
     }
 
-    callback_command(item, action, _alt){
+    callback_command(item, action, _alt, errorMessage){
         let currentAction = action;
         let alt           = _alt;
         if((currentAction === undefined || currentAction === null || currentAction.length === 0) && (alt === undefined || alt === null || alt.length === 0)){
             let name = "no defined action.";
-            let fallback = ["gnome-terminal", "--", "/usr/bin/zenity", "--error", `--title='could not run ${name}'`, 
-                                 `--text='error running ${name} it may not be installed you may need to install the ${name} packages.'`];
-            GLib.spawn_async(null, fallback, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
+            
+            let dialog;
+            if(errorMessage === undefined){
+                dialog = new Gzz.GzzMessageDialog(`could not run '${name}'`, `error running '${name}' it may not be installed you may need to install the packages containing '${name}'.`);
+            }else{
+                dialog = new Gzz.GzzMessageDialog(errorMessage.title, errorMessage.text);
+            }
+            dialog.open();
+                        
             return false;
         }
         if(this.launch(currentAction, alt)){
@@ -173,25 +184,30 @@ class ExtensionImpl extends PanelMenu.Button {
         }else{
             let name = '<unknown>';
             if(currentAction === undefined || currentAction === null || currentAction.length === 0){
-                if(typeof currentAction === 'string'){
-                    name = currentAction;
-                }else{
-                    name = currentAction[0];
-                }
-            }else{
                 if(typeof alt === 'string'){
                     name = alt;
                 }else{
                     name = alt[0];
                 }
+            }else{
+                if(typeof currentAction === 'string'){
+                    name = currentAction;
+                }else{
+                    name = currentAction[0];
+                }
             }
-            let fallback = ["gnome-terminal", "--", "/usr/bin/zenity", "--error", `--title='could not run ${name}'`, 
-                                 `--text='error running ${name} it may not be installed you may need to install the ${name} packages.'`];
-            return GLib.spawn_async(null, fallback, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
+            let dialog;
+            if(errorMessage === undefined){
+                dialog = new Gzz.GzzMessageDialog(`could not run '${name}'`, `error running '${name}' it may not be installed you may need to install the packages containing '${name}'.`);
+            }else{
+                dialog = new Gzz.GzzMessageDialog(errorMessage.title, errorMessage.text);
+            }
+            dialog.open();
+            return false;
         }
     }
 
-    callback_desktop(item, action, alt){
+    callback_desktop(item, action, alt, errorMessage){
         let currentAction = action;
         // Save context variable for binding //
         let def = Shell.AppSystem.get_default();
@@ -206,9 +222,18 @@ class ExtensionImpl extends PanelMenu.Button {
             }else{
                 name = alt[0];
             }
-            let fallback = ["gnome-terminal", "--", "/usr/bin/zenity", "--error", `--title='could not run ${name}'`, 
-                                 `--text='error running ${name} it may not be installed you may need to install the ${name} packages.'`];
-            return this.launch(alt, fallback);
+            if(this.launch(alt, null)){
+                return true;
+            }else{
+                let dialog;
+                if(errorMessage === undefined){
+                    dialog = new Gzz.GzzMessageDialog(`could not run '${name}'`, `error running '${name}' it may not be installed you may need to install the packages containing '${name}'.`);
+                }else{
+                    dialog = new Gzz.GzzMessageDialog(errorMessage.title, errorMessage.text);
+                }
+                dialog.open();
+                return false;
+            }
         }
     }
 
@@ -254,15 +279,16 @@ export default class Hplip_menu2_Extension extends Extension {
         this.cmds = [
             { type: "submenu", text: _("Printers..."),                  actions: [
                 { type: "desktop", text: _("System Printers..."),             action: "gnome-printers-panel.desktop",                                      alt: ["gnome-control-center", "printers"] },
-                { type: "command", text: _("Additional Printer Settings..."), action: ["/usr/share/system-config-printer/system-config-printer.py"],       alt: ["gnome-terminal", "--", "/usr/bin/zenity", "--error", "--title='could not run the old printer settings'", 
-                                                                                                                                                                 "--text='error running /usr/share/system-config-printer/system-config-printer.py check if the relevant package is installed'"]  },
+                { type: "command", text: _("Additional Printer Settings..."), action: ["/usr/share/system-config-printer/system-config-printer.py"],       alt: "system-config-printer.py", errorMessage: {title: "could not run the old printer settings", 
+                                                                                                                                                                                                           text:  "error running '/usr/share/system-config-printer/system-config-printer.py'" 
+                                                                                                                                                                                                                + "check if the relevant package is installed"}  },
                 { type: "separator" },
-                { type: "desktop", text: _("Hp Device Manager..."),           action: "hplip.desktop",                                                     alt: ["gnome-terminal", "--", "/usr/bin/zenity", "--error", "--title='could not run hp-toolbox'", 
-                                                                                                                                                                 "--text='error running hp-toolbox it may not be installed you may need to install the hplips packages.'"]  },
+                { type: "desktop", text: _("Hp Device Manager..."),           action: "hplip.desktop",                                                     alt: ["hp-toolbox"], errorMessage: {title: "could not run 'hp-toolbox'", 
+                                                                                                                                                                                               text: "error running 'hp-toolbox' it may not be installed you may need to install the 'hplip' & 'hplip-gui' packages."}  },
             ] }, 
             { type: "separator" },
-            { type: "desktop", text: _("Gnome Tweaks..."),                action: "org.gnome.tweaks.desktop",                                              alt: ["gnome-tweaks"]  },
-            { type: "desktop", text: _("Gnome Settings..."),              action: "gnome-control-center.desktop",                                          alt: ["gnome-control-center"]  },
+            { type: "desktop", text: _("Gnome Tweaks..."),               action: "org.gnome.tweaks.desktop",                                               alt: ["gnome-tweaks"], errorMessage: {title: "gnome-tweaks missing", text: "install the gnome-tweaks package"}  },
+            { type: "desktop", text: _("Gnome Settings..."),             action: "gnome-control-center.desktop",                                           alt: ["gnome-control-center"]  },
             { type: "desktop", text: _("Extensions..."),                 action: "org.gnome.Extensions.desktop",                                           alt: ["gnome-extensions-app"]  },
             { type: "separator" },
             { type: "submenu", text: _("Hardware"),                     actions: [
@@ -318,8 +344,11 @@ export default class Hplip_menu2_Extension extends Extension {
                 { type: "desktop", text: _("About This Computer..."),        action: "gnome-info-overview-panel.desktop",                    alt: ["gnome-control-center", "info-overview"] },
             ] }, 
             { type: "separator" },
-            { type: "desktop", text: _("Software Update..."),             action: "update-manager.desktop",                                                alt: ["gnome-software",  "--mode=updates"]  },
-            { type: "desktop", text: _("Gnome Software..."),              action: "org.gnome.Software.desktop",                                            alt: ["gnome-software", "--mode=overview"] },
+            { type: "desktop", text: _("Software Update..."),             action: "update-manager.desktop",                                                alt: ["gnome-software",  "--mode=updates"], errorMessage: {title: " could not find 'update-manager'",
+                                                                                                                                                                                                                      text: "perhaps you need to install 'update-manager' or"
+                                                                                                                                                                                                                          + "'gnome-software' if your disrobution does not support 'update-manager'."}  },
+            { type: "desktop", text: _("Gnome Software..."),              action: "org.gnome.Software.desktop",                                            alt: ["gnome-software", "--mode=overview"], errorMessage: {title: " could not find 'gnome-software'",
+                                                                                                                                                                                                                      text: "perhaps you need to install 'gnome-software'"} },
             { type: "separator" },
             { type: "settings", text: _("Settings..."),                   action: [] ,                                                                     alt: [] }
         ];
