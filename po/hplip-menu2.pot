@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-23 07:19+1100\n"
+"POT-Creation-Date: 2023-10-16 08:24+1100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,226 +17,280 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: prefs.js:94
+#: prefs.js:17
 msgid "Area"
 msgstr ""
 
-#: prefs.js:96
+#: prefs.js:19
 msgid "Left"
 msgstr ""
 
-#: prefs.js:96
+#: prefs.js:19
 msgid "Center"
 msgstr ""
 
-#: prefs.js:96
+#: prefs.js:19
 msgid "Right"
 msgstr ""
 
-#: prefs.js:110
+#: prefs.js:33
 msgid "Icon"
 msgstr ""
 
-#: prefs.js:126
+#: prefs.js:81
 msgid "Position"
 msgstr ""
 
-#: prefs.js:143
+#: prefs.js:96
 msgid "Save Settings"
 msgstr ""
 
-#: prefs.js:201
-msgid "Settings"
+#: prefs.js:119
+msgid "Alternate Menu for Hplip2 Settings"
 msgstr ""
 
-#: prefs.js:203
+#: prefs.js:125
+msgid "Hplip menu2 settings"
+msgstr ""
+
+#: prefs.js:165
+msgid "Credits"
+msgstr ""
+
+#: prefs.js:171
 msgid "About"
 msgstr ""
 
-#: prefs.js:211
+#: prefs.js:180
 msgid "Copyright"
 msgstr ""
 
-#: prefs.js:223
+#: prefs.js:192
 msgid "Author"
 msgstr ""
 
-#: prefs.js:228
-msgid "Dutch localization"
+#: prefs.js:197
+msgid "Dutch localisation"
 msgstr ""
 
-#: extension.js:59
+#: extension.js:280
 msgid "Printers..."
 msgstr ""
 
-#: extension.js:60
+#: extension.js:281
 msgid "System Printers..."
 msgstr ""
 
-#: extension.js:61
+#: extension.js:282
 msgid "Additional Printer Settings..."
 msgstr ""
 
-#: extension.js:63
+#: extension.js:282
+msgid "could not run the old printer settings"
+msgstr ""
+
+#: extension.js:283
+msgid ""
+"error running '/usr/share/system-config-printer/system-config-printer."
+"py'check if the relevant package is installed"
+msgstr ""
+
+#: extension.js:286
 msgid "Hp Device Manager..."
 msgstr ""
 
-#: extension.js:66
+#: extension.js:286
+msgid "could not run 'hp-toolbox'"
+msgstr ""
+
+#: extension.js:287
+msgid ""
+"error running 'hp-toolbox' it may not be installed you may need to install "
+"the 'hplip' & 'hplip-gui' packages."
+msgstr ""
+
+#: extension.js:290
 msgid "Gnome Tweaks..."
 msgstr ""
 
-#: extension.js:67
+#: extension.js:290
+msgid "gnome-tweaks missing"
+msgstr ""
+
+#: extension.js:290
+msgid "install the gnome-tweaks package"
+msgstr ""
+
+#: extension.js:291
 msgid "Gnome Settings..."
 msgstr ""
 
-#: extension.js:68
+#: extension.js:292
 msgid "Extensions..."
 msgstr ""
 
-#: extension.js:70
+#: extension.js:294
 msgid "Hardware"
 msgstr ""
 
-#: extension.js:72
+#: extension.js:296
 msgid "Power..."
 msgstr ""
 
-#: extension.js:74
+#: extension.js:298
 msgid "Display..."
 msgstr ""
 
-#: extension.js:75
+#: extension.js:299
 msgid "Keyboard..."
 msgstr ""
 
-#: extension.js:76
+#: extension.js:300
 msgid "Color..."
 msgstr ""
 
-#: extension.js:77
+#: extension.js:301
 msgid "Sound..."
 msgstr ""
 
-#: extension.js:79
+#: extension.js:303
 msgid "Removable Media..."
 msgstr ""
 
-#: extension.js:81
+#: extension.js:305
 msgid "Input"
 msgstr ""
 
-#: extension.js:82
+#: extension.js:306
 msgid "Mouse..."
 msgstr ""
 
-#: extension.js:83
+#: extension.js:307
 msgid "Wacom..."
 msgstr ""
 
-#: extension.js:85
+#: extension.js:309
 msgid "Private"
 msgstr ""
 
-#: extension.js:86
+#: extension.js:310
 msgid "Connectivity..."
 msgstr ""
 
-#: extension.js:88
+#: extension.js:312
 msgid "Location Services..."
 msgstr ""
 
-#: extension.js:89
+#: extension.js:313
 msgid "File History & Rubbish Bin..."
 msgstr ""
 
-#: extension.js:90
+#: extension.js:314
 msgid "Screen Lock..."
 msgstr ""
 
-#: extension.js:93
+#: extension.js:317
 msgid "Connections"
 msgstr ""
 
-#: extension.js:95
+#: extension.js:319
 msgid "Wifi..."
 msgstr ""
 
-#: extension.js:96
+#: extension.js:320
 msgid "Bluetooth..."
 msgstr ""
 
-#: extension.js:97
+#: extension.js:321
 msgid "Network..."
 msgstr ""
 
-#: extension.js:99
+#: extension.js:323
 msgid "Misc"
 msgstr ""
 
-#: extension.js:101
+#: extension.js:325
 msgid "Search..."
 msgstr ""
 
-#: extension.js:102
+#: extension.js:326
 msgid "Acceessibility..."
 msgstr ""
 
-#: extension.js:103
+#: extension.js:327
 msgid "Sharing..."
 msgstr ""
 
-#: extension.js:104
+#: extension.js:328
 msgid "Default Apps..."
 msgstr ""
 
-#: extension.js:106
+#: extension.js:330
 msgid "Asorted"
 msgstr ""
 
-#: extension.js:107
+#: extension.js:331
 msgid "Background..."
 msgstr ""
 
-#: extension.js:108
+#: extension.js:332
 msgid "Applications..."
 msgstr ""
 
-#: extension.js:110
+#: extension.js:334
 msgid "Locale"
 msgstr ""
 
-#: extension.js:112
+#: extension.js:336
 msgid "Datetime..."
 msgstr ""
 
-#: extension.js:113
+#: extension.js:337
 msgid "Language and Region..."
 msgstr ""
 
-#: extension.js:115
+#: extension.js:339
 msgid "System"
 msgstr ""
 
-#: extension.js:117
+#: extension.js:341
 msgid "Notifications..."
 msgstr ""
 
-#: extension.js:118
+#: extension.js:342
 msgid "User Accounts..."
 msgstr ""
 
-#: extension.js:120
+#: extension.js:344
 msgid "About This Computer..."
 msgstr ""
 
-#: extension.js:123
+#: extension.js:347
 msgid "Software Update..."
 msgstr ""
 
-#: extension.js:124
+#: extension.js:347
+msgid " could not find 'update-manager'"
+msgstr ""
+
+#: extension.js:348
+msgid ""
+"perhaps you need to install 'update-manager' or'gnome-software' if your "
+"disrobution does not support 'update-manager'."
+msgstr ""
+
+#: extension.js:350
 msgid "Gnome Software..."
 msgstr ""
 
-#: extension.js:126
+#: extension.js:350
+msgid " could not find 'gnome-software'"
+msgstr ""
+
+#: extension.js:351
+msgid "perhaps you need to install 'gnome-software'"
+msgstr ""
+
+#: extension.js:353
 msgid "Settings..."
 msgstr ""

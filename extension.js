@@ -279,15 +279,15 @@ export default class Hplip_menu2_Extension extends Extension {
         this.cmds = [
             { type: "submenu", text: _("Printers..."),                  actions: [
                 { type: "desktop", text: _("System Printers..."),             action: "gnome-printers-panel.desktop",                                      alt: ["gnome-control-center", "printers"] },
-                { type: "command", text: _("Additional Printer Settings..."), action: ["/usr/share/system-config-printer/system-config-printer.py"],       alt: "system-config-printer.py", errorMessage: {title: "could not run the old printer settings", 
-                                                                                                                                                                                                           text:  "error running '/usr/share/system-config-printer/system-config-printer.py'" 
-                                                                                                                                                                                                                + "check if the relevant package is installed"}  },
+                { type: "command", text: _("Additional Printer Settings..."), action: ["/usr/share/system-config-printer/system-config-printer.py"],       alt: "system-config-printer.py", errorMessage: {title: _("could not run the old printer settings"), 
+                                                                                                                                                                                                           text:  _("error running '/usr/share/system-config-printer/system-config-printer.py'" 
+                                                                                                                                                                                                                  + "check if the relevant package is installed")}  },
                 { type: "separator" },
-                { type: "desktop", text: _("Hp Device Manager..."),           action: "hplip.desktop",                                                     alt: ["hp-toolbox"], errorMessage: {title: "could not run 'hp-toolbox'", 
-                                                                                                                                                                                               text: "error running 'hp-toolbox' it may not be installed you may need to install the 'hplip' & 'hplip-gui' packages."}  },
+                { type: "desktop", text: _("Hp Device Manager..."),           action: "hplip.desktop",                                                     alt: ["hp-toolbox"], errorMessage: {title: _("could not run 'hp-toolbox'"), 
+                                                                                                                                                                                               text: _("error running 'hp-toolbox' it may not be installed you may need to install the 'hplip' & 'hplip-gui' packages.")}  },
             ] }, 
             { type: "separator" },
-            { type: "desktop", text: _("Gnome Tweaks..."),               action: "org.gnome.tweaks.desktop",                                               alt: ["gnome-tweaks"], errorMessage: {title: "gnome-tweaks missing", text: "install the gnome-tweaks package"}  },
+            { type: "desktop", text: _("Gnome Tweaks..."),               action: "org.gnome.tweaks.desktop",                                               alt: ["gnome-tweaks"], errorMessage: {title: _("gnome-tweaks missing"), text: _("install the gnome-tweaks package")}  },
             { type: "desktop", text: _("Gnome Settings..."),             action: "gnome-control-center.desktop",                                           alt: ["gnome-control-center"]  },
             { type: "desktop", text: _("Extensions..."),                 action: "org.gnome.Extensions.desktop",                                           alt: ["gnome-extensions-app"]  },
             { type: "separator" },
@@ -344,11 +344,11 @@ export default class Hplip_menu2_Extension extends Extension {
                 { type: "desktop", text: _("About This Computer..."),        action: "gnome-info-overview-panel.desktop",                    alt: ["gnome-control-center", "info-overview"] },
             ] }, 
             { type: "separator" },
-            { type: "desktop", text: _("Software Update..."),             action: "update-manager.desktop",                                                alt: ["gnome-software",  "--mode=updates"], errorMessage: {title: " could not find 'update-manager'",
-                                                                                                                                                                                                                      text: "perhaps you need to install 'update-manager' or"
-                                                                                                                                                                                                                          + "'gnome-software' if your disrobution does not support 'update-manager'."}  },
-            { type: "desktop", text: _("Gnome Software..."),              action: "org.gnome.Software.desktop",                                            alt: ["gnome-software", "--mode=overview"], errorMessage: {title: " could not find 'gnome-software'",
-                                                                                                                                                                                                                      text: "perhaps you need to install 'gnome-software'"} },
+            { type: "desktop", text: _("Software Update..."),             action: "update-manager.desktop",                                                alt: ["gnome-software",  "--mode=updates"], errorMessage: {title: _(" could not find 'update-manager'"),
+                                                                                                                                                                                                                      text: _("perhaps you need to install 'update-manager' or"
+                                                                                                                                                                                                                          + "'gnome-software' if your disrobution does not support 'update-manager'.")}  },
+            { type: "desktop", text: _("Gnome Software..."),              action: "org.gnome.Software.desktop",                                            alt: ["gnome-software", "--mode=overview"], errorMessage: {title: _(" could not find 'gnome-software'"),
+                                                                                                                                                                                                                      text: _("perhaps you need to install 'gnome-software'")} },
             { type: "separator" },
             { type: "settings", text: _("Settings..."),                   action: [] ,                                                                     alt: [] }
         ];
