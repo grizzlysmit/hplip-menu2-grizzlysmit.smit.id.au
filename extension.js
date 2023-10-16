@@ -167,13 +167,15 @@ class ExtensionImpl extends PanelMenu.Button {
         let currentAction = action;
         let alt           = _alt;
         if((currentAction === undefined || currentAction === null || currentAction.length === 0) && (alt === undefined || alt === null || alt.length === 0)){
-            let name = "no defined action.";
+            let name = "<no defined action>.";
             
             let dialog;
             if(errorMessage === undefined){
-                dialog = new Gzz.GzzMessageDialog(`could not run '${name}'`, `error running '${name}' it may not be installed you may need to install the packages containing '${name}'.`);
+                let title = this._caller.get_title(name);
+                let text  = this._caller.get_text(name);
+                dialog    = new Gzz.GzzMessageDialog(title, text);
             }else{
-                dialog = new Gzz.GzzMessageDialog(errorMessage.title, errorMessage.text);
+                dialog    = new Gzz.GzzMessageDialog(errorMessage.title, errorMessage.text);
             }
             dialog.open();
                         
@@ -198,9 +200,11 @@ class ExtensionImpl extends PanelMenu.Button {
             }
             let dialog;
             if(errorMessage === undefined){
-                dialog = new Gzz.GzzMessageDialog(`could not run '${name}'`, `error running '${name}' it may not be installed you may need to install the packages containing '${name}'.`);
+                let title = this._caller.get_title(name);
+                let text  = this._caller.get_text(name);
+                dialog    = new Gzz.GzzMessageDialog(title, text);
             }else{
-                dialog = new Gzz.GzzMessageDialog(errorMessage.title, errorMessage.text);
+                dialog    = new Gzz.GzzMessageDialog(errorMessage.title, errorMessage.text);
             }
             dialog.open();
             return false;
@@ -227,9 +231,11 @@ class ExtensionImpl extends PanelMenu.Button {
             }else{
                 let dialog;
                 if(errorMessage === undefined){
-                    dialog = new Gzz.GzzMessageDialog(`could not run '${name}'`, `error running '${name}' it may not be installed you may need to install the packages containing '${name}'.`);
+                    let title = this._caller.get_title(name);
+                    let text  = this._caller.get_text(name);
+                    dialog    = new Gzz.GzzMessageDialog(title, text);
                 }else{
-                    dialog = new Gzz.GzzMessageDialog(errorMessage.title, errorMessage.text);
+                    dialog    = new Gzz.GzzMessageDialog(errorMessage.title, errorMessage.text);
                 }
                 dialog.open();
                 return false;
@@ -272,6 +278,17 @@ export default class Hplip_menu2_Extension extends Extension {
 
     set_settings_data(sd){
         this.settings_data = sd;
+    }
+
+    get_title(name){
+        let t0 = _("could not run");
+        return `${t0} '${name}'`;
+    }
+
+    get_text(name){
+        let t0 = _("error running");
+        let t1 = _("it may not be installed you may need to install the packages containing");
+        return `${t0} '${name}' ${t1} '${name}'.`;
     }
 
     enable() {
