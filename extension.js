@@ -31,8 +31,8 @@ class ExtensionImpl extends PanelMenu.Button {
             this._caller.set_settings(this._caller.getSettings());
             this._caller.set_settings_data(JSON.parse(this._caller.get_settings().get_string("settings-json")));
         }
-        if (this._caller.get_settings_data().icon_name) {
-            this.icon_name = this._caller.get_settings_data().icon_name;
+        if (this._caller.get_settings().get_string("icon-name")) {
+            this.icon_name = this._caller.get_settings().get_string("icon-name");
         } else {
             this.icon_name = "printer";
         }
@@ -64,81 +64,77 @@ class ExtensionImpl extends PanelMenu.Button {
         let item = null;
         for(let x = 0; x < this.cmds.length; x++){
 
-            if (this.cmds[x].type === "command") {
-                let action       = this.cmds[x].action;
-                let alt          = this.cmds[x].alt;
-                let errorMessage = this.cmds[x].errorMessage;
-                item = new PopupMenu.PopupMenuItem(this.cmds[x].text);
-                item.connect("activate", this.callback_command.bind(this, item, action, alt, errorMessage));
-                this.menu.addMenuItem(item);
-            }
+            switch (this.cmds[x].type) {
+                case "command":
+                    let action       = this.cmds[x].action;
+                    let alt          = this.cmds[x].alt;
+                    let errorMessage = this.cmds[x].errorMessage;
+                    item = new PopupMenu.PopupMenuItem(this.cmds[x].text);
+                    item.connect("activate", this.callback_command.bind(this, item, action, alt, errorMessage));
+                    this.menu.addMenuItem(item);
+                    break;
+                case "desktop":
+                    let action = this.cmds[x].action;
+                    let alt    = this.cmds[x].alt;
+                    let errorMessage = this.cmds[x].errorMessage;
 
-            if (this.cmds[x].type === "desktop") {
-                let action = this.cmds[x].action;
-                let alt    = this.cmds[x].alt;
-                let errorMessage = this.cmds[x].errorMessage;
+                    item = new PopupMenu.PopupMenuItem(this.cmds[x].text);
+                    item.connect("activate", this.callback_desktop.bind(this, item, action, alt, errorMessage));
+                    this.menu.addMenuItem(item);
+                    break;
+                case "settings":
+                    item = new PopupMenu.PopupMenuItem(this.cmds[x].text);
+                    item.connect("activate", () => { this._caller.openPreferences(); });
+                    this.menu.addMenuItem(item);
+                    break;
+                case "separator":
+                    this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+                    break;
+                case "submenu":
+                    let text = this.cmds[x].text;
+                    let submenu = new PopupMenu.PopupSubMenuMenuItem(text, true, this, 0);
+                    this.build_menu(submenu, this.cmds[x].actions);
+                    this.menu.addMenuItem(submenu);
+                    break;
+            } // switch (this.cmds[x].type) //
 
-                item = new PopupMenu.PopupMenuItem(this.cmds[x].text);
-                item.connect("activate", this.callback_desktop.bind(this, item, action, alt, errorMessage));
-                this.menu.addMenuItem(item);
-            }
-
-            if(this.cmds[x].type === "settings"){
-                item = new PopupMenu.PopupMenuItem(this.cmds[x].text);
-                item.connect("activate", () => { this._caller.openPreferences(); });
-                this.menu.addMenuItem(item);
-            }
-
-            if (this.cmds[x].type === "separator") {
-                this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-            }
-
-            if (this.cmds[x].type === "submenu"){
-                let text = this.cmds[x].text;
-                let submenu = new PopupMenu.PopupSubMenuMenuItem(text, true, this, 0);
-                this.build_menu(submenu, this.cmds[x].actions);
-                this.menu.addMenuItem(submenu);
-            }
-
-        }
+        } // for(let x = 0; x < this.cmds.length; x++) //
     } // constructor(caller, _cmds) //
 
     build_menu(thesubmenu, actions){
         let item = null;
         for(let x = 0; x < actions.length; x++){
 
-            if (actions[x].type === "command") {
-                let action       = actions[x].action;
-                let alt          = actions[x].alt;
-                let errorMessage = actions[x].errorMessage;
-                item = new PopupMenu.PopupMenuItem(actions[x].text);
-                item.connect("activate", this.callback_command.bind(this, item, action, alt, errorMessage));
-                thesubmenu.menu.addMenuItem(item);
-            }
+            switch (actions[x].type) {
+                case "command":
+                    let action       = actions[x].action;
+                    let alt          = actions[x].alt;
+                    let errorMessage = actions[x].errorMessage;
+                    item = new PopupMenu.PopupMenuItem(actions[x].text);
+                    item.connect("activate", this.callback_command.bind(this, item, action, alt, errorMessage));
+                    thesubmenu.menu.addMenuItem(item);
+                    break;
+                case "desktop":
+                    let action       = actions[x].action;
+                    let alt          = actions[x].alt;
+                    let errorMessage = actions[x].errorMessage;
 
-            if (actions[x].type === "desktop") {
-                let action       = actions[x].action;
-                let alt          = actions[x].alt;
-                let errorMessage = actions[x].errorMessage;
+                    item = new PopupMenu.PopupMenuItem(actions[x].text);
+                    item.connect("activate", this.callback_desktop.bind(this, item, action, alt, errorMessage));
+                    thesubmenu.menu.addMenuItem(item);
+                    break;
+                case "settings":
+                    item = new PopupMenu.PopupMenuItem(this.actions[x].text);
+                    item.connect("activate", () => { this._caller.openPreferences(); });
+                    thesubmenu.menu.addMenuItem(item);
+                    break;
+                case "separator":
+                    thesubmenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+                    break;
+            } // actions[x].type //
 
-                item = new PopupMenu.PopupMenuItem(actions[x].text);
-                item.connect("activate", this.callback_desktop.bind(this, item, action, alt, errorMessage));
-                thesubmenu.menu.addMenuItem(item);
-            }
-
-            if(actions[x].type === "settings"){
-                item = new PopupMenu.PopupMenuItem(this.actions[x].text);
-                item.connect("activate", () => { this._caller.openPreferences(); });
-                thesubmenu.menu.addMenuItem(item);
-            }
-
-            if (actions[x].type === "separator") {
-                thesubmenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-            }
-
-            
-        }
-    }
+        } // for(let x = 0; x < actions.length; x++) //
+    } // build_menu(thesubmenu, actions) //
 
     launch(action, alt){
         if(typeof action === 'string'){
@@ -304,9 +300,12 @@ export default class Hplip_menu2_Extension extends Extension {
                                                                                                                                                                                                text: _("error running 'hp-toolbox' it may not be installed you may need to install the 'hplip' & 'hplip-gui' packages.")}  },
             ] }, 
             { type: "separator" },
-            { type: "desktop", text: _("Gnome Tweaks..."),               action: "org.gnome.tweaks.desktop",                                               alt: ["gnome-tweaks"], errorMessage: {title: _("gnome-tweaks missing"), text: _("install the gnome-tweaks package")}  },
-            { type: "desktop", text: _("Gnome Settings..."),             action: "gnome-control-center.desktop",                                           alt: ["gnome-control-center"]  },
-            { type: "desktop", text: _("Extensions..."),                 action: "org.gnome.Extensions.desktop",                                           alt: ["gnome-extensions-app"]  },
+            { type: "submenu", text: _("System Utils..."),                  actions: [
+                { type: "desktop", text: _("Gnome Tweaks..."),               action: "org.gnome.tweaks.desktop",                                               alt: ["gnome-tweaks"], errorMessage: {title: _("gnome-tweaks missing"), text: _("install the gnome-tweaks package")}  },
+                { type: "desktop", text: _("Gnome Settings..."),             action: "gnome-control-center.desktop",                                           alt: ["gnome-control-center"]  },
+                { type: "desktop", text: _("Extensions..."),                 action: "org.gnome.Extensions.desktop",                                           alt: ["gnome-extensions-app"]  },
+                { type: "desktop", text: _("Extension Mangager..."),         action: "com.mattjakeman.ExtensionManager.desktop",                               alt: ["extension-manager"], errorMessage: {title: _("extension-manager missing"), text: _("install the extension-manager package")}   },
+            ] }, 
             { type: "separator" },
             { type: "submenu", text: _("Hardware"),                     actions: [
                 { type: "separator" },
@@ -361,32 +360,47 @@ export default class Hplip_menu2_Extension extends Extension {
                 { type: "desktop", text: _("About This Computer..."),        action: "gnome-info-overview-panel.desktop",                    alt: ["gnome-control-center", "info-overview"] },
             ] }, 
             { type: "separator" },
-            { type: "desktop", text: _("Software Update..."),             action: "update-manager.desktop",                                                alt: ["gnome-software",  "--mode=updates"], errorMessage: {title: _(" could not find 'update-manager'"),
-                                                                                                                                                                                                                      text: _("perhaps you need to install 'update-manager' or"
-                                                                                                                                                                                                                          + "'gnome-software' if your disrobution does not support 'update-manager'.")}  },
-            { type: "desktop", text: _("Gnome Software..."),              action: "org.gnome.Software.desktop",                                            alt: ["gnome-software", "--mode=overview"], errorMessage: {title: _(" could not find 'gnome-software'"),
-                                                                                                                                                                                                                      text: _("perhaps you need to install 'gnome-software'")} },
+            { type: "submenu", text: _("Software..."),                  actions: [
+                { type: "desktop", text: _("Software Update..."),             action: "update-manager.desktop",                                                alt: ["gnome-software",  "--mode=updates"], errorMessage: {title: _(" could not find 'update-manager'"),
+                                                                                                                                                                                                                          text: _("perhaps you need to install 'update-manager' or"
+                                                                                                                                                                                                                              + "'gnome-software' if your disrobution does not support 'update-manager'.")}  },
+                { type: "desktop", text: _("Gnome Software..."),              action: "org.gnome.Software.desktop",                                            alt: ["gnome-software", "--mode=overview"], errorMessage: {title: _(" could not find 'gnome-software'"),
+                                                                                                                                                                                                                          text: _("perhaps you need to install 'gnome-software'")} },
+            ] }, 
             { type: "separator" },
             { type: "settings", text: _("Settings..."),                   action: [] ,                                                                     alt: [] }
         ];
 
         this.settings = this.getSettings();
-        this.settings_data = JSON.parse(this.settings.get_string("settings-json"));
-        if(this.settings_data.position < 0 || this.settings_data.position > 25) this.settings_data.position = 0;
-        this.icon_name = this.settings_data.icon;
-        this.settings.set_string("settings-json", JSON.stringify(this.settings_data));
+        if(this.settings.get_boolean("first-time")){ // grab legacy settings //
+            this.settings_data = JSON.parse(this.settings.get_string("settings-json"));
+            this.settings.set_string("area", this.settings_data.area);
+            this.settings.set_string("icon-name", this.settings_data.icon_name);
+            this.settings.set_int("position", this.settings_data.position);
+            this.settings.set_boolean("first-time", false); // old settings obtained //
+            this.settings.apply(); // save settings //
+        }
+        if(this.settings.get_int("position") < 0 || this.settings.get_int("position") > 25) this.settings.set_int("position", 0);
+        this.icon_name = this.settings.get_string("icon-name");
+        this.area = this.settings.get_string("area");
         this.settings.apply();
         this._ext = new ExtensionImpl(this, this.cmds);
         let id = this.uuid;
         let indx = id.indexOf('@');
-        Main.panel.addToStatusArea(id.substr(0, indx), this._ext, this.settings_data.position, this.settings_data.area);
-        this.settingsID = this.settings.connect("changed::settings-json", this.onSettingsChanged.bind(this)); 
+        Main.panel.addToStatusArea(id.substr(0, indx), this._ext, this.settings.get_int("position"), this.settings.get_string("area"));
+        this.settingsID_area = this.settings.connect("changed::area", this.onSettingsChanged.bind(this)); 
+        this.settingsID_icon = this.settings.connect("changed::icon-name", this.onSettingsChanged.bind(this)); 
+        this.settingsID_pos  = this.settings.connect("changed::position", this.onSettingsChanged.bind(this)); 
+        this.settingsID_comp = this.settings.connect("changed::compact", this.onSettingsChanged.bind(this)); 
     }
 
     disable() {
         this.cmds = null;
         this._ext?.destroy();
-        this.settings.disconnect(this.settingsID);
+        this.settings.disconnect(this.settingsID_area);
+        this.settings.disconnect(this.settingsID_icon);
+        this.settings.disconnect(this.settingsID_pos);
+        this.settings.disconnect(this.settingsID_comp);
         delete this.settings;
         delete this.settings_data;
         delete this._ext;

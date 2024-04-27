@@ -13,50 +13,52 @@ import Gtk from 'gi://Gtk';
 export default class HpExtensionPreferences extends ExtensionPreferences {
 
     _area_token_box(){
-        let hbox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, });
-        let area_token_label = new Gtk.Label({label: _("Area"), xalign: 0 });
+        const title = _("Area");
+        const row = new Adw.ActionRow({ title });
+        row.set_subtitle(_("Area in the panel"));
+        this.area = this._window._settings.get_string("area");
         this.area_token_input = new Gtk.ComboBoxText();
         let areas = [_("Left"), _("Center"), _("Right")];
-        for (let i = 0; i < areas.length; i++)
+        let cur = 0;
+        for (let i = 0; i < areas.length; i++){
+            if(this.area === areas[i]) cur = i;
             this.area_token_input.append_text(areas[i]);
-        this.area_token_input.set_active(0);
-        this.area_token_input.connect ("changed", this.area_dropdown_clicked.bind(this));
-        hbox.prepend(area_token_label);
-        hbox.append(this.area_token_input);
-        hbox.set_spacing(15);
-        this.area = "left";
-        return hbox;
+        }
+        this.area_token_input.set_active(cur);
+        this.area_token_input.connect("changed", this.area_dropdown_clicked.bind(this));
+        row.add_suffix(this.area_token_input);
+        row.activatable_widget = this.area_token_input;
+        return row;
     }
 
     _icon_token_box(){
-        let hbox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, });
-        let icon_token_label = new Gtk.Label({label: _("Icon"), xalign: 0 });
+        const title = _("Icon Name");
+        const row = new Adw.ActionRow({ title });
+        row.set_subtitle(_("The name of the icon"));
         this.icon_token_input = new Gtk.ComboBoxText();
-        this.icon_token_input.set_active(0);
         let icons = ["printer", "/usr/share/hplip/data/images/16x16/hp_logo.png"];
-        for (let i = 0; i < icons.length; i++)
+        this.icon_name = this._window._settings.get_string("icon-name");
+        let cur = 0;
+        for (let i = 0; i < icons.length; i++){
+            if(this.icon_name === icons[i]) cur = i;
             this.icon_token_input.append_text(icons[i]);
+        }
+        this.icon_token_input.set_active(cur);
         this.icon_token_input.connect ("changed", this.icon_dropdown_clicked.bind(this));
-        hbox.prepend(icon_token_label);
-        hbox.append(this.icon_token_input);
-        hbox.set_spacing(15);
-        this.icon_name = "printer";
-        return hbox;
+        row.add_suffix(this.icon_token_input);
+        row.activatable_widget = this.icon_token_input;
+        return row;
     }
 
     save_clicked(){
-        // get the settings
-        this.settings_data = JSON.parse(this._window._settings.get_string("settings-json"));
-
         // update the values
-        this.settings_data.area = this.area;
-        this.settings_data.icon_name = this.icon_name;
+        this._window._settings.set_string("area", this.area);
+        this._window._settings.set_string("icon-name", this.icon_name);
         if(0 <= this.position_input.get_value() && this.position_input.get_value() <= 25){
-            this.settings_data.position = this.position_input.get_value();
+            this._window._settings.set_int("position", this.position_input.get_value());
         }
 
-        this._window._settings.set_string("settings-json", JSON.stringify(this.settings_data));
-        this._window._settings.apply();
+        this._window._settings.apply(); // save the settings //
     }
 
     area_dropdown_clicked(combo){
@@ -77,30 +79,35 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
     }
 
     _position_box(){
-        let hbox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, });
-        let position_label = new Gtk.Label({label: _("Position"), xalign: 0});
-        this.position_input = new Gtk.Scale({ orientation: Gtk.Orientation.HORIZONTAL, vexpand: false, hexpand: true });
-        this.position_input.set_range(0, 25);
-        this.position_input.set_digits(2);
-        this.position_input.set_draw_value(true);
-        hbox.prepend(position_label);
-        hbox.append(this.position_input);
-        hbox.set_spacing(15);
-        this.position_input.set_value_pos(0);
-        return hbox;
+        const title = _("Position");
+        const row = new Adw.ActionRow({ title });
+        row.set_subtitle(_("Position in the area of the panel."));
+        const slider = new Gtk.Scale({
+            digits: 2,
+            adjustment: new Gtk.Adjustment({ lower: 0, upper: 25, stepIncrement: 1 }),
+            value_pos: Gtk.PositionType.RIGHT,
+            hexpand: true,
+            halign: Gtk.Align.END
+        });
+        slider.set_draw_value(true);
+        slider.set_value(this._window._settings.get_int("position"));
+        //slider.connect('value-changed', (sw) => settings.set_int("position", sw.get_value()));
+        slider.set_size_request(400, 15);
+        row.add_suffix(slider);
+        row.activatable_widget = slider;
+        this.position_input = slider;
+        return row;
     }
 
     _save_settings_box(){
-        let hbox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, });
-        let save_settings_spacer = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: true, hexpand: true });
+        const title = "";
+        const row = new Adw.ActionRow({ title });
+        row.set_subtitle("");
         this.save_settings_button = new Gtk.Button({label: _("Save Settings") });
-        let save_settings_spacer_end = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: true, hexpand: true });
-        hbox.prepend(save_settings_spacer);
-        hbox.append(this.save_settings_button);
-        hbox.append(save_settings_spacer_end);
-        hbox.set_spacing(15);
+        row.add_suffix(this.save_settings_button);
+        row.activatable_widget = this.save_settings_button;
 
-        return hbox;
+        return row;
     }
 
     fillPreferencesWindow(window) {
@@ -114,9 +121,17 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         this._window = window;
 
         window._settings = this.getSettings();
+        if(window._settings.get_boolean("first-time")){ // grab legacy _settings //
+            window.settings_data = JSON.parse(window._settings.get_string("_settings-json"));
+            window._settings.set_string("area", window.settings_data.area);
+            window._settings.set_string("icon-name", window.settings_data.icon_name);
+            window._settings.set_int("position", window.settings_data.position);
+            window._settings.set_boolean("first-time", false); // old _settings obtained //
+            window._settings.apply(); // save _settings //
+        }
 
         const page1 = Adw.PreferencesPage.new();
-        page1.set_title(_("Alternate Menu for Hplip2 Settings"));
+        page1.set_title(_("Settings"));
         page1.set_name("hplips_menu2_page1");
         page1.set_icon_name("preferences-system-symbolic");
 
@@ -125,40 +140,20 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         group1.set_title(_("Hplip menu2 settings"));
         group1.set_name("HpLip_menu2_global");
         page1.add(group1);
-        let vbox = new Gtk.Box({
-            orientation: Gtk.Orientation.VERTICAL,
-            spacing: 12,
-            margin_top: 10,
-        });
         this.area_token_box = this._area_token_box();
-        // set the saved area token value
-        this.settings_data = JSON.parse(window._settings.get_string("settings-json"));
-        if (this.settings_data.area === "left") this.area_token_input.set_active(0);
-        if (this.settings_data.area === "center") this.area_token_input.set_active(1);
-        if (this.settings_data.area === "right") this.area_token_input.set_active(2);
-        vbox.prepend(this.area_token_box);
+        group1.add(this.area_token_box);
 
         this.icon_token_box = this._icon_token_box();
-        // set the saved icon token value
-        if (this.settings_data.icon_name === "printer") this.icon_token_input.set_active(0);
-        if (this.settings_data.icon_name === "/usr/share/hplip/data/images/16x16/hp_logo.png") this.icon_token_input.set_active(1);
-        vbox.append(this.icon_token_box);
+        group1.add(this.icon_token_box);
         this.position_box = this._position_box();
-        if(0 <= this.settings_data.position && this.settings_data.position <= 25){
-            this.position_input.set_value(this.settings_data.position);
-        }else{
-            this.position_input.set_value_pos(0);
-            this.settings_data.position = 0;
-        }
-        vbox.append(this.position_box);
+        group1.add(this.position_box);
         let save_settings_box = this._save_settings_box();
         this.save_settings_button.connect("clicked", this.save_clicked.bind(this));
-        vbox.append(save_settings_box);
+        group1.add(save_settings_box);
         let hbox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, vexpand: true, hexpand: true, });
         let bottom_spacer = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: true, hexpand: true });
         hbox.prepend(bottom_spacer);
-        vbox.append(hbox);
-        group1.add(vbox);
+        group1.add(hbox);
 
                 //page2
         const page2 = Adw.PreferencesPage.new();
@@ -170,11 +165,6 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         const group2 = Adw.PreferencesGroup.new();
         group2.set_title(_("About"));
         group2.set_name("Hplip_menu2_About");
-        let vbox_about = new Gtk.Box({
-            orientation: Gtk.Orientation.VERTICAL,
-            spacing: 12,
-            margin_top: 10,
-        });
         let credits_Grid = new Gtk.Grid();
         credits_Grid.set_column_homogeneous(false);
         credits_Grid.attach(new Gtk.Label({label: _("Copyright") + ": ©2022 & ©2023 Francis Grizzly Smit", xalign: 0 }), 0, 0, 2, 1);
@@ -199,8 +189,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         link2.set_use_underline(true);
         link2.set_halign(Gtk.Align.START);
         credits_Grid.attach(link2, 2, 5, 1, 1);
-        vbox_about.append(credits_Grid);
-        group2.add(vbox_about);
+        group2.add(credits_Grid);
         page2.add(group2);
         window.connect("close-request", () => {
             this.area = null;
@@ -214,9 +203,8 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             this.area_token_input = null;
             this.settings_data = null;
         });
-        window.set_default_size(750, 725);
         window.add(page1);
         window.add(page2);
-    }
-}
+    } // fillPreferencesWindow(window) //
+} // export default class HpExtensionPreferences extends ExtensionPreferences //
 
