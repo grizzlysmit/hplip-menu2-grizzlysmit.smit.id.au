@@ -14,6 +14,7 @@ import * as Main from './main.js';
 import * as Params from '../misc/params.js';
 import Gtk from 'gi://Gtk';
 
+import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from './popupMenu.js';
 
 export const PopoverMenuItem = GObject.registerClass(
@@ -33,7 +34,7 @@ class PopoverMenuItem extends PopupMenu.PopupBaseMenuItem {
 
 export class PopoverMenu extends PopupMenu.PopupMenuBase {
     constructor(sourceActor, arrowAlignment, arrowSide) {
-        super(sourceActor, 'popup-menu-content');
+        super(sourceActor, 'popover-menu-content');
 
         this._arrowAlignment = arrowAlignment;
         this._arrowSide = arrowSide;
@@ -41,10 +42,10 @@ export class PopoverMenu extends PopupMenu.PopupMenuBase {
         this._boxPointer = new BoxPointer.BoxPointer(arrowSide);
         this.actor = this._boxPointer;
         this.actor._delegate = this;
-        this.actor.style_class = 'popup-menu-boxpointer';
+        this.actor.style_class = 'popover-menu-boxpointer';
 
         this._boxPointer.bin.set_child(this.box);
-        this.actor.add_style_class_name('popup-menu');
+        this.actor.add_style_class_name('popover-menu');
 
         global.focus_manager.add_group(this.actor);
         this.actor.reactive = true;
@@ -185,7 +186,7 @@ export class PopoverSubMenu extends PopupMenu.PopupMenuBase {
         // with long content, we make it scrollable - the scrollbar will only take
         // effect if a CSS max-height is set on the top menu.
         this.actor = new St.ScrollView({
-            style_class: 'popup-sub-menu',
+            style_class: 'popover-sub-menu',
             vscrollbar_policy: St.PolicyType.NEVER,
             child: this.box,
         });
@@ -305,4 +306,21 @@ export class PopoverSubMenu extends PopupMenu.PopupMenuBase {
         return Clutter.EVENT_PROPAGATE;
     }
 }
+
+export const PopupOverMenuItem = GObject.registerClass(
+class PopupOverMenuItem extends PopupMenu.PopupBaseMenuItem {
+    _init(text, params) {
+        super._init(params);
+
+        this.label = new St.Label({
+            text,
+            y_expand: true,
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+        this.button = new PanelMenu.Button(this.label.length, text);
+        this.button.add_child(this.label);
+        this.add_child(this.button);
+        this.label_actor = this.button;
+    }
+});
 

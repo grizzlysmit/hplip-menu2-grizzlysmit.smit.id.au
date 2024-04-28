@@ -57,6 +57,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         if(0 <= this.position_input.get_value() && this.position_input.get_value() <= 25){
             this._window._settings.set_int("position", this.position_input.get_value());
         }
+        this._window._settings.set_boolean("compact", this.compact_switch.get_state());
 
         this._window._settings.apply(); // save the settings //
     }
@@ -96,6 +97,20 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         row.add_suffix(slider);
         row.activatable_widget = slider;
         this.position_input = slider;
+        return row;
+    }
+
+    _compact_row(){
+        const title = _("Compact");
+        const row = new Adw.ActionRow({ title });
+        row.set_subtitle(_("Compact Menu."));
+        const compact_switch = new Gtk.Switch({
+          active: window._settings.get_boolean("compact"),
+          valign: Gtk.Align.CENTER,
+        });
+        row.add_suffix(compact_switch);
+        row.activatable_widget = compact_switch;
+        this.compact_switch = compact_switch;
         return row;
     }
 
@@ -147,6 +162,8 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         group1.add(this.icon_token_box);
         this.position_box = this._position_box();
         group1.add(this.position_box);
+        this.compact_row = this._compact_row();
+        group1.add(this.compact_row);
         let save_settings_box = this._save_settings_box();
         this.save_settings_button.connect("clicked", this.save_clicked.bind(this));
         group1.add(save_settings_box);

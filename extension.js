@@ -9,6 +9,7 @@ import St from 'gi://St';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import * as Gzz from './gzzDialog.js';
+import * as PopoverMenu from './PopoverMenu.js';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
@@ -96,10 +97,61 @@ class ExtensionImpl extends PanelMenu.Button {
                     this.build_menu(submenu, this.cmds[x].actions);
                     this.menu.addMenuItem(submenu);
                     break;
+                case "optsubmenu":
+                    if(this._caller.compact){
+                        let text = this.cmds[x].text;
+                        let submenu = new PopoverMenu.PopupOverMenuItem(text, { } );
+                        this.build_opt_menu(submenu, this.cmds[x].actions);
+                        this.menu.addMenuItem(submenu);
+                    }else{
+                        this.build_opt_menu(this, this.cmds[x].actions);
+                    }
+                    break;
             } // switch (this.cmds[x].type) //
 
         } // for(let x = 0; x < this.cmds.length; x++) //
     } // constructor(caller, _cmds) //
+
+    build_opt_menu(thesubmenu, actions){
+        let item = null;
+        for(let x = 0; x < actions.length; x++){
+
+            switch (actions[x].type) {
+                case "command":
+                    let action       = actions[x].action;
+                    let alt          = actions[x].alt;
+                    let errorMessage = actions[x].errorMessage;
+                    item = new PopupMenu.PopupMenuItem(actions[x].text);
+                    item.connect("activate", this.callback_command.bind(this, item, action, alt, errorMessage));
+                    thesubmenu.menu.addMenuItem(item);
+                    break;
+                case "desktop":
+                    let action       = actions[x].action;
+                    let alt          = actions[x].alt;
+                    let errorMessage = actions[x].errorMessage;
+
+                    item = new PopupMenu.PopupMenuItem(actions[x].text);
+                    item.connect("activate", this.callback_desktop.bind(this, item, action, alt, errorMessage));
+                    thesubmenu.menu.addMenuItem(item);
+                    break;
+                case "settings":
+                    item = new PopupMenu.PopupMenuItem(this.actions[x].text);
+                    item.connect("activate", () => { this._caller.openPreferences(); });
+                    thesubmenu.menu.addMenuItem(item);
+                    break;
+                case "separator":
+                    thesubmenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+                    break;
+                case "submenu":
+                    let text = actions[x].text;
+                    let submenu = new PopupMenu.PopupSubMenuMenuItem(text, true, this, 0);
+                    thesubmenu.build_menu(submenu, actions[x].actions);
+                    thesubmenu.menu.addMenuItem(submenu);
+                    break;
+            } // actions[x].type //
+
+        } // for(let x = 0; x < actions.length; x++) //
+    }
 
     build_menu(thesubmenu, actions){
         let item = null;
@@ -307,65 +359,68 @@ export default class Hplip_menu2_Extension extends Extension {
                 { type: "desktop", text: _("Extension Mangager..."),         action: "com.mattjakeman.ExtensionManager.desktop",                               alt: ["extension-manager"], errorMessage: {title: _("extension-manager missing"), text: _("install the extension-manager package")}   },
             ] }, 
             { type: "separator" },
-            { type: "submenu", text: _("Hardware"),                     actions: [
+            { type: "optsubmenu", text: _("Gnone Settings..."),                     actions: [
                 { type: "separator" },
-                { type: "desktop", text: _("Power..."),                      action: "gnome-power-panel.desktop",                                          alt: ["gnome-control-center", "power"] },
+                { type: "submenu", text: _("Hardware"),                     actions: [
+                    { type: "separator" },
+                    { type: "desktop", text: _("Power..."),                      action: "gnome-power-panel.desktop",                                          alt: ["gnome-control-center", "power"] },
+                    { type: "separator" },
+                    { type: "desktop", text: _("Display..."),                    action: "gnome-display-panel.desktop",                                        alt: ["gnome-control-center", "display"] },
+                    { type: "desktop", text: _("Keyboard..."),                   action: "gnome-keyboard-panel.desktop",                                       alt: ["gnome-control-center", "keyboard"] },
+                    { type: "desktop", text: _("Color..."),                      action: "gnome-color-panel.desktop",                                          alt: ["gnome-control-center", "color"] },
+                    { type: "desktop", text: _("Sound..."),                      action: "gnome-sound-panel.desktop",                                          alt: ["gnome-control-center", "sound"] },
+                    { type: "separator" },
+                    { type: "desktop", text: _("Removable Media..."),            action: "gnome-removable-media-panel.desktop",                                alt: ["gnome-control-center", "removable-media"] },
+                ] }, 
+                { type: "submenu", text: _("Input"),                        actions: [
+                    { type: "desktop", text: _("Mouse..."),                      action: "gnome-mouse-panel.desktop",                                          alt: ["gnome-control-center", "mouse"] },
+                    { type: "desktop", text: _("Wacom..."),                      action: "gnome-wacom-panel.desktop",                                          alt: ["gnome-control-center", "wacom"] },
+                ] }, 
+                { type: "submenu", text: _("Private"),                        actions: [
+                    { type: "desktop", text: _("Connectivity..."),               action: "gnome-connectivity-panel.desktop",                                   alt: ["gnome-control-center", "connectivity"] },
+                    { type: "separator" },
+                    { type: "desktop", text: _("Location Services..."),          action: "gnome-location-panel.desktop",                                       alt: ["gnome-control-center", "location"] },
+                    { type: "desktop", text: _("File History & Rubbish Bin..."), action: "gnome-usage-panel.desktop",                                          alt: ["gnome-control-center", "usage"] },
+                    { type: "desktop", text: _("Screen Lock..."),                action: "gnome-lock-panel.desktop",                                           alt: ["gnome-control-center", "lock"] },
+                ] }, 
                 { type: "separator" },
-                { type: "desktop", text: _("Display..."),                    action: "gnome-display-panel.desktop",                                        alt: ["gnome-control-center", "display"] },
-                { type: "desktop", text: _("Keyboard..."),                   action: "gnome-keyboard-panel.desktop",                                       alt: ["gnome-control-center", "keyboard"] },
-                { type: "desktop", text: _("Color..."),                      action: "gnome-color-panel.desktop",                                          alt: ["gnome-control-center", "color"] },
-                { type: "desktop", text: _("Sound..."),                      action: "gnome-sound-panel.desktop",                                          alt: ["gnome-control-center", "sound"] },
+                { type: "submenu", text: _("Connections"),                  actions: [
+                    { type: "separator" },
+                    { type: "desktop", text: _("Wifi..."),                       action: "gnome-wifi-panel.desktop",                                           alt: ["gnome-control-center", "wifi"] },
+                    { type: "desktop", text: _("Bluetooth..."),                  action: "gnome-bluetooth-panel.desktop",                                      alt: ["gnome-control-center", "bluetooth"] },
+                    { type: "desktop", text: _("Network..."),                    action: "gnome-network-panel.desktop",                                        alt: ["gnome-control-center", "network"] },
+                ] }, 
+                { type: "submenu", text: _("Misc"),                         actions: [
+                    { type: "separator" },
+                    { type: "desktop", text: _("Search..."),                     action: "gnome-search-panel.desktop",                                         alt: ["gnome-control-center", "search"] },
+                    { type: "desktop", text: _("Acceessibility..."),             action: "gnome-universal-access-panel.desktop",                               alt: ["gnome-control-center", "universal-access"] },
+                    { type: "desktop", text: _("Sharing..."),                    action: "gnome-sharing-panel.desktop",                                        alt: ["gnome-control-center", "sharing"] },
+                    { type: "desktop", text: _("Default Apps..."),               action: "gnome-default-apps-panel.desktop",                                   alt: ["gnome-control-center", "default-apps"] },
+                ] }, 
+                { type: "submenu", text: _("Asorted"),                      actions: [
+                    { type: "desktop", text: _("Background..."),                 action: "gnome-background-panel.desktop",                                     alt: ["gnome-control-center", "background"] },
+                    { type: "desktop", text: _("Applications..."),               action: "gnome-applications-panel.desktop",                                   alt: ["gnome-control-center", "applications"] },
+                ] }, 
+                { type: "submenu", text: _("Locale"),                        actions: [
+                    { type: "separator" },
+                    { type: "desktop", text: _("Datetime..."),                   action: "gnome-datetime-panel.desktop",                                       alt: ["gnome-control-center", "datetime"] },
+                    { type: "desktop", text: _("Language and Region..."),        action: "gnome-region-panel.desktop",                                         alt: ["gnome-control-center", "region"] },
+                ] }, 
+                { type: "submenu", text:_("System"),                        actions: [
+                    { type: "separator" },
+                    { type: "desktop", text: _("Notifications..."),              action: "gnome-notifications-panel.desktop",                    alt: ["gnome-control-center", "notifications"] },
+                    { type: "desktop", text: _("User Accounts..."),              action: "gnome-user-accounts-panel.desktop",                    alt: ["gnome-control-center", "user-accounts"] },
+                    { type: "separator" },
+                    { type: "desktop", text: _("About This Computer..."),        action: "gnome-info-overview-panel.desktop",                    alt: ["gnome-control-center", "info-overview"] },
+                ] }, 
                 { type: "separator" },
-                { type: "desktop", text: _("Removable Media..."),            action: "gnome-removable-media-panel.desktop",                                alt: ["gnome-control-center", "removable-media"] },
-            ] }, 
-            { type: "submenu", text: _("Input"),                        actions: [
-                { type: "desktop", text: _("Mouse..."),                      action: "gnome-mouse-panel.desktop",                                          alt: ["gnome-control-center", "mouse"] },
-                { type: "desktop", text: _("Wacom..."),                      action: "gnome-wacom-panel.desktop",                                          alt: ["gnome-control-center", "wacom"] },
-            ] }, 
-            { type: "submenu", text: _("Private"),                        actions: [
-                { type: "desktop", text: _("Connectivity..."),               action: "gnome-connectivity-panel.desktop",                                   alt: ["gnome-control-center", "connectivity"] },
-                { type: "separator" },
-                { type: "desktop", text: _("Location Services..."),          action: "gnome-location-panel.desktop",                                       alt: ["gnome-control-center", "location"] },
-                { type: "desktop", text: _("File History & Rubbish Bin..."), action: "gnome-usage-panel.desktop",                                          alt: ["gnome-control-center", "usage"] },
-                { type: "desktop", text: _("Screen Lock..."),                action: "gnome-lock-panel.desktop",                                           alt: ["gnome-control-center", "lock"] },
-            ] }, 
-            { type: "separator" },
-            { type: "submenu", text: _("Connections"),                  actions: [
-                { type: "separator" },
-                { type: "desktop", text: _("Wifi..."),                       action: "gnome-wifi-panel.desktop",                                           alt: ["gnome-control-center", "wifi"] },
-                { type: "desktop", text: _("Bluetooth..."),                  action: "gnome-bluetooth-panel.desktop",                                      alt: ["gnome-control-center", "bluetooth"] },
-                { type: "desktop", text: _("Network..."),                    action: "gnome-network-panel.desktop",                                        alt: ["gnome-control-center", "network"] },
-            ] }, 
-            { type: "submenu", text: _("Misc"),                         actions: [
-                { type: "separator" },
-                { type: "desktop", text: _("Search..."),                     action: "gnome-search-panel.desktop",                                         alt: ["gnome-control-center", "search"] },
-                { type: "desktop", text: _("Acceessibility..."),             action: "gnome-universal-access-panel.desktop",                               alt: ["gnome-control-center", "universal-access"] },
-                { type: "desktop", text: _("Sharing..."),                    action: "gnome-sharing-panel.desktop",                                        alt: ["gnome-control-center", "sharing"] },
-                { type: "desktop", text: _("Default Apps..."),               action: "gnome-default-apps-panel.desktop",                                   alt: ["gnome-control-center", "default-apps"] },
-            ] }, 
-            { type: "submenu", text: _("Asorted"),                      actions: [
-                { type: "desktop", text: _("Background..."),                 action: "gnome-background-panel.desktop",                                     alt: ["gnome-control-center", "background"] },
-                { type: "desktop", text: _("Applications..."),               action: "gnome-applications-panel.desktop",                                   alt: ["gnome-control-center", "applications"] },
-            ] }, 
-            { type: "submenu", text: _("Locale"),                        actions: [
-                { type: "separator" },
-                { type: "desktop", text: _("Datetime..."),                   action: "gnome-datetime-panel.desktop",                                       alt: ["gnome-control-center", "datetime"] },
-                { type: "desktop", text: _("Language and Region..."),        action: "gnome-region-panel.desktop",                                         alt: ["gnome-control-center", "region"] },
-            ] }, 
-            { type: "submenu", text:_("System"),                        actions: [
-                { type: "separator" },
-                { type: "desktop", text: _("Notifications..."),              action: "gnome-notifications-panel.desktop",                    alt: ["gnome-control-center", "notifications"] },
-                { type: "desktop", text: _("User Accounts..."),              action: "gnome-user-accounts-panel.desktop",                    alt: ["gnome-control-center", "user-accounts"] },
-                { type: "separator" },
-                { type: "desktop", text: _("About This Computer..."),        action: "gnome-info-overview-panel.desktop",                    alt: ["gnome-control-center", "info-overview"] },
-            ] }, 
-            { type: "separator" },
-            { type: "submenu", text: _("Software..."),                  actions: [
-                { type: "desktop", text: _("Software Update..."),             action: "update-manager.desktop",                                                alt: ["gnome-software",  "--mode=updates"], errorMessage: {title: _(" could not find 'update-manager'"),
-                                                                                                                                                                                                                          text: _("perhaps you need to install 'update-manager' or"
-                                                                                                                                                                                                                              + "'gnome-software' if your disrobution does not support 'update-manager'.")}  },
-                { type: "desktop", text: _("Gnome Software..."),              action: "org.gnome.Software.desktop",                                            alt: ["gnome-software", "--mode=overview"], errorMessage: {title: _(" could not find 'gnome-software'"),
-                                                                                                                                                                                                                          text: _("perhaps you need to install 'gnome-software'")} },
+                { type: "submenu", text: _("Software..."),                  actions: [
+                    { type: "desktop", text: _("Software Update..."),             action: "update-manager.desktop",                                                alt: ["gnome-software",  "--mode=updates"], errorMessage: {title: _(" could not find 'update-manager'"),
+                                                                                                                                                                                                                              text: _("perhaps you need to install 'update-manager' or"
+                                                                                                                                                                                                                                  + "'gnome-software' if your disrobution does not support 'update-manager'.")}  },
+                    { type: "desktop", text: _("Gnome Software..."),              action: "org.gnome.Software.desktop",                                            alt: ["gnome-software", "--mode=overview"], errorMessage: {title: _(" could not find 'gnome-software'"),
+                                                                                                                                                                                                                              text: _("perhaps you need to install 'gnome-software'")} },
+                ] }, 
             ] }, 
             { type: "separator" },
             { type: "settings", text: _("Settings..."),                   action: [] ,                                                                     alt: [] }
@@ -378,7 +433,13 @@ export default class Hplip_menu2_Extension extends Extension {
             this.settings.set_string("icon-name", this.settings_data.icon_name);
             this.settings.set_int("position", this.settings_data.position);
             this.settings.set_boolean("first-time", false); // old settings obtained //
+            this.compact = this.settings.get_boolean("compact");
             this.settings.apply(); // save settings //
+        }else{
+            this.area      = this.settings.get_string("area");
+            this.icon_name = this.settings.get_string("icon-name");
+            this.position  = this.settings.get_int("position");
+            this.compact   = this.settings.get_boolean("compact");
         }
         if(this.settings.get_int("position") < 0 || this.settings.get_int("position") > 25) this.settings.set_int("position", 0);
         this.icon_name = this.settings.get_string("icon-name");
