@@ -155,7 +155,7 @@ class ExtensionImpl extends PanelMenu.Button {
                 case "submenu":
                     text = actions[x].text;
                     submenu = new PopupMenu.PopupSubMenuMenuItem(text, true, this, 0);
-                    thesubmenu.build_menu(submenu, actions[x].actions);
+                    this.build_menu(submenu, actions[x].actions);
                     thesubmenu.menu.addMenuItem(submenu);
                     break;
             } // actions[x].type //
