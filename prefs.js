@@ -105,7 +105,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         const row = new Adw.ActionRow({ title });
         row.set_subtitle(_("Compact Menu."));
         const compact_switch = new Gtk.Switch({
-          active: window._settings.get_boolean("compact"),
+          active: this._window._settings.get_boolean("compact"),
           valign: Gtk.Align.CENTER,
         });
         row.add_suffix(compact_switch);
