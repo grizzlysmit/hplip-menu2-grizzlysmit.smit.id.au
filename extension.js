@@ -106,7 +106,7 @@ class ExtensionImpl extends PanelMenu.Button {
                     if(this._caller.compact){
                         text = this.cmds[x].text;
                         submenu = new PopoverMenu.PopupOverMenuItem(text, { } );
-                        this.build_opt_menu(submenu, this.cmds[x].actions);
+                        this.build_opt_menu(submenu.button, this.cmds[x].actions);
                         this.menu.addMenuItem(submenu);
                     }else{
                         this.build_opt_menu(this, this.cmds[x].actions);
@@ -161,15 +161,13 @@ class ExtensionImpl extends PanelMenu.Button {
             } // actions[x].type //
 
         } // for(let x = 0; x < actions.length; x++) //
-    }
+    } // build_opt_menu(thesubmenu, actions) //
 
     build_menu(thesubmenu, actions){
         let item         = null;
         let action       = null;
         let alt          = null;
         let errorMessage = null;
-        let text         = null;
-        let submenu      = null;
         for(let x = 0; x < actions.length; x++){
 
             switch (actions[x].type) {
