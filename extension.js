@@ -62,24 +62,29 @@ class ExtensionImpl extends PanelMenu.Button {
         this.icon.icon_size = 17;
         this.add_child(this.icon);
 
-        let item = null;
+        let item         = null;
+        let action       = null;
+        let alt          = null;
+        let errorMessage = null;
+        let text         = null;
+        let submenu      = null;
         for(let x = 0; x < this.cmds.length; x++){
 
             switch (this.cmds[x].type) {
                 case "command":
-                    let action       = this.cmds[x].action;
-                    let alt          = this.cmds[x].alt;
-                    let errorMessage = this.cmds[x].errorMessage;
+                    action       = this.cmds[x].action;
+                    alt          = this.cmds[x].alt;
+                    errorMessage = this.cmds[x].errorMessage;
                     item = new PopupMenu.PopupMenuItem(this.cmds[x].text);
                     item.connect("activate", this.callback_command.bind(this, item, action, alt, errorMessage));
                     this.menu.addMenuItem(item);
                     break;
                 case "desktop":
-                    let action = this.cmds[x].action;
-                    let alt    = this.cmds[x].alt;
-                    let errorMessage = this.cmds[x].errorMessage;
+                    action       = this.cmds[x].action;
+                    alt          = this.cmds[x].alt;
+                    errorMessage = this.cmds[x].errorMessage;
 
-                    item = new PopupMenu.PopupMenuItem(this.cmds[x].text);
+                    item         = new PopupMenu.PopupMenuItem(this.cmds[x].text);
                     item.connect("activate", this.callback_desktop.bind(this, item, action, alt, errorMessage));
                     this.menu.addMenuItem(item);
                     break;
@@ -92,15 +97,15 @@ class ExtensionImpl extends PanelMenu.Button {
                     this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
                     break;
                 case "submenu":
-                    let text = this.cmds[x].text;
-                    let submenu = new PopupMenu.PopupSubMenuMenuItem(text, true, this, 0);
+                    text = this.cmds[x].text;
+                    submenu = new PopupMenu.PopupSubMenuMenuItem(text, true, this, 0);
                     this.build_menu(submenu, this.cmds[x].actions);
                     this.menu.addMenuItem(submenu);
                     break;
                 case "optsubmenu":
                     if(this._caller.compact){
-                        let text = this.cmds[x].text;
-                        let submenu = new PopoverMenu.PopupOverMenuItem(text, { } );
+                        text = this.cmds[x].text;
+                        submenu = new PopoverMenu.PopupOverMenuItem(text, { } );
                         this.build_opt_menu(submenu, this.cmds[x].actions);
                         this.menu.addMenuItem(submenu);
                     }else{
@@ -113,22 +118,27 @@ class ExtensionImpl extends PanelMenu.Button {
     } // constructor(caller, _cmds) //
 
     build_opt_menu(thesubmenu, actions){
-        let item = null;
+        let item         = null;
+        let action       = null;
+        let alt          = null;
+        let errorMessage = null;
+        let text         = null;
+        let submenu      = null;
         for(let x = 0; x < actions.length; x++){
 
             switch (actions[x].type) {
                 case "command":
-                    let action       = actions[x].action;
-                    let alt          = actions[x].alt;
-                    let errorMessage = actions[x].errorMessage;
+                    action       = actions[x].action;
+                    alt          = actions[x].alt;
+                    errorMessage = actions[x].errorMessage;
                     item = new PopupMenu.PopupMenuItem(actions[x].text);
                     item.connect("activate", this.callback_command.bind(this, item, action, alt, errorMessage));
                     thesubmenu.menu.addMenuItem(item);
                     break;
                 case "desktop":
-                    let action       = actions[x].action;
-                    let alt          = actions[x].alt;
-                    let errorMessage = actions[x].errorMessage;
+                    action       = actions[x].action;
+                    alt          = actions[x].alt;
+                    errorMessage = actions[x].errorMessage;
 
                     item = new PopupMenu.PopupMenuItem(actions[x].text);
                     item.connect("activate", this.callback_desktop.bind(this, item, action, alt, errorMessage));
@@ -143,8 +153,8 @@ class ExtensionImpl extends PanelMenu.Button {
                     thesubmenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
                     break;
                 case "submenu":
-                    let text = actions[x].text;
-                    let submenu = new PopupMenu.PopupSubMenuMenuItem(text, true, this, 0);
+                    text = actions[x].text;
+                    submenu = new PopupMenu.PopupSubMenuMenuItem(text, true, this, 0);
                     thesubmenu.build_menu(submenu, actions[x].actions);
                     thesubmenu.menu.addMenuItem(submenu);
                     break;
@@ -154,22 +164,27 @@ class ExtensionImpl extends PanelMenu.Button {
     }
 
     build_menu(thesubmenu, actions){
-        let item = null;
+        let item         = null;
+        let action       = null;
+        let alt          = null;
+        let errorMessage = null;
+        let text         = null;
+        let submenu      = null;
         for(let x = 0; x < actions.length; x++){
 
             switch (actions[x].type) {
                 case "command":
-                    let action       = actions[x].action;
-                    let alt          = actions[x].alt;
-                    let errorMessage = actions[x].errorMessage;
+                    action       = actions[x].action;
+                    alt          = actions[x].alt;
+                    errorMessage = actions[x].errorMessage;
                     item = new PopupMenu.PopupMenuItem(actions[x].text);
                     item.connect("activate", this.callback_command.bind(this, item, action, alt, errorMessage));
                     thesubmenu.menu.addMenuItem(item);
                     break;
                 case "desktop":
-                    let action       = actions[x].action;
-                    let alt          = actions[x].alt;
-                    let errorMessage = actions[x].errorMessage;
+                    action       = actions[x].action;
+                    alt          = actions[x].alt;
+                    errorMessage = actions[x].errorMessage;
 
                     item = new PopupMenu.PopupMenuItem(actions[x].text);
                     item.connect("activate", this.callback_desktop.bind(this, item, action, alt, errorMessage));
