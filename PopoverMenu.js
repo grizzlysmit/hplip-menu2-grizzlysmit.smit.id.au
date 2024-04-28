@@ -1,18 +1,18 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 
-import Atk from 'gi://Atk';
+//import Atk from 'gi://Atk';
 import Clutter from 'gi://Clutter';
-import Gio from 'gi://Gio';
+//import Gio from 'gi://Gio';
 import GObject from 'gi://GObject';
-import Graphene from 'gi://Graphene';
-import Shell from 'gi://Shell';
+//import Graphene from 'gi://Graphene';
+//import Shell from 'gi://Shell';
 import St from 'gi://St';
-import * as Signals from '../misc/signals.js';
+//import * as Signals from '../misc/signals.js';
 
 import * as BoxPointer from './boxpointer.js';
 import * as Main from './main.js';
-import * as Params from '../misc/params.js';
-import Gtk from 'gi://Gtk';
+//import * as Params from '../misc/params.js';
+//import Gtk from 'gi://Gtk';
 
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from './popupMenu.js';
@@ -47,7 +47,7 @@ export class PopoverMenu extends PopupMenu.PopupMenuBase {
         this._boxPointer.bin.set_child(this.box);
         this.actor.add_style_class_name('popover-menu');
 
-        global.focus_manager.add_group(this.actor);
+        //global.focus_manager.add_group(this.actor);
         this.actor.reactive = true;
 
         if (this.sourceActor) {
