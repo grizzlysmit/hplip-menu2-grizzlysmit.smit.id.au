@@ -373,7 +373,6 @@ export default class Hplip_menu2_Extension extends Extension {
             ] }, 
             { type: "separator" },
             { type: "optsubmenu", text: _("Gnone Settings..."),                     actions: [
-                { type: "separator" },
                 { type: "submenu", text: _("Hardware"),                     actions: [
                     { type: "separator" },
                     { type: "desktop", text: _("Power..."),                      action: "gnome-power-panel.desktop",                                          alt: ["gnome-control-center", "power"] },
@@ -426,14 +425,14 @@ export default class Hplip_menu2_Extension extends Extension {
                     { type: "separator" },
                     { type: "desktop", text: _("About This Computer..."),        action: "gnome-info-overview-panel.desktop",                    alt: ["gnome-control-center", "info-overview"] },
                 ] }, 
-                { type: "separator" },
-                { type: "submenu", text: _("Software..."),                  actions: [
-                    { type: "desktop", text: _("Software Update..."),             action: "update-manager.desktop",                                                alt: ["gnome-software",  "--mode=updates"], errorMessage: {title: _(" could not find 'update-manager'"),
-                                                                                                                                                                                                                              text: _("perhaps you need to install 'update-manager' or"
-                                                                                                                                                                                                                                  + "'gnome-software' if your disrobution does not support 'update-manager'.")}  },
-                    { type: "desktop", text: _("Gnome Software..."),              action: "org.gnome.Software.desktop",                                            alt: ["gnome-software", "--mode=overview"], errorMessage: {title: _(" could not find 'gnome-software'"),
-                                                                                                                                                                                                                              text: _("perhaps you need to install 'gnome-software'")} },
-                ] }, 
+            ] }, 
+            { type: "separator" },
+            { type: "submenu", text: _("Software..."),                  actions: [
+                { type: "desktop", text: _("Software Update..."),             action: "update-manager.desktop",                                                alt: ["gnome-software",  "--mode=updates"], errorMessage: {title: _(" could not find 'update-manager'"),
+                                                                                                                                                                                                                          text: _("perhaps you need to install 'update-manager' or"
+                                                                                                                                                                                                                              + "'gnome-software' if your disrobution does not support 'update-manager'.")}  },
+                { type: "desktop", text: _("Gnome Software..."),              action: "org.gnome.Software.desktop",                                            alt: ["gnome-software", "--mode=overview"], errorMessage: {title: _(" could not find 'gnome-software'"),
+                                                                                                                                                                                                                          text: _("perhaps you need to install 'gnome-software'")} },
             ] }, 
             { type: "separator" },
             { type: "settings", text: _("Settings..."),                   action: [] ,                                                                     alt: [] }
