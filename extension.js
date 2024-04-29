@@ -105,7 +105,7 @@ class ExtensionImpl extends PanelMenu.Button {
                 case "optsubmenu":
                     if(this._caller.compact){
                         text = this.cmds[x].text;
-                        submenu = new PopoverMenu.PopupOverMenuItem(text, { } );
+                        submenu = new PopoverMenu.PopupOverMenuButtonItem(text, { } );
                         this.build_opt_menu(submenu.button, this.cmds[x].actions);
                         this.menu.addMenuItem(submenu);
                     }else{
@@ -116,9 +116,48 @@ class ExtensionImpl extends PanelMenu.Button {
 
         } // for(let x = 0; x < this.cmds.length; x++) //
     } // constructor(caller, _cmds) //
+    
+    menu_item_command(text, action, alt, errorMessage) {
+        let item = null;
+        if(this._caller.compact){
+            item = new PopoverMenu.PopupOverMenuItem(text,  null);
+            item.connect("clicked", this.callback_command.bind(this, item, action, alt, errorMessage));
+            return item;
+        } else {
+            item = new PopupMenu.PopupMenuItem(text);
+            item.connect("activate", this.callback_command.bind(this, item, action, alt, errorMessage));
+            return item;
+        }
+    } // menu_item_command(text, action, alt, errorMessage)  //
+
+    menu_item_desktop(text, action, alt, errorMessage) {
+        let item = null;
+        if(this._caller.compact){
+            item = new PopoverMenu.PopupOverMenuItem(text,  null);
+            item.connect("clicked", this.callback_desktop.bind(this, item, action, alt, errorMessage));
+            return item;
+        } else {
+            item = new PopupMenu.PopupMenuItem(text);
+            item.connect("activate", this.callback_desktop.bind(this, item, action, alt, errorMessage));
+            return item;
+        }
+    } // menu_item_desktop(text, action, alt, errorMessage) //
+
+    menu_item_settings(text) {
+        let item = null;
+        if(this._caller.compact){
+            item = new PopoverMenu.PopupOverMenuItem(text,  null);
+            item.connect("clicked", () => { this._caller.openPreferences(); });
+            return item;
+        } else {
+            item = new PopupMenu.PopupMenuItem(text);
+            item.connect("activate", () => { this._caller.openPreferences(); });
+            return item;
+        }
+    } // menu_item_settings(text) //
 
     build_opt_menu(thesubmenu, actions){
-        let item         = null;
+        //let item         = null;
         let action       = null;
         let alt          = null;
         let errorMessage = null;
@@ -131,31 +170,38 @@ class ExtensionImpl extends PanelMenu.Button {
                     action       = actions[x].action;
                     alt          = actions[x].alt;
                     errorMessage = actions[x].errorMessage;
-                    item = new PopupMenu.PopupMenuItem(actions[x].text);
-                    item.connect("activate", this.callback_command.bind(this, item, action, alt, errorMessage));
-                    thesubmenu.menu.addMenuItem(item);
+                    text = actions[x].text;
+
+                    thesubmenu.menu.addMenuItem(this.menu_item_command(text, action, alt, errorMessage));
                     break;
                 case "desktop":
                     action       = actions[x].action;
                     alt          = actions[x].alt;
                     errorMessage = actions[x].errorMessage;
+                    text = actions[x].text;
 
-                    item = new PopupMenu.PopupMenuItem(actions[x].text);
-                    item.connect("activate", this.callback_desktop.bind(this, item, action, alt, errorMessage));
-                    thesubmenu.menu.addMenuItem(item);
+                    thesubmenu.menu.addMenuItem(this.menu_item_desktop(text, action, alt, errorMessage));
                     break;
                 case "settings":
-                    item = new PopupMenu.PopupMenuItem(this.actions[x].text);
-                    item.connect("activate", () => { this._caller.openPreferences(); });
-                    thesubmenu.menu.addMenuItem(item);
+                    text = actions[x].text;
+                    thesubmenu.menu.addMenuItem(this.menu_item_settings(text));
                     break;
                 case "separator":
-                    thesubmenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+                    if(this._caller.compact){
+                        thesubmenu.menu.addMenuItem(new PopoverMenu.PopupOverSeparatorMenuItem());
+                    } else {
+                        thesubmenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+                    }
                     break;
                 case "submenu":
                     text = actions[x].text;
-                    submenu = new PopupMenu.PopupSubMenuMenuItem(text, true, this, 0);
-                    this.build_menu(submenu, actions[x].actions);
+                    if(this._caller.compact){
+                        submenu = new PopoverMenu.OverButton(text);
+                        this.build_menu(submenu, actions[x].actions);
+                    } else {
+                        submenu = new PopupMenu.PopupSubMenuMenuItem(text, true, this, 0);
+                        this.build_menu(submenu, actions[x].actions);
+                    }
                     thesubmenu.menu.addMenuItem(submenu);
                     break;
             } // actions[x].type //
@@ -164,10 +210,11 @@ class ExtensionImpl extends PanelMenu.Button {
     } // build_opt_menu(thesubmenu, actions) //
 
     build_menu(thesubmenu, actions){
-        let item         = null;
+        //let item         = null;
         let action       = null;
         let alt          = null;
         let errorMessage = null;
+        let text         = null;
         for(let x = 0; x < actions.length; x++){
 
             switch (actions[x].type) {
@@ -175,26 +222,28 @@ class ExtensionImpl extends PanelMenu.Button {
                     action       = actions[x].action;
                     alt          = actions[x].alt;
                     errorMessage = actions[x].errorMessage;
-                    item = new PopupMenu.PopupMenuItem(actions[x].text);
-                    item.connect("activate", this.callback_command.bind(this, item, action, alt, errorMessage));
-                    thesubmenu.menu.addMenuItem(item);
+                    text = actions[x].text;
+
+                    thesubmenu.menu.addMenuItem(this.menu_item_command(text, action, alt, errorMessage));
                     break;
                 case "desktop":
                     action       = actions[x].action;
                     alt          = actions[x].alt;
                     errorMessage = actions[x].errorMessage;
+                    text = actions[x].text;
 
-                    item = new PopupMenu.PopupMenuItem(actions[x].text);
-                    item.connect("activate", this.callback_desktop.bind(this, item, action, alt, errorMessage));
-                    thesubmenu.menu.addMenuItem(item);
+                    thesubmenu.menu.addMenuItem(this.menu_item_desktop(text, action, alt, errorMessage));
                     break;
                 case "settings":
-                    item = new PopupMenu.PopupMenuItem(this.actions[x].text);
-                    item.connect("activate", () => { this._caller.openPreferences(); });
-                    thesubmenu.menu.addMenuItem(item);
+                    text = actions[x].text;
+                    thesubmenu.menu.addMenuItem(this.menu_item_settings(text));
                     break;
                 case "separator":
-                    thesubmenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+                    if(this._caller.compact){
+                        thesubmenu.menu.addMenuItem(new PopoverMenu.PopupOverSeparatorMenuItem());
+                    } else {
+                        thesubmenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+                    }
                     break;
             } // actions[x].type //
 

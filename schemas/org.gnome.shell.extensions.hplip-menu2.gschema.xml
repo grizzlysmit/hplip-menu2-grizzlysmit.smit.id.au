@@ -28,7 +28,7 @@
             <description>The position to place the button in the area 0 to 25.</description>
         </key>
         <key type="b" name="compact">
-            <default>true</default>
+            <default>false</default>
             <summary>Traditional or Compacted</summary>
             <description>Compacted shortens the menu allowing it to use less vertical space.</description>
         </key>

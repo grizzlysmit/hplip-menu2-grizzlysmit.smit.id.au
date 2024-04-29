@@ -1,6 +1,6 @@
 /* Add your custom extension styling here */
-GtkButton {
-    font-size: 36px;
+button {
+    font-size: 12pt;
     font-weight: bold;
     color: #ffffff;
     background-color: rgba(10,10,10,0.7);
