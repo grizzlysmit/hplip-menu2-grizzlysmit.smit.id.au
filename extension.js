@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 Francis Grizzly Smit <grizzly@smit.id.au>
+// SPDX-FileCopyrightText: 2023 and 2024 Francis Grizzly Smit <grizzly@smit.id.au>
 //
 // SPDX-License-Identifier: GPL-2.0-or-later
 
@@ -9,7 +9,7 @@ import St from 'gi://St';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import * as Gzz from './gzzDialog.js';
-import * as PopoverMenu from './PopoverMenu.js';
+import * as CompactMenu from './CompactMenu.js';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
@@ -28,11 +28,7 @@ class ExtensionImpl extends PanelMenu.Button {
         this._caller = caller;
         this.cmds = _cmds;
 
-        if(this._caller.get_settings() === null){
-            this._caller.set_settings(this._caller.getSettings());
-            this._caller.set_settings_data(JSON.parse(this._caller.get_settings().get_string("settings-json")));
-        }
-        if (this._caller.get_settings().get_string("icon-name")) {
+        if (this._caller.icon_name) {
             this.icon_name = this._caller.get_settings().get_string("icon-name");
         } else {
             this.icon_name = "printer";
@@ -103,14 +99,7 @@ class ExtensionImpl extends PanelMenu.Button {
                     this.menu.addMenuItem(submenu);
                     break;
                 case "optsubmenu":
-                    if(this._caller.compact){
-                        text = this.cmds[x].text;
-                        submenu = new PopoverMenu.PopupOverMenuButtonItem(text, { } );
-                        this.build_opt_menu(submenu.button, this.cmds[x].actions);
-                        this.menu.addMenuItem(submenu);
-                    }else{
-                        this.build_opt_menu(this, this.cmds[x].actions);
-                    }
+                    this.build_opt_menu(this, this.cmds[x].actions);
                     break;
             } // switch (this.cmds[x].type) //
 
@@ -119,41 +108,23 @@ class ExtensionImpl extends PanelMenu.Button {
     
     menu_item_command(text, action, alt, errorMessage) {
         let item = null;
-        if(this._caller.compact){
-            item = new PopoverMenu.PopupOverMenuItem(text,  null);
-            item.connect("clicked", this.callback_command.bind(this, item, action, alt, errorMessage));
-            return item;
-        } else {
-            item = new PopupMenu.PopupMenuItem(text);
-            item.connect("activate", this.callback_command.bind(this, item, action, alt, errorMessage));
-            return item;
-        }
+        item = new PopupMenu.PopupMenuItem(text);
+        item.connect("activate", this.callback_command.bind(this, item, action, alt, errorMessage));
+        return item;
     } // menu_item_command(text, action, alt, errorMessage)  //
 
     menu_item_desktop(text, action, alt, errorMessage) {
         let item = null;
-        if(this._caller.compact){
-            item = new PopoverMenu.PopupOverMenuItem(text,  null);
-            item.connect("clicked", this.callback_desktop.bind(this, item, action, alt, errorMessage));
-            return item;
-        } else {
-            item = new PopupMenu.PopupMenuItem(text);
-            item.connect("activate", this.callback_desktop.bind(this, item, action, alt, errorMessage));
-            return item;
-        }
+        item = new PopupMenu.PopupMenuItem(text);
+        item.connect("activate", this.callback_desktop.bind(this, item, action, alt, errorMessage));
+        return item;
     } // menu_item_desktop(text, action, alt, errorMessage) //
 
     menu_item_settings(text) {
         let item = null;
-        if(this._caller.compact){
-            item = new PopoverMenu.PopupOverMenuItem(text,  null);
-            item.connect("clicked", () => { this._caller.openPreferences(); });
-            return item;
-        } else {
-            item = new PopupMenu.PopupMenuItem(text);
-            item.connect("activate", () => { this._caller.openPreferences(); });
-            return item;
-        }
+        item = new PopupMenu.PopupMenuItem(text);
+        item.connect("activate", () => { this._caller.openPreferences(); });
+        return item;
     } // menu_item_settings(text) //
 
     build_opt_menu(thesubmenu, actions){
@@ -187,21 +158,12 @@ class ExtensionImpl extends PanelMenu.Button {
                     thesubmenu.menu.addMenuItem(this.menu_item_settings(text));
                     break;
                 case "separator":
-                    if(this._caller.compact){
-                        thesubmenu.menu.addMenuItem(new PopoverMenu.PopupOverSeparatorMenuItem());
-                    } else {
-                        thesubmenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-                    }
+                    thesubmenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
                     break;
                 case "submenu":
                     text = actions[x].text;
-                    if(this._caller.compact){
-                        submenu = new PopoverMenu.OverButton(text);
-                        this.build_menu(submenu, actions[x].actions);
-                    } else {
-                        submenu = new PopupMenu.PopupSubMenuMenuItem(text, true, this, 0);
-                        this.build_menu(submenu, actions[x].actions);
-                    }
+                    submenu = new PopupMenu.PopupSubMenuMenuItem(text, true, this, 0);
+                    this.build_menu(submenu, actions[x].actions);
                     thesubmenu.menu.addMenuItem(submenu);
                     break;
             } // actions[x].type //
@@ -239,11 +201,7 @@ class ExtensionImpl extends PanelMenu.Button {
                     thesubmenu.menu.addMenuItem(this.menu_item_settings(text));
                     break;
                 case "separator":
-                    if(this._caller.compact){
-                        thesubmenu.menu.addMenuItem(new PopoverMenu.PopupOverSeparatorMenuItem());
-                    } else {
-                        thesubmenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-                    }
+                    thesubmenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
                     break;
             } // actions[x].type //
 
@@ -494,8 +452,12 @@ export default class Hplip_menu2_Extension extends Extension {
             this.settings.set_string("icon-name", this.settings_data.icon_name);
             this.settings.set_int("position", this.settings_data.position);
             this.settings.set_boolean("first-time", false); // old settings obtained //
-            this.compact = this.settings.get_boolean("compact");
+            this.settings.set_boolean("compact", this.settings.get_boolean("compact")); // make sure it is saved to dconf db //
             this.settings.apply(); // save settings //
+            this.area      = this.settings.get_string("area");
+            this.icon_name = this.settings.get_string("icon-name");
+            this.position  = this.settings.get_int("position");
+            this.compact   = this.settings.get_boolean("compact");
         }else{
             this.area      = this.settings.get_string("area");
             this.icon_name = this.settings.get_string("icon-name");
@@ -506,7 +468,11 @@ export default class Hplip_menu2_Extension extends Extension {
         this.icon_name = this.settings.get_string("icon-name");
         this.area = this.settings.get_string("area");
         this.settings.apply();
-        this._ext = new ExtensionImpl(this, this.cmds);
+        if(this.compact){
+            this._ext = new CompactMenu.ApplicationsButton(this, this.cmds);
+        } else {
+            this._ext = new ExtensionImpl(this, this.cmds);
+        }
         let id = this.uuid;
         let indx = id.indexOf('@');
         Main.panel.addToStatusArea(id.substr(0, indx), this._ext, this.settings.get_int("position"), this.settings.get_string("area"));
@@ -518,13 +484,12 @@ export default class Hplip_menu2_Extension extends Extension {
 
     disable() {
         this.cmds = null;
+        Main.panel.menuManager.removeMenu(this._ext.menu);
         this._ext?.destroy();
         this.settings.disconnect(this.settingsID_area);
         this.settings.disconnect(this.settingsID_icon);
         this.settings.disconnect(this.settingsID_pos);
         this.settings.disconnect(this.settingsID_comp);
-        delete this.settings;
-        delete this.settings_data;
         delete this._ext;
     }
 

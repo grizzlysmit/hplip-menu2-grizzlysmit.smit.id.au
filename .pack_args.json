@@ -1,5 +1,5 @@
 {
-  "extra-sources": ["gzzDialog.js", "PopoverMenu.js" ],
+  "extra-sources": ["gzzDialog.js", "CompactMenu.js" ],
   "gettext-domain": "hplip-menu2",
   "schema": "schemas/org.gnome.shell.extensions.hplip-menu2.gschema.xml",
   "package-dir": "hplip-menu2@grizzlysmit.smit.id.au",

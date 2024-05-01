@@ -1,0 +1,869 @@
+// SPDX-FileCopyrightText: 2023 and 2024 Francis Grizzly Smit <grizzly@smit.id.au>
+//
+// SPDX-License-Identifier: GPL-2.0-or-later
+
+/* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
+
+import Atk from 'gi://Atk';
+import Clutter from 'gi://Clutter';
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
+//import GMenu from 'gi://GMenu';
+import GObject from 'gi://GObject';
+import Gtk from 'gi://Gtk';
+import Meta from 'gi://Meta';
+import Shell from 'gi://Shell';
+import St from 'gi://St';
+import {EventEmitter} from 'resource:///org/gnome/shell/misc/signals.js';
+import * as Gzz from './gzzDialog.js';
+
+//import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
+import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
+
+//import * as DND from 'resource:///org/gnome/shell/ui/dnd.js';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+
+//const appSys = Shell.AppSystem.get_default();
+
+const APPLICATION_ICON_SIZE = 32;
+const HORIZ_FACTOR = 5;
+const MENU_HEIGHT_OFFSET = 132;
+const NAVIGATION_REGION_OVERSHOOT = 50;
+
+Gio._promisify(Gio._LocalFilePrototype, 'query_info_async', 'query_info_finish');
+Gio._promisify(Gio._LocalFilePrototype, 'set_attributes_async', 'set_attributes_finish');
+
+class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
+    static {
+        GObject.registerClass(this);
+    }
+
+    constructor(button, item) {
+        super();
+        this._menuitem = this;
+        this._item = item;
+        this._button = button;
+
+        this._iconBin = new St.Bin();
+        this.add_child(this._iconBin);
+
+        let menuitemLabel = new St.Label({
+            text: this._item.text,
+            y_expand: true,
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+        this.add_child(menuitemLabel);
+        this.icon_actor = menuitemLabel;
+
+        let textureCache = St.TextureCache.get_default();
+        textureCache.connectObject('icon-theme-changed',
+            () => this._updateIcon(), this);
+        this._updateIcon();
+
+        this._delegate = this;
+        /*
+        let draggable = DND.makeDraggable(this);
+
+        let maybeStartDrag = draggable._maybeStartDrag;
+        draggable._maybeStartDrag = event => {
+            if (this._dragEnabled)
+                return maybeStartDrag.call(draggable, event);
+            return false;
+        };
+        // */
+        let action       = null;
+        let alt          = null;
+        let errorMessage = null;
+        switch (this._item.type) {
+            case "command":
+                action       = this._item.action;
+                alt          = this._item.alt;
+                errorMessage = this._item.errorMessage;
+                item.connect("activate", this.callback_command.bind(this, this._item, action, alt, errorMessage));
+                //this._button.menu.addMenuItem(item);
+                break;
+            case "desktop":
+                action       = this._item.action;
+                alt          = this._item.alt;
+                errorMessage = this._item.errorMessage;
+
+                item.connect("activate", this.callback_desktop.bind(this, this._item, action, alt, errorMessage));
+                //this._button.menu.addMenuItem(item);
+                break;
+            case "settings":
+                item.connect("activate", () => { this._caller.openPreferences(); });
+                //this._button.menu.addMenuItem(item);
+                break;
+        } // switch (this.item.type) //
+    }
+
+    launch(action, alt){
+        if(typeof action === 'string'){
+            let path = GLib.find_program_in_path(action);
+            if(path === null){
+                if(alt === null){
+                    return false;
+                }
+                return this.launch(alt, null);
+            }else{
+                return GLib.spawn(path);
+            }
+        }else{
+            let path = GLib.find_program_in_path(action[0]);
+            if(path === null){
+                if(alt === null){
+                    return false;
+                }
+                return this.launch(alt,  null);
+            }
+            return GLib.spawn_async(null, action, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
+        }
+    }
+
+    callback_command(item, action, _alt, errorMessage){
+        let currentAction = action;
+        let alt           = _alt;
+        if((currentAction === undefined || currentAction === null || currentAction.length === 0) && (alt === undefined || alt === null || alt.length === 0)){
+            let name = "<no defined action>.";
+            
+            let dialog;
+            if(errorMessage === undefined){
+                let title = this._caller.get_title(name);
+                let text  = this._caller.get_text(name);
+                dialog    = new Gzz.GzzMessageDialog(title, text);
+            }else{
+                dialog    = new Gzz.GzzMessageDialog(errorMessage.title, errorMessage.text);
+            }
+            dialog.open();
+                        
+            return false;
+        }
+        if(this.launch(currentAction, alt)){
+            return true;
+        }else{
+            let name = '<unknown>';
+            if(currentAction === undefined || currentAction === null || currentAction.length === 0){
+                if(typeof alt === 'string'){
+                    name = alt;
+                }else{
+                    name = alt[0];
+                }
+            }else{
+                if(typeof currentAction === 'string'){
+                    name = currentAction;
+                }else{
+                    name = currentAction[0];
+                }
+            }
+            let dialog;
+            if(errorMessage === undefined){
+                let title = this._caller.get_title(name);
+                let text  = this._caller.get_text(name);
+                dialog    = new Gzz.GzzMessageDialog(title, text);
+            }else{
+                dialog    = new Gzz.GzzMessageDialog(errorMessage.title, errorMessage.text);
+            }
+            dialog.open();
+            return false;
+        }
+    }
+
+    callback_desktop(item, action, alt, errorMessage){
+        let currentAction = action;
+        // Save context variable for binding //
+        let def = Shell.AppSystem.get_default();
+        let app = def.lookup_app(currentAction);
+        if(app !== null){
+            app.activate();
+            return true;
+        }else{ // could not launch by action so use alt //
+            let name = '<unknown>';
+            if(typeof alt === 'string'){
+                name = alt;
+            }else{
+                name = alt[0];
+            }
+            if(this.launch(alt, null)){
+                return true;
+            }else{
+                let dialog;
+                if(errorMessage === undefined){
+                    let title = this._button._caller.get_title(name);
+                    let text  = this._button._caller.get_text(name);
+                    dialog    = new Gzz.GzzMessageDialog(title, text);
+                }else{
+                    dialog    = new Gzz.GzzMessageDialog(errorMessage.title, errorMessage.text);
+                }
+                dialog.open();
+                return false;
+            }
+        }
+    }
+
+    activate(event) {
+        this._menuitem.open_new_window(-1);
+        this._button.selectCategory(null);
+        this._button.menu.toggle();
+        super.activate(event);
+
+        Main.overview.hide();
+    }
+
+    setActive(active, params) {
+        if (active)
+            this._button.scrollToButton(this);
+        super.setActive(active, params);
+    }
+
+    setDragEnabled(enabled) {
+        this._dragEnabled = enabled;
+    }
+
+    getDragActor() {
+        return this._menuitem.create_icon_texture(APPLICATION_ICON_SIZE);
+    }
+
+    getDragActorSource() {
+        return this._iconBin;
+    }
+
+    _updateIcon() {
+        let icon = this.getDragActor();
+        icon.style_class = 'icon-dropshadow';
+        this._iconBin.set_child(icon);
+    }
+}
+
+class CategoryMenuItem extends PopupMenu.PopupBaseMenuItem {
+    static {
+        GObject.registerClass(this);
+    }
+
+    constructor(button, category) {
+        super();
+        this._category = category;
+        this._button = button;
+
+        this._oldX = -1;
+        this._oldY = -1;
+
+        let name;
+        if (this._category)
+            name = this._category.text;
+        else
+            name = _('Everything else');
+
+        this.add_child(new St.Label({text: name}));
+        this.connect('motion-event', this._onMotionEvent.bind(this));
+        this.connect('notify::active', this._onActiveChanged.bind(this));
+    }
+
+    activate(event) {
+        this._button.selectCategory(this._category);
+        this._button.scrollToCatButton(this);
+        super.activate(event);
+    }
+
+    _isNavigatingSubmenu([x, y]) {
+        let [posX, posY] = this.get_transformed_position();
+
+        if (this._oldX === -1) {
+            this._oldX = x;
+            this._oldY = y;
+            return true;
+        }
+
+        let deltaX = Math.abs(x - this._oldX);
+        let deltaY = Math.abs(y - this._oldY);
+
+        this._oldX = x;
+        this._oldY = y;
+
+        // If it lies outside the x-coordinates then it is definitely outside.
+        if (posX > x || posX + this.width < x)
+            return false;
+
+        // If it lies inside the menu item then it is definitely inside.
+        if (posY <= y && posY + this.height >= y)
+            return true;
+
+        // We want the keep-up triangle only if the movement is more
+        // horizontal than vertical.
+        if (deltaX * HORIZ_FACTOR < deltaY)
+            return false;
+
+        // Check whether the point lies inside triangle ABC, and a similar
+        // triangle on the other side of the menu item.
+        //
+        //   +---------------------+
+        //   | menu item           |
+        // A +---------------------+ C
+        //              P          |
+        //                         B
+
+        // Ensure that the point P always lies below line AC so that we can
+        // only check for triangle ABC.
+        if (posY > y) {
+            let offset = posY - y;
+            y = posY + this.height + offset;
+        }
+
+        // Ensure that A is (0, 0).
+        x -= posX;
+        y -= posY + this.height;
+
+        // Check which side of line AB the point P lies on by taking the
+        // cross-product of AB and AP. See:
+        // http://stackoverflow.com/questions/3461453/determine-which-side-of-a-line-a-point-lies
+        if (this.width * y - NAVIGATION_REGION_OVERSHOOT * x <= 0)
+            return true;
+
+        return false;
+    }
+
+    _onMotionEvent(actor, event) {
+        if (!this._grab) {
+            this._oldX = -1;
+            this._oldY = -1;
+            const grab = global.stage.grab(this);
+            if (grab.get_seat_state() !== Clutter.GrabState.NONE)
+                this._grab = grab;
+            else
+                grab.dismiss();
+        }
+        this.hover = true;
+
+        if (this._isNavigatingSubmenu(event.get_coords()))
+            return true;
+
+        this._oldX = -1;
+        this._oldY = -1;
+        this.hover = false;
+        this._grab?.dismiss();
+        delete this._grab;
+
+        const targetActor = global.stage.get_event_actor(event);
+        if (targetActor instanceof St.Widget)
+            targetActor.sync_hover();
+
+        return false;
+    }
+
+    _onActiveChanged() {
+        if (!this.active)
+            return;
+
+        this._button.selectCategory(this._category);
+        this._button.scrollToCatButton(this);
+    }
+}
+
+class ApplicationsMenu extends PopupMenu.PopupMenu {
+    constructor(sourceActor, arrowAlignment, arrowSide, button) {
+        super(sourceActor, arrowAlignment, arrowSide);
+        this._button = button;
+    }
+
+    isEmpty() {
+        return false;
+    }
+
+    toggle() {
+        if (this.isOpen)
+            this._button.selectCategory(null);
+        super.toggle();
+    }
+}
+
+class DesktopTarget extends EventEmitter {
+    constructor() {
+        super();
+
+        this._desktop = null;
+        this._desktopDestroyedId = 0;
+
+        this._windowAddedId =
+            global.window_group.connect('actor-added',
+                this._onWindowAdded.bind(this));
+
+        global.get_window_actors().forEach(a => {
+            this._onWindowAdded(a.get_parent(), a);
+        });
+    }
+
+    get hasDesktop() {
+        return this._desktop !== null;
+    }
+
+    _onWindowAdded(group, actor) {
+        if (!(actor instanceof Meta.WindowActor))
+            return;
+
+        if (actor.meta_window.get_window_type() === Meta.WindowType.DESKTOP)
+            this._setDesktop(actor);
+    }
+
+    _setDesktop(desktop) {
+        if (this._desktop) {
+            this._desktop.disconnectObject(this);
+            delete this._desktop._delegate;
+        }
+
+        this._desktop = desktop;
+        this.emit('desktop-changed');
+
+        if (this._desktop) {
+            this._desktop.connectObject('destroy', () => {
+                this._setDesktop(null);
+            }, this);
+            this._desktop._delegate = this;
+        }
+    }
+
+    /*
+    _getSourceAppInfo(source) {
+        if (!(source instanceof ApplicationMenuItem))
+            return null;
+        return source._item.app_info;
+    }
+
+    async _markTrusted(file) {
+        let modeAttr = Gio.FILE_ATTRIBUTE_UNIX_MODE;
+        let trustedAttr = 'metadata::trusted';
+        let queryFlags = Gio.FileQueryInfoFlags.NONE;
+        let ioPriority = GLib.PRIORITY_DEFAULT;
+
+        try {
+            let info = await file.query_info_async(modeAttr, queryFlags, ioPriority, null);
+
+            let mode = info.get_attribute_uint32(modeAttr) | 0o100;
+            info.set_attribute_uint32(modeAttr, mode);
+            info.set_attribute_string(trustedAttr, 'yes');
+            await file.set_attributes_async(info, queryFlags, ioPriority, null);
+
+            // Hack: force nautilus to reload file info
+            info = new Gio.FileInfo();
+            info.set_attribute_uint64(
+                Gio.FILE_ATTRIBUTE_TIME_ACCESS, GLib.get_real_time());
+            try {
+                await file.set_attributes_async(info, queryFlags, ioPriority, null);
+            } catch (e) {
+                log(`Failed to update access time: ${e.message}`);
+            }
+        } catch (e) {
+            log(`Failed to mark file as trusted: ${e.message}`);
+        }
+    }
+    // */
+
+    destroy() {
+        global.window_group.disconnectObject(this);
+        this._setDesktop(null);
+    }
+
+    /*
+    handleDragOver(source, _actor, _x, _y, _time) {
+        let appInfo = this._getSourceAppInfo(source);
+        if (!appInfo)
+            return DND.DragMotionResult.CONTINUE;
+
+        return DND.DragMotionResult.COPY_DROP;
+    }
+
+    acceptDrop(source, _actor, _x, _y, _time) {
+        let appInfo = this._getSourceAppInfo(source);
+        if (!appInfo)
+            return false;
+
+        this.emit('app-dropped');
+
+        let desktop = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DESKTOP);
+
+        let src = Gio.File.new_for_path(appInfo.get_filename());
+        let dst = Gio.File.new_for_path(GLib.build_filenamev([desktop, src.get_basename()]));
+
+        try {
+            // copy_async() isn't introspectable :-(
+            src.copy(dst, Gio.FileCopyFlags.OVERWRITE, null, null);
+            this._markTrusted(dst);
+        } catch (e) {
+            log(`Failed to copy to desktop: ${e.message}`);
+        }
+
+        return true;
+    }
+    // */
+}
+
+class MainLayout extends Clutter.BoxLayout {
+    static {
+        GObject.registerClass(this);
+    }
+
+    vfunc_get_preferred_height(container, forWidth) {
+        const [mainChild] = container;
+        const [minHeight, natHeight] =
+            mainChild.get_preferred_height(forWidth);
+
+        return [minHeight, natHeight + MENU_HEIGHT_OFFSET];
+    }
+}
+
+export class ApplicationsButton extends PanelMenu.Button {
+    static {
+        GObject.registerClass(this);
+    }
+
+    constructor(caller, _cmds) {
+        super(1.0, null, false);
+        this._caller = caller;
+        this.cmds = _cmds;
+
+
+        this.setMenu(new ApplicationsMenu(this, 1.0, St.Side.TOP, this));
+        Main.panel.menuManager.addMenu(this.menu);
+
+        // At this moment applications menu is not keyboard navigable at
+        // all (so not accessible), so it doesn't make sense to set as
+        // role ATK_ROLE_MENU like other elements of the panel.
+        this.accessible_role = Atk.Role.LABEL;
+
+        if(this._caller.get_settings() === null){
+            this._caller.set_settings(this._caller.getSettings());
+            this._caller.set_settings_data(JSON.parse(this._caller.get_settings().get_string("settings-json")));
+        }
+        if (this._caller.get_settings().get_string("icon-name")) {
+            this.icon_name = this._caller.get_settings().get_string("icon-name");
+        } else {
+            this.icon_name = "printer";
+        }
+        this.icon = new St.Icon({
+            style_class: 'menu-button',
+        });
+        let gicon/*, icon*/;
+        let re = /^.*\.png$/;
+        let re2 = /^\/.*\.png$/;
+        if (!re.test(this.icon_name) ){
+            gicon = Gio.icon_new_for_string(this.icon_name);
+        } else if (re2.test(this.icon_name)) {
+            try {
+                gicon = Gio.icon_new_for_string(this.icon_name);
+            } catch(err) {
+                gicon = false;
+            }
+            if (!gicon) {
+                this.icon_name = "printer";
+                gicon = Gio.icon_new_for_string(this.icon_name);
+            }
+        } else {
+            gicon = Gio.icon_new_for_string(this._caller.path + "/icons/" + this.icon_name);
+        }
+        this.icon.gicon = gicon;
+        this.icon.icon_size = 17;
+        this.add_child(this.icon);
+
+        this.add_actor(this.icon);
+        this.name = 'Hplip-menu2';
+        this.icon_actor = this.icon;
+
+        Main.overview.connectObject(
+            'showing', () => this.add_accessible_state(Atk.StateType.CHECKED),
+            'hiding', () => this.remove_accessible_state(Atk.StateType.CHECKED),
+            this);
+
+        /*
+        Main.wm.addKeybinding(
+            'hplip-menu2-toggle-menu',
+            Extension.lookupByURL(import.meta.url).getSettings(),
+            Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
+            Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
+            () => this.menu.toggle());
+
+        this._desktopTarget = new DesktopTarget();
+        this._desktopTarget.connect('app-dropped', () => {
+            this.menu.close();
+        });
+        this._desktopTarget.connect('desktop-changed', () => {
+            this._applicationsButtons.forEach(item => {
+                item.setDragEnabled(this._desktopTarget.hasDesktop);
+            });
+        });
+        // */
+
+
+        this._applicationsButtons = new Map();
+        this.reloadFlag = false;
+        this._createLayout();
+        this._display();
+    } // constructor(caller, _cmds) //
+
+    _onDestroy() {
+        super._onDestroy();
+
+        Main.wm.removeKeybinding('apps-menu-toggle-menu');
+
+        this._desktopTarget.destroy();
+    }
+
+    _onMenuKeyPress(actor, event) {
+        let symbol = event.get_key_symbol();
+        if (symbol === Clutter.KEY_Left || symbol === Clutter.KEY_Right) {
+            let direction = symbol === Clutter.KEY_Left
+                ? Gtk.DirectionType.LEFT : Gtk.DirectionType.RIGHT;
+            if (this.menu.actor.navigate_focus(global.stage.key_focus, direction, false))
+                return true;
+        }
+        return super._onMenuKeyPress(actor, event);
+    }
+
+    _onOpenStateChanged(menu, open) {
+        if (open) {
+            if (this.reloadFlag) {
+                this._redisplay();
+                this.reloadFlag = false;
+            }
+            this.mainBox.show();
+        }
+        super._onOpenStateChanged(menu, open);
+    }
+
+    _redisplay() {
+        this.applicationsBox.destroy_all_children();
+        this.categoriesBox.destroy_all_children();
+        this._display();
+    }
+
+    _loadCategory(categoryId, thesubmenu, actions) {
+        let text         = null;
+        for(let x = 0; x < actions.length; x++){
+            switch (actions[x].type) {
+                case "command":
+                    text = actions[x].text;
+
+                    if(categoryId){
+                        this.applicationsByCategory[categoryId].push(text);
+                    }else{
+                        this.applicationsByCategory['Everything else'].push(text);
+                    }
+                    break;
+                case "desktop":
+                    text = actions[x].text;
+
+                    if(categoryId){
+                        this.applicationsByCategory[categoryId].push(text);
+                    }else{
+                        this.applicationsByCategory['Everything else'].push(text);
+                    }
+                    break;
+                case "settings":
+                    if(categoryId){
+                        this.applicationsByCategory[categoryId].push('settings');
+                    }else{
+                        this.applicationsByCategory['Everything else'].push('settings');
+                    }
+                    break;
+                case "separator":
+                    if(categoryId){
+                        this.applicationsByCategory[categoryId].push('separator');
+                    }else{
+                        this.applicationsByCategory['Everything else'].push('separator');
+                    }
+                    break;
+            } // actions[x].type //
+        }
+    } // _loadCategory(categoryId, thesubmenu, actions) //
+
+    scrollToButton(button) {
+        let appsScrollBoxAdj = this.applicationsScrollBox.get_vscroll_bar().get_adjustment();
+        let appsScrollBoxAlloc = this.applicationsScrollBox.get_allocation_box();
+        let currentScrollValue = appsScrollBoxAdj.get_value();
+        let boxHeight = appsScrollBoxAlloc.y2 - appsScrollBoxAlloc.y1;
+        let buttonAlloc = button.get_allocation_box();
+        let newScrollValue = currentScrollValue;
+        if (currentScrollValue > buttonAlloc.y1 - 10)
+            newScrollValue = buttonAlloc.y1 - 10;
+        if (boxHeight + currentScrollValue < buttonAlloc.y2 + 10)
+            newScrollValue = buttonAlloc.y2 - boxHeight + 10;
+        if (newScrollValue !== currentScrollValue)
+            appsScrollBoxAdj.set_value(newScrollValue);
+    }
+
+    scrollToCatButton(button) {
+        let catsScrollBoxAdj = this.categoriesScrollBox.get_vscroll_bar().get_adjustment();
+        let catsScrollBoxAlloc = this.categoriesScrollBox.get_allocation_box();
+        let currentScrollValue = catsScrollBoxAdj.get_value();
+        let boxHeight = catsScrollBoxAlloc.y2 - catsScrollBoxAlloc.y1;
+        let buttonAlloc = button.get_allocation_box();
+        let newScrollValue = currentScrollValue;
+        if (currentScrollValue > buttonAlloc.y1 - 10)
+            newScrollValue = buttonAlloc.y1 - 10;
+        if (boxHeight + currentScrollValue < buttonAlloc.y2 + 10)
+            newScrollValue = buttonAlloc.y2 - boxHeight + 10;
+        if (newScrollValue !== currentScrollValue)
+            catsScrollBoxAdj.set_value(newScrollValue);
+    }
+
+    _createLayout() {
+        let section = new PopupMenu.PopupMenuSection();
+        this.menu.addMenuItem(section);
+        this.mainBox = new St.BoxLayout({layoutManager: new MainLayout()});
+        this.leftBox = new St.BoxLayout({vertical: true});
+        this.applicationsScrollBox = new St.ScrollView({
+            style_class: 'apps-menu vfade',
+            x_expand: true,
+        });
+        this.applicationsScrollBox.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
+        let vscroll = this.applicationsScrollBox.get_vscroll_bar();
+        vscroll.connect('scroll-start', () => {
+            this.menu.passEvents = true;
+        });
+        vscroll.connect('scroll-stop', () => {
+            this.menu.passEvents = false;
+        });
+        this.categoriesScrollBox = new St.ScrollView({
+            style_class: 'vfade',
+        });
+        this.categoriesScrollBox.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
+        vscroll = this.categoriesScrollBox.get_vscroll_bar();
+        vscroll.connect('scroll-start', () => (this.menu.passEvents = true));
+        vscroll.connect('scroll-stop', () => (this.menu.passEvents = false));
+        this.leftBox.add_child(this.categoriesScrollBox);
+
+        this.applicationsBox = new St.BoxLayout({vertical: true});
+        this.applicationsScrollBox.add_actor(this.applicationsBox);
+        this.categoriesBox = new St.BoxLayout({vertical: true});
+        this.categoriesScrollBox.add_actor(this.categoriesBox);
+
+        this.mainBox.add(this.leftBox);
+        this.mainBox.add_child(this.applicationsScrollBox);
+        section.actor.add_actor(this.mainBox);
+    }
+
+    _display() {
+        this._applicationsButtons.clear();
+        this.mainBox.hide();
+
+        // Load categories
+        this.applicationsByCategory = {};
+        this.applicationsByCategory['Everything else'] = [];
+        let categoryMenuItem = new CategoryMenuItem(this, null);
+        this.categoriesBox.add_actor(categoryMenuItem);
+        let text       = null;
+        let actions    = null;
+        for(let x = 0; x < this.cmds.length; x++){
+            switch (this.cmds[x].type) {
+                case "command":
+                    this._loadCategory('Everything else', this, [ this.cmds[x] ]);
+                    break;
+                case "desktop":
+                    this._loadCategory('Everything else', this, [ this.cmds[x] ]);
+                    break;
+                case "settings":
+                    this._loadCategory('Everything else', this, [ this.cmds[x] ]);
+                    break;
+                case "separator":
+                    this._loadCategory('Everything else', this, [ this.cmds[x] ]);
+                    break;
+                case "submenu":
+                    text = this.cmds[x].text;
+                    actions = this.cmds[x].actions;
+                    this.applicationsByCategory[text] = [];
+                    this._loadCategory(text, this, actions);
+                    if (this.applicationsByCategory[text].length > 0) {
+                        categoryMenuItem = new CategoryMenuItem(this, this.cmds[x]);
+                        this.categoriesBox.add_actor(categoryMenuItem);
+                    }
+                    break;
+                case "optsubmenu":
+                    text = this.cmds[x].text;
+                    actions = this.cmds[x].actions;
+                    this.applicationsByCategory[text] = [];
+                    this._display_optsubmenu(text, actions)
+                    if (this.applicationsByCategory[text].length > 0) {
+                        categoryMenuItem = new CategoryMenuItem(this, this.cmds[x]);
+                        this.categoriesBox.add_actor(categoryMenuItem);
+                    }
+                    break;
+            } // switch (this.cmds[x].type) //
+        } // for(let x = 0; x < this.cmds.length; x++) //
+
+        // Load applications
+        this._displayButtons(this._listApplications(null));
+    } // _display() //
+
+    _display_optsubmenu(name, theactions){
+        let actions = null;
+        for(let x = 0; x < theactions.length; x++){
+            switch (theactions[x].type) {
+                case "command":
+                    this._loadCategory(name, this, [ theactions[x] ]);
+                    break;
+                case "desktop":
+                    this._loadCategory(name, this, [ theactions[x] ]);
+                    break;
+                case "settings":
+                    this._loadCategory(name, this, [ theactions[x] ]);
+                    break;
+                case "separator":
+                    this._loadCategory(name, this, [ theactions[x] ]);
+                    break;
+                case "submenu":
+                    actions = theactions[x].actions;
+                    this._loadCategory(name, this, actions);
+                    break;
+            } // switch (theactions[x].type) //
+        }
+    } // _display_optsubmenu(name, theactions) //
+
+    selectCategory(cat) {
+        // empty this.applicationsBox //
+        this.applicationsBox.get_children().forEach(c => {
+            if (c._delegate instanceof PopupMenu.PopupSeparatorMenuItem)
+                c._delegate.destroy();
+            else
+                this.applicationsBox.remove_actor(c);
+        });
+
+        if (cat)
+            this._displayButtons(this._listApplications(cat.text));
+        else
+            this._displayButtons(this._listApplications(null));
+    }
+
+    _displayButtons(items) {
+        for (let i = 0; i < items.length; i++) {
+            let item = items[i];
+            let menuitem = null;
+            switch (item.type) {
+                case "command":
+                case "desktop":
+                case "settings":
+                    menuitem = new ApplicationMenuItem(this, this._applicationsButtons.get(item));
+                    break;
+                case "separator":
+                    menuitem = new PopupMenu.PopupSeparatorMenuItem();
+                    break;
+            } // switch (item.type) //
+            if(menuitem) {
+                this._applicationsButtons.set(item, menuitem);
+                //menuitem.setDragEnabled(this._desktopTarget.hasDesktop);
+                if (!menuitem.get_parent())
+                    this.applicationsBox.add_actor(menuitem);
+            } // if(menuitem) //
+        } // for (let i = 0; i < items.length; i++) //
+    } // _displayButtons(items) //
+
+    _listApplications(categoryMenuId) {
+        let itemlist;
+
+        if (categoryMenuId) {
+            itemlist = this.applicationsByCategory[categoryMenuId];
+        } else {
+            itemlist = this.applicationsByCategory['Everything else'];
+        }
+
+        return itemlist;
+    }
+}
