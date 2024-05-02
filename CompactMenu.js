@@ -17,8 +17,8 @@ import St from 'gi://St';
 import {EventEmitter} from 'resource:///org/gnome/shell/misc/signals.js';
 import * as Gzz from './gzzDialog.js';
 
-//import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
-import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
+import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
+//import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 //import * as DND from 'resource:///org/gnome/shell/ui/dnd.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
@@ -97,7 +97,7 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
                 //this._button.menu.addMenuItem(item);
                 break;
         } // switch (this.item.type) //
-    }
+    } // constructor(button, item) //
 
     launch(action, alt){
         if(typeof action === 'string'){
@@ -385,7 +385,7 @@ class DesktopTarget extends EventEmitter {
         this._desktopDestroyedId = 0;
 
         this._windowAddedId =
-            global.window_group.connect('actor-added',
+            global.window_group.connect('child-added',
                 this._onWindowAdded.bind(this));
 
         global.get_window_actors().forEach(a => {
@@ -564,7 +564,7 @@ export class ApplicationsButton extends PanelMenu.Button {
         this.icon.icon_size = 17;
         this.add_child(this.icon);
 
-        this.add_actor(this.icon);
+        this.add_child(this.icon);
         this.name = 'Hplip-menu2';
         this.icon_actor = this.icon;
 
@@ -573,24 +573,27 @@ export class ApplicationsButton extends PanelMenu.Button {
             'hiding', () => this.remove_accessible_state(Atk.StateType.CHECKED),
             this);
 
-        /*
+        //*
+        extensionObject = Extension.lookupByURL(import.meta.url);
+        extensionSettings = extensionObject.getSettings();
+        console.log(extensionObject.metadata);
         Main.wm.addKeybinding(
             'hplip-menu2-toggle-menu',
-            Extension.lookupByURL(import.meta.url).getSettings(),
+            extensionSettings,
             Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
             Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
             () => this.menu.toggle());
+        // */
 
         this._desktopTarget = new DesktopTarget();
         this._desktopTarget.connect('app-dropped', () => {
             this.menu.close();
         });
         this._desktopTarget.connect('desktop-changed', () => {
-            this._applicationsButtons.forEach(item => {
-                item.setDragEnabled(this._desktopTarget.hasDesktop);
+            this._applicationsButtons.forEach(menuitem => {
+                menuitem.setDragEnabled(this._desktopTarget.hasDesktop);
             });
         });
-        // */
 
 
         this._applicationsButtons = new Map();
@@ -602,7 +605,7 @@ export class ApplicationsButton extends PanelMenu.Button {
     _onDestroy() {
         super._onDestroy();
 
-        Main.wm.removeKeybinding('apps-menu-toggle-menu');
+        Main.wm.removeKeybinding('hplip-menu2-toggle-menu');
 
         this._desktopTarget.destroy();
     }
@@ -676,7 +679,7 @@ export class ApplicationsButton extends PanelMenu.Button {
     } // _loadCategory(categoryId, thesubmenu, actions) //
 
     scrollToButton(button) {
-        let appsScrollBoxAdj = this.applicationsScrollBox.get_vscroll_bar().get_adjustment();
+        let appsScrollBoxAdj = this.applicationsScrollBox.get_vadjustment();
         let appsScrollBoxAlloc = this.applicationsScrollBox.get_allocation_box();
         let currentScrollValue = appsScrollBoxAdj.get_value();
         let boxHeight = appsScrollBoxAlloc.y2 - appsScrollBoxAlloc.y1;
@@ -691,7 +694,7 @@ export class ApplicationsButton extends PanelMenu.Button {
     }
 
     scrollToCatButton(button) {
-        let catsScrollBoxAdj = this.categoriesScrollBox.get_vscroll_bar().get_adjustment();
+        let catsScrollBoxAdj = this.categoriesScrollBox.get_vadjustment();
         let catsScrollBoxAlloc = this.categoriesScrollBox.get_allocation_box();
         let currentScrollValue = catsScrollBoxAdj.get_value();
         let boxHeight = catsScrollBoxAlloc.y2 - catsScrollBoxAlloc.y1;
@@ -714,6 +717,7 @@ export class ApplicationsButton extends PanelMenu.Button {
             style_class: 'apps-menu vfade',
             x_expand: true,
         });
+        //*
         this.applicationsScrollBox.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
         let vscroll = this.applicationsScrollBox.get_vscroll_bar();
         vscroll.connect('scroll-start', () => {
@@ -722,23 +726,26 @@ export class ApplicationsButton extends PanelMenu.Button {
         vscroll.connect('scroll-stop', () => {
             this.menu.passEvents = false;
         });
+        // */
         this.categoriesScrollBox = new St.ScrollView({
             style_class: 'vfade',
         });
+        //*
         this.categoriesScrollBox.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
         vscroll = this.categoriesScrollBox.get_vscroll_bar();
         vscroll.connect('scroll-start', () => (this.menu.passEvents = true));
         vscroll.connect('scroll-stop', () => (this.menu.passEvents = false));
+        // */
         this.leftBox.add_child(this.categoriesScrollBox);
 
         this.applicationsBox = new St.BoxLayout({vertical: true});
-        this.applicationsScrollBox.add_actor(this.applicationsBox);
+        this.applicationsScrollBox.set_child(this.applicationsBox);
         this.categoriesBox = new St.BoxLayout({vertical: true});
-        this.categoriesScrollBox.add_actor(this.categoriesBox);
+        this.categoriesScrollBox.set_child(this.categoriesBox);
 
-        this.mainBox.add(this.leftBox);
+        this.mainBox.add_child(this.leftBox);
         this.mainBox.add_child(this.applicationsScrollBox);
-        section.actor.add_actor(this.mainBox);
+        section.actor.add_child(this.mainBox);
     }
 
     _display() {
@@ -749,7 +756,7 @@ export class ApplicationsButton extends PanelMenu.Button {
         this.applicationsByCategory = {};
         this.applicationsByCategory['Everything else'] = [];
         let categoryMenuItem = new CategoryMenuItem(this, null);
-        this.categoriesBox.add_actor(categoryMenuItem);
+        this.categoriesBox.add_child(categoryMenuItem);
         let text       = null;
         let actions    = null;
         for(let x = 0; x < this.cmds.length; x++){
@@ -773,7 +780,7 @@ export class ApplicationsButton extends PanelMenu.Button {
                     this._loadCategory(text, this, actions);
                     if (this.applicationsByCategory[text].length > 0) {
                         categoryMenuItem = new CategoryMenuItem(this, this.cmds[x]);
-                        this.categoriesBox.add_actor(categoryMenuItem);
+                        this.categoriesBox.add_child(categoryMenuItem);
                     }
                     break;
                 case "optsubmenu":
@@ -783,7 +790,7 @@ export class ApplicationsButton extends PanelMenu.Button {
                     this._display_optsubmenu(text, actions)
                     if (this.applicationsByCategory[text].length > 0) {
                         categoryMenuItem = new CategoryMenuItem(this, this.cmds[x]);
-                        this.categoriesBox.add_actor(categoryMenuItem);
+                        this.categoriesBox.add_child(categoryMenuItem);
                     }
                     break;
             } // switch (this.cmds[x].type) //
@@ -823,7 +830,7 @@ export class ApplicationsButton extends PanelMenu.Button {
             if (c._delegate instanceof PopupMenu.PopupSeparatorMenuItem)
                 c._delegate.destroy();
             else
-                this.applicationsBox.remove_actor(c);
+                this.applicationsBox.remove_child(c);
         });
 
         if (cat)
@@ -840,18 +847,19 @@ export class ApplicationsButton extends PanelMenu.Button {
                 case "command":
                 case "desktop":
                 case "settings":
-                    menuitem = new ApplicationMenuItem(this, this._applicationsButtons.get(item));
+                    menuitem = this._applicationsButtons.get(item.text);
                     break;
                 case "separator":
                     menuitem = new PopupMenu.PopupSeparatorMenuItem();
                     break;
             } // switch (item.type) //
-            if(menuitem) {
+            if (!menuitem) {
+                menuitem = new ApplicationMenuItem(this, item);
+                menuitem.setDragEnabled(this._desktopTarget.hasDesktop);
                 this._applicationsButtons.set(item, menuitem);
-                //menuitem.setDragEnabled(this._desktopTarget.hasDesktop);
-                if (!menuitem.get_parent())
-                    this.applicationsBox.add_actor(menuitem);
-            } // if(menuitem) //
+            }
+            if (!menuitem.get_parent())
+                this.applicationsBox.add_child(menuitem);
         } // for (let i = 0; i < items.length; i++) //
     } // _displayButtons(items) //
 
@@ -866,4 +874,4 @@ export class ApplicationsButton extends PanelMenu.Button {
 
         return itemlist;
     }
-}
+} // export class ApplicationsButton extends PanelMenu.Button //
