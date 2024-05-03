@@ -8,7 +8,6 @@ import Atk from 'gi://Atk';
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
-//import GMenu from 'gi://GMenu';
 import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk';
 import Meta from 'gi://Meta';
@@ -18,14 +17,13 @@ import {EventEmitter} from 'resource:///org/gnome/shell/misc/signals.js';
 import * as Gzz from './gzzDialog.js';
 
 import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
-//import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 
-//import * as DND from 'resource:///org/gnome/shell/ui/dnd.js';
+import * as DND from 'resource:///org/gnome/shell/ui/dnd.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
-//const appSys = Shell.AppSystem.get_default();
+const appSys = Shell.AppSystem.get_default();
 
 const APPLICATION_ICON_SIZE = 32;
 const HORIZ_FACTOR = 5;
@@ -46,16 +44,25 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
         this._item = item;
         this._button = button;
 
+        let action = null;
+        switch (this._item.type) {
+            case "command":
+            case "desktop":
+                action       = this._item?.action;
+                break;
+        } // switch (this.item.type) //
+        if(action) this._app = appSys.lookup_app(action);
+
         this._iconBin = new St.Bin();
         this.add_child(this._iconBin);
 
         let menuitemLabel = new St.Label({
-            text: this._item.text,
+            text: this._item?.text ?? '<Error bad value for this_item.text>',
             y_expand: true,
             y_align: Clutter.ActorAlign.CENTER,
         });
         this.add_child(menuitemLabel);
-        this.icon_actor = menuitemLabel;
+        this.label_actor = menuitemLabel;
 
         let textureCache = St.TextureCache.get_default();
         textureCache.connectObject('icon-theme-changed',
@@ -63,7 +70,6 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
         this._updateIcon();
 
         this._delegate = this;
-        /*
         let draggable = DND.makeDraggable(this);
 
         let maybeStartDrag = draggable._maybeStartDrag;
@@ -72,29 +78,11 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
                 return maybeStartDrag.call(draggable, event);
             return false;
         };
-        // */
-        let action       = null;
-        let alt          = null;
-        let errorMessage = null;
         switch (this._item.type) {
             case "command":
-                action       = this._item.action;
-                alt          = this._item.alt;
-                errorMessage = this._item.errorMessage;
-                item.connect("activate", this.callback_command.bind(this, this._item, action, alt, errorMessage));
-                //this._button.menu.addMenuItem(item);
-                break;
             case "desktop":
-                action       = this._item.action;
-                alt          = this._item.alt;
-                errorMessage = this._item.errorMessage;
-
-                item.connect("activate", this.callback_desktop.bind(this, this._item, action, alt, errorMessage));
-                //this._button.menu.addMenuItem(item);
-                break;
             case "settings":
-                item.connect("activate", () => { this._caller.openPreferences(); });
-                //this._button.menu.addMenuItem(item);
+                this._button.applicationsBox.add_child(this);
                 break;
         } // switch (this.item.type) //
     } // constructor(button, item) //
@@ -173,9 +161,8 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
     callback_desktop(item, action, alt, errorMessage){
         let currentAction = action;
         // Save context variable for binding //
-        let def = Shell.AppSystem.get_default();
-        let app = def.lookup_app(currentAction);
-        if(app !== null){
+        let app = appSys.lookup_app(currentAction);
+        if(app){
             app.activate();
             return true;
         }else{ // could not launch by action so use alt //
@@ -203,7 +190,31 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
     }
 
     activate(event) {
-        this._menuitem.open_new_window(-1);
+        if(this._app){
+            this._app.open_new_window(-1);
+        }else{
+            let action       = null;
+            let alt          = null;
+            let errorMessage = null;
+            switch (this._item.type) {
+                case "command":
+                    action       = this._item.action;
+                    alt          = this._item.alt;
+                    errorMessage = this._item.errorMessage;
+                    this.callback_command(this._button, this, action, alt, errorMessage);
+                    break;
+                case "desktop":
+                    action       = this._item.action;
+                    alt          = this._item.alt;
+                    errorMessage = this._item.errorMessage;
+
+                    this.callback_desktop(this._button, this, action, alt, errorMessage);
+                    break;
+                case "settings":
+                    this._button._caller.openPreferences();
+                    break;
+            } // switch (this._item.type) //
+        }
         this._button.selectCategory(null);
         this._button.menu.toggle();
         super.activate(event);
@@ -222,7 +233,40 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
     }
 
     getDragActor() {
-        return this._menuitem.create_icon_texture(APPLICATION_ICON_SIZE);
+        let action       = null;
+        let alt          = null;
+        let app          = null;
+        switch (this._item.type) {
+            case "command":
+                action       = this._item?.action;
+                alt          = this._item?.alt;
+
+                app = appSys.lookup_app(action);
+                if(!app) app = appSys.lookup_app(alt);
+                break;
+            case "desktop":
+                action       = this._item?.action;
+                alt          = this._item?.alt;
+
+                app = appSys.lookup_app(action);
+                if(!app) app = appSys.lookup_app(alt);
+                break;
+            case "settings":
+                app = appSys.lookup_app('org.gnome.Settings');
+                break;
+        } // switch (this.item.type) //
+        if(!app){
+            let icon = new St.Icon({
+                style_class: 'icon-dropshadow',
+            });
+            let gicon/*, icon*/;
+            let icon_name = "printer";
+            gicon = Gio.icon_new_for_string(icon_name);
+            icon.gicon = gicon;
+            icon.icon_size = 17;
+            return icon;
+        }
+        return app.create_icon_texture(APPLICATION_ICON_SIZE);
     }
 
     getDragActorSource() {
@@ -231,10 +275,12 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
 
     _updateIcon() {
         let icon = this.getDragActor();
-        icon.style_class = 'icon-dropshadow';
-        this._iconBin.set_child(icon);
+        if(icon){
+            icon.style_class = 'icon-dropshadow';
+            this._iconBin.set_child(icon);
+        }
     }
-}
+} // class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem //
 
 class CategoryMenuItem extends PopupMenu.PopupBaseMenuItem {
     static {
@@ -251,9 +297,9 @@ class CategoryMenuItem extends PopupMenu.PopupBaseMenuItem {
 
         let name;
         if (this._category)
-            name = this._category.text;
+            name = this._category?.text ?? '<Error no valuefound this._category.text>';
         else
-            name = _('Everything else');
+            name = _('Settings & Stuff');
 
         this.add_child(new St.Label({text: name}));
         this.connect('motion-event', this._onMotionEvent.bind(this));
@@ -261,7 +307,7 @@ class CategoryMenuItem extends PopupMenu.PopupBaseMenuItem {
     }
 
     activate(event) {
-        this._button.selectCategory(this._category);
+        this._button.selectCategory(this?._category ?? null);
         this._button.scrollToCatButton(this);
         super.activate(event);
     }
@@ -355,10 +401,10 @@ class CategoryMenuItem extends PopupMenu.PopupBaseMenuItem {
         if (!this.active)
             return;
 
-        this._button.selectCategory(this._category);
+        this._button.selectCategory(this?._category ?? null);
         this._button.scrollToCatButton(this);
     }
-}
+} // class CategoryMenuItem extends PopupMenu.PopupBaseMenuItem //
 
 class ApplicationsMenu extends PopupMenu.PopupMenu {
     constructor(sourceActor, arrowAlignment, arrowSide, button) {
@@ -422,11 +468,10 @@ class DesktopTarget extends EventEmitter {
         }
     }
 
-    /*
     _getSourceAppInfo(source) {
         if (!(source instanceof ApplicationMenuItem))
             return null;
-        return source._item.app_info;
+        return source._app?.app_info ?? null;
     }
 
     async _markTrusted(file) {
@@ -450,20 +495,18 @@ class DesktopTarget extends EventEmitter {
             try {
                 await file.set_attributes_async(info, queryFlags, ioPriority, null);
             } catch (e) {
-                log(`Failed to update access time: ${e.message}`);
+                console.log(`Failed to update access time: ${e.message}`);
             }
         } catch (e) {
-            log(`Failed to mark file as trusted: ${e.message}`);
+            console.log(`Failed to mark file as trusted: ${e.message}`);
         }
     }
-    // */
 
     destroy() {
         global.window_group.disconnectObject(this);
         this._setDesktop(null);
     }
 
-    /*
     handleDragOver(source, _actor, _x, _y, _time) {
         let appInfo = this._getSourceAppInfo(source);
         if (!appInfo)
@@ -489,12 +532,11 @@ class DesktopTarget extends EventEmitter {
             src.copy(dst, Gio.FileCopyFlags.OVERWRITE, null, null);
             this._markTrusted(dst);
         } catch (e) {
-            log(`Failed to copy to desktop: ${e.message}`);
+            console.log(`Failed to copy to desktop: ${e.message}`);
         }
 
         return true;
     }
-    // */
 }
 
 class MainLayout extends Clutter.BoxLayout {
@@ -565,7 +607,7 @@ export class ApplicationsButton extends PanelMenu.Button {
         this.add_child(this.icon);
 
         this.add_child(this.icon);
-        this.name = 'Hplip-menu2';
+        this.name = 'hplip-menu2';
         this.icon_actor = this.icon;
 
         Main.overview.connectObject(
@@ -573,25 +615,22 @@ export class ApplicationsButton extends PanelMenu.Button {
             'hiding', () => this.remove_accessible_state(Atk.StateType.CHECKED),
             this);
 
-        //*
-        extensionObject = Extension.lookupByURL(import.meta.url);
-        extensionSettings = extensionObject.getSettings();
-        console.log(extensionObject.metadata);
+        let extensionObject = Extension.lookupByUUID('hplip-menu2@grizzlysmit.smit.id.au');
+        let extensionSettings = extensionObject.getSettings();
         Main.wm.addKeybinding(
-            'hplip-menu2-toggle-menu',
+            'apps-menu-toggle-menu',
             extensionSettings,
             Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
             Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
             () => this.menu.toggle());
-        // */
 
         this._desktopTarget = new DesktopTarget();
         this._desktopTarget.connect('app-dropped', () => {
             this.menu.close();
         });
         this._desktopTarget.connect('desktop-changed', () => {
-            this._applicationsButtons.forEach(menuitem => {
-                menuitem.setDragEnabled(this._desktopTarget.hasDesktop);
+            this._applicationsButtons.forEach(c => {
+                c.setDragEnabled(this._desktopTarget.hasDesktop);
             });
         });
 
@@ -605,7 +644,7 @@ export class ApplicationsButton extends PanelMenu.Button {
     _onDestroy() {
         super._onDestroy();
 
-        Main.wm.removeKeybinding('hplip-menu2-toggle-menu');
+        Main.wm.removeKeybinding('apps-menu-toggle-menu');
 
         this._desktopTarget.destroy();
     }
@@ -639,39 +678,16 @@ export class ApplicationsButton extends PanelMenu.Button {
     }
 
     _loadCategory(categoryId, thesubmenu, actions) {
-        let text         = null;
         for(let x = 0; x < actions.length; x++){
             switch (actions[x].type) {
                 case "command":
-                    text = actions[x].text;
-
-                    if(categoryId){
-                        this.applicationsByCategory[categoryId].push(text);
-                    }else{
-                        this.applicationsByCategory['Everything else'].push(text);
-                    }
-                    break;
                 case "desktop":
-                    text = actions[x].text;
-
-                    if(categoryId){
-                        this.applicationsByCategory[categoryId].push(text);
-                    }else{
-                        this.applicationsByCategory['Everything else'].push(text);
-                    }
-                    break;
                 case "settings":
-                    if(categoryId){
-                        this.applicationsByCategory[categoryId].push('settings');
-                    }else{
-                        this.applicationsByCategory['Everything else'].push('settings');
-                    }
-                    break;
                 case "separator":
                     if(categoryId){
-                        this.applicationsByCategory[categoryId].push('separator');
+                        this.applicationsByCategory[categoryId].push(actions[x]);
                     }else{
-                        this.applicationsByCategory['Everything else'].push('separator');
+                        this.applicationsByCategory['Settings & Stuff'].push(actions[x]);
                     }
                     break;
             } // actions[x].type //
@@ -717,7 +733,6 @@ export class ApplicationsButton extends PanelMenu.Button {
             style_class: 'apps-menu vfade',
             x_expand: true,
         });
-        //*
         this.applicationsScrollBox.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
         let vscroll = this.applicationsScrollBox.get_vscroll_bar();
         vscroll.connect('scroll-start', () => {
@@ -726,16 +741,13 @@ export class ApplicationsButton extends PanelMenu.Button {
         vscroll.connect('scroll-stop', () => {
             this.menu.passEvents = false;
         });
-        // */
         this.categoriesScrollBox = new St.ScrollView({
             style_class: 'vfade',
         });
-        //*
         this.categoriesScrollBox.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
         vscroll = this.categoriesScrollBox.get_vscroll_bar();
         vscroll.connect('scroll-start', () => (this.menu.passEvents = true));
         vscroll.connect('scroll-stop', () => (this.menu.passEvents = false));
-        // */
         this.leftBox.add_child(this.categoriesScrollBox);
 
         this.applicationsBox = new St.BoxLayout({vertical: true});
@@ -754,7 +766,7 @@ export class ApplicationsButton extends PanelMenu.Button {
 
         // Load categories
         this.applicationsByCategory = {};
-        this.applicationsByCategory['Everything else'] = [];
+        this.applicationsByCategory['Settings & Stuff'] = [];
         let categoryMenuItem = new CategoryMenuItem(this, null);
         this.categoriesBox.add_child(categoryMenuItem);
         let text       = null;
@@ -762,16 +774,10 @@ export class ApplicationsButton extends PanelMenu.Button {
         for(let x = 0; x < this.cmds.length; x++){
             switch (this.cmds[x].type) {
                 case "command":
-                    this._loadCategory('Everything else', this, [ this.cmds[x] ]);
-                    break;
                 case "desktop":
-                    this._loadCategory('Everything else', this, [ this.cmds[x] ]);
-                    break;
                 case "settings":
-                    this._loadCategory('Everything else', this, [ this.cmds[x] ]);
-                    break;
                 case "separator":
-                    this._loadCategory('Everything else', this, [ this.cmds[x] ]);
+                    this._loadCategory('Settings & Stuff', this, [ this.cmds[x] ]);
                     break;
                 case "submenu":
                     text = this.cmds[x].text;
@@ -805,14 +811,8 @@ export class ApplicationsButton extends PanelMenu.Button {
         for(let x = 0; x < theactions.length; x++){
             switch (theactions[x].type) {
                 case "command":
-                    this._loadCategory(name, this, [ theactions[x] ]);
-                    break;
                 case "desktop":
-                    this._loadCategory(name, this, [ theactions[x] ]);
-                    break;
                 case "settings":
-                    this._loadCategory(name, this, [ theactions[x] ]);
-                    break;
                 case "separator":
                     this._loadCategory(name, this, [ theactions[x] ]);
                     break;
@@ -840,6 +840,8 @@ export class ApplicationsButton extends PanelMenu.Button {
     }
 
     _displayButtons(items) {
+        let top_of_apps   = true;
+        let last_menuitem = null;
         for (let i = 0; i < items.length; i++) {
             let item = items[i];
             let menuitem = null;
@@ -847,19 +849,33 @@ export class ApplicationsButton extends PanelMenu.Button {
                 case "command":
                 case "desktop":
                 case "settings":
-                    menuitem = this._applicationsButtons.get(item.text);
+                    menuitem = this._applicationsButtons.get(item);
                     break;
                 case "separator":
                     menuitem = new PopupMenu.PopupSeparatorMenuItem();
                     break;
             } // switch (item.type) //
             if (!menuitem) {
-                menuitem = new ApplicationMenuItem(this, item);
-                menuitem.setDragEnabled(this._desktopTarget.hasDesktop);
-                this._applicationsButtons.set(item, menuitem);
+                try {
+                    menuitem = new ApplicationMenuItem(this, item);
+                    menuitem.setDragEnabled(this._desktopTarget.hasDesktop);
+                    this._applicationsButtons.set(item, menuitem);
+                }
+                catch(e){
+                    console.log(`Error comstucting ApplicationMenuItem ${JSON.stringify(item)}: ${e.message}`)
+                }
             }
-            if (!menuitem.get_parent())
+            if(top_of_apps && menuitem instanceof PopupMenu.PopupSeparatorMenuItem){
+                continue;
+            }
+            if(last_menuitem instanceof PopupMenu.PopupSeparatorMenuItem && menuitem instanceof PopupMenu.PopupSeparatorMenuItem){
+                continue;
+            }
+            last_menuitem = menuitem;
+            if (!menuitem.get_parent()){
                 this.applicationsBox.add_child(menuitem);
+                top_of_apps = false;
+            }
         } // for (let i = 0; i < items.length; i++) //
     } // _displayButtons(items) //
 
@@ -869,7 +885,7 @@ export class ApplicationsButton extends PanelMenu.Button {
         if (categoryMenuId) {
             itemlist = this.applicationsByCategory[categoryMenuId];
         } else {
-            itemlist = this.applicationsByCategory['Everything else'];
+            itemlist = this.applicationsByCategory['Settings & Stuff'];
         }
 
         return itemlist;
