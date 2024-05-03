@@ -1,4 +1,10 @@
-// SPDX-FileCopyrightText: 2023 and 2024 Francis Grizzly Smit <grizzly@smit.id.au>
+// I used code from the Apps Menu apps-menu@gnome-shell-extensions.gcampax.github.com for this file
+// it implements my compact mode. I have modified it but the legacy is there.
+// SPDX-FileCopyrightText: 2011 Vamsi Krishna Brahmajosyula <vamsikrishna.brahmajosyula@gmail.com>
+// SPDX-FileCopyrightText: 2011 Giovanni Campagna <gcampagna@src.gnome.org>
+// SPDX-FileCopyrightText: 2013 Debarshi Ray <debarshir@gnome.org>
+// SPDX-FileCopyrightText: 2013 Florian Müllner <fmuellner@gnome.org>
+// SPDX-FileCopyrightText: 2024 Francis Grizzly Smit <grizzly@smit.id.au>
 //
 // SPDX-License-Identifier: GPL-2.0-or-later
 
