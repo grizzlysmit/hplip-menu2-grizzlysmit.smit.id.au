@@ -1,108 +1,128 @@
 # English translations for hplip-menu package.
-# Copyright (C) 2023 THE hplip-menu'S COPYRIGHT HOLDER
+# Copyright (C) 2023 & 2024 Francis Grizzly Smit <grizzly@smit.id.au>
 # This file is distributed under the same license as the hplip-menu package.
-# Francis Grizzly Smit <grizzly@smit.id.au>, 2023.
+# Francis Grizzly Smit <grizzly@smit.id.au>, 2023 & 2024.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: hplip-menu 2@grizzlysmit.smit.id.au\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-16 12:12+1100\n"
-"PO-Revision-Date: 2023-10-16 13:06+1100\n"
+"Report-Msgid-Bugs-To: Francis Grizzly Smit <grizzly@smit.id.au>\n"
+"Project-Id-Version: 24\n"
+"Report-Msgid-Bugs-To: Francis Grizzly Smit <grizzly@smit.id.au>\n"
+"POT-Creation-Date: 2024-05-03 23:05+1000\n"
+"PO-Revision-Date: 2024-05-03 23:38+1000\n"
 "Last-Translator: Francis Grizzly Smit <grizzly@smit.id.au>\n"
-"Language-Team: English\n"
-"Language: en_AU\n"
+"Language-Team: Francis Grizzly Smit <grizzly@smit.id.au>\n"
+"Language: English\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: prefs.js:17
+#: prefs.js:16
 msgid "Area"
 msgstr "Area"
 
-#: prefs.js:19
+#: prefs.js:18
+msgid "Area in the panel"
+msgstr "Area in the panel"
+
+#: prefs.js:21
 msgid "Left"
 msgstr "Left"
 
-#: prefs.js:19
+#: prefs.js:21
 msgid "Center"
 msgstr "Center"
 
-#: prefs.js:19
+#: prefs.js:21
 msgid "Right"
 msgstr "Right"
 
-#: prefs.js:33
-msgid "Icon"
-msgstr "Icon"
+#: prefs.js:35
+msgid "Icon Name"
+msgstr "Icon Name"
 
-#: prefs.js:81
+#: prefs.js:37
+msgid "The name of the icon"
+msgstr "The name of the icon"
+
+#: prefs.js:83
 msgid "Position"
 msgstr "Position"
 
-#: prefs.js:96
+#: prefs.js:85
+msgid "Position in the area of the panel."
+msgstr "Position in the area of the panel."
+
+#: prefs.js:104
+msgid "Compact"
+msgstr "Compact"
+
+#: prefs.js:106
+msgid "Compact Menu."
+msgstr "Compact Menu."
+
+#: prefs.js:121
 msgid "Save Settings"
 msgstr "Save Settings"
 
-#: prefs.js:119
-msgid "Alternate Menu for Hplip2 Settings"
-msgstr "Alternate Menu for Hplip2 Settings"
+#: prefs.js:149
+msgid "Settings"
+msgstr "Settings"
 
-#: prefs.js:125
+#: prefs.js:155
 msgid "Hplip menu2 settings"
 msgstr "Hplip menu2 settings"
 
-#: prefs.js:165
+#: prefs.js:177
 msgid "Credits"
 msgstr "Credits"
 
-#: prefs.js:171
+#: prefs.js:183
 msgid "About"
 msgstr "About"
 
-#: prefs.js:180
+#: prefs.js:187
 msgid "Copyright"
 msgstr "Copyright"
 
-#: prefs.js:192
+#: prefs.js:199
 msgid "Author"
 msgstr "Author"
 
-#: prefs.js:197
+#: prefs.js:204
 msgid "Dutch localisation"
 msgstr "Dutch localisation"
 
-#: extension.js:284
+#: extension.js:352
 msgid "could not run"
 msgstr "could not run"
 
-#: extension.js:289
+#: extension.js:357
 msgid "error running"
 msgstr "error running"
 
-#: extension.js:290
+#: extension.js:358
 msgid "it may not be installed you may need to install the packages containing"
-msgstr ""
-"it may not be installed you may need to install the packages containing"
+msgstr "it may not be installed you may need to install the packages containing"
 
-#: extension.js:297
+#: extension.js:365
 msgid "Printers..."
 msgstr "Printers..."
 
-#: extension.js:298
+#: extension.js:366
 msgid "System Printers..."
 msgstr "System Printers..."
 
-#: extension.js:299
+#: extension.js:367
 msgid "Additional Printer Settings..."
 msgstr "Additional Printer Settings..."
 
-#: extension.js:299
+#: extension.js:367
 msgid "could not run the old printer settings"
 msgstr "could not run the old printer settings"
 
-#: extension.js:300
+#: extension.js:368
 msgid ""
 "error running '/usr/share/system-config-printer/system-config-printer."
 "py'check if the relevant package is installed"
@@ -110,15 +130,15 @@ msgstr ""
 "error running '/usr/share/system-config-printer/system-config-printer."
 "py'check if the relevant package is installed"
 
-#: extension.js:303
+#: extension.js:371
 msgid "Hp Device Manager..."
 msgstr "Hp Device Manager..."
 
-#: extension.js:303
+#: extension.js:371
 msgid "could not run 'hp-toolbox'"
 msgstr "could not run 'hp-toolbox'"
 
-#: extension.js:304
+#: extension.js:372
 msgid ""
 "error running 'hp-toolbox' it may not be installed you may need to install "
 "the 'hplip' & 'hplip-gui' packages."
@@ -126,171 +146,195 @@ msgstr ""
 "error running 'hp-toolbox' it may not be installed you may need to install "
 "the 'hplip' & 'hplip-gui' packages."
 
-#: extension.js:307
+#: extension.js:375
+msgid "System Utils..."
+msgstr ""
+
+#: extension.js:376
 msgid "Gnome Tweaks..."
 msgstr "Gnome Tweaks..."
 
-#: extension.js:307
+#: extension.js:376
 msgid "gnome-tweaks missing"
 msgstr "gnome-tweaks missing"
 
-#: extension.js:307
+#: extension.js:376
 msgid "install the gnome-tweaks package"
 msgstr "install the gnome-tweaks package"
 
-#: extension.js:308
+#: extension.js:377
 msgid "Gnome Settings..."
 msgstr "Gnome Settings..."
 
-#: extension.js:309
+#: extension.js:378
 msgid "Extensions..."
 msgstr "Extensions..."
 
-#: extension.js:311
+#: extension.js:379
+msgid "Extension Mangager..."
+msgstr "Extension Mangager..."
+
+#: extension.js:379
+msgid "extension-manager missing"
+msgstr "extension-manager missing"
+
+#: extension.js:379
+msgid "install the extension-manager package"
+msgstr "install the extension-manager package"
+
+#: extension.js:382
+msgid "Gnone Settings..."
+msgstr "Gnone Settings..."
+
+#: extension.js:383
 msgid "Hardware"
 msgstr "Hardware"
 
-#: extension.js:313
+#: extension.js:385
 msgid "Power..."
 msgstr "Power..."
 
-#: extension.js:315
+#: extension.js:387
 msgid "Display..."
 msgstr "Display..."
 
-#: extension.js:316
+#: extension.js:388
 msgid "Keyboard..."
 msgstr "Keyboard..."
 
-#: extension.js:317
+#: extension.js:389
 msgid "Color..."
 msgstr "Color..."
 
-#: extension.js:318
+#: extension.js:390
 msgid "Sound..."
 msgstr "Sound..."
 
-#: extension.js:320
-msgid "Removable Media..."
-msgstr "Removable Media..."
-
-#: extension.js:322
+#: extension.js:393
 msgid "Input"
 msgstr "Input"
 
-#: extension.js:323
+#: extension.js:394
 msgid "Mouse..."
 msgstr "Mouse..."
 
-#: extension.js:324
+#: extension.js:395
 msgid "Wacom..."
 msgstr "Wacom..."
 
-#: extension.js:326
+#: extension.js:397
 msgid "Private"
 msgstr "Private"
 
-#: extension.js:327
-msgid "Connectivity..."
-msgstr "Connectivity..."
+#: extension.js:398
+msgid "Ubuntu Desktop..."
+msgstr "Ubuntu Desktop..."
 
-#: extension.js:329
-msgid "Location Services..."
-msgstr "Location Services..."
+#: extension.js:400
+msgid "Privacy..."
+msgstr "Privacy..."
 
-#: extension.js:330
-msgid "File History & Rubbish Bin..."
-msgstr "File History & Rubbish Bin..."
+#: extension.js:401
+msgid "Online Accounts..."
+msgstr "Online Accounts..."
 
-#: extension.js:331
-msgid "Screen Lock..."
-msgstr "Screen Lock..."
-
-#: extension.js:334
+#: extension.js:404
 msgid "Connections"
 msgstr "Connections"
 
-#: extension.js:336
+#: extension.js:406
 msgid "Wifi..."
 msgstr "Wifi..."
 
-#: extension.js:337
+#: extension.js:407
 msgid "Bluetooth..."
 msgstr "Bluetooth..."
 
-#: extension.js:338
+#: extension.js:408
 msgid "Network..."
 msgstr "Network..."
 
-#: extension.js:340
+#: extension.js:409
+msgid "Mobile Network..."
+msgstr "Mobile Network..."
+
+#: extension.js:411
 msgid "Misc"
 msgstr "Misc"
 
-#: extension.js:342
+#: extension.js:413
 msgid "Search..."
 msgstr "Search..."
 
-#: extension.js:343
+#: extension.js:414
 msgid "Acceessibility..."
 msgstr "Acceessibility..."
 
-#: extension.js:344
+#: extension.js:415
 msgid "Sharing..."
 msgstr "Sharing..."
 
-#: extension.js:345
-msgid "Default Apps..."
-msgstr "Default Apps..."
+#: extension.js:416
+msgid "Multitasking..."
+msgstr "Multitasking..."
 
-#: extension.js:347
+#: extension.js:418
 msgid "Asorted"
 msgstr "Asorted"
 
-#: extension.js:348
+#: extension.js:419
 msgid "Background..."
 msgstr "Background..."
 
-#: extension.js:349
-msgid "Applications..."
-msgstr "Applications..."
+#: extension.js:420
+msgid "Apps..."
+msgstr "Apps..."
 
-#: extension.js:351
+#: extension.js:422
 msgid "Locale"
 msgstr "Locale"
 
-#: extension.js:353
+#: extension.js:424
 msgid "Datetime..."
 msgstr "Datetime..."
 
-#: extension.js:354
+#: extension.js:425
 msgid "Language and Region..."
 msgstr "Language and Region..."
 
-#: extension.js:356
+#: extension.js:427
 msgid "System"
 msgstr "System"
 
-#: extension.js:358
+#: extension.js:429
 msgid "Notifications..."
 msgstr "Notifications..."
 
-#: extension.js:359
+#: extension.js:430
 msgid "User Accounts..."
 msgstr "User Accounts..."
 
-#: extension.js:361
+#: extension.js:432
 msgid "About This Computer..."
 msgstr "About This Computer..."
 
-#: extension.js:364
+#: extension.js:433
+msgid "System..."
+msgstr "System..."
+
+#: extension.js:437
+msgid "Software..."
+msgstr "Software..."
+
+#: extension.js:438
 msgid "Software Update..."
 msgstr "Software Update..."
 
-#: extension.js:364
+#: extension.js:438
 msgid " could not find 'update-manager'"
 msgstr " could not find 'update-manager'"
 
-#: extension.js:365
+#: extension.js:439
 msgid ""
 "perhaps you need to install 'update-manager' or'gnome-software' if your "
 "disrobution does not support 'update-manager'."
@@ -298,18 +342,18 @@ msgstr ""
 "perhaps you need to install 'update-manager' or'gnome-software' if your "
 "disrobution does not support 'update-manager'."
 
-#: extension.js:367
+#: extension.js:441
 msgid "Gnome Software..."
 msgstr "Gnome Software..."
 
-#: extension.js:367
+#: extension.js:441
 msgid " could not find 'gnome-software'"
 msgstr " could not find 'gnome-software'"
 
-#: extension.js:368
+#: extension.js:442
 msgid "perhaps you need to install 'gnome-software'"
 msgstr "perhaps you need to install 'gnome-software'"
 
-#: extension.js:370
+#: extension.js:445
 msgid "Settings..."
 msgstr "Settings..."

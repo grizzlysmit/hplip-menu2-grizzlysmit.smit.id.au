@@ -1,7 +1,7 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# English translations for hplip-menu package.
+# Copyright (C) 2023 & 2024 Francis Grizzly Smit <grizzly@smit.id.au>
+# This file is distributed under the same license as the hplip-menu package.
+# Francis Grizzly Smit <grizzly@smit.id.au>, 2023 & 2024.
 #
 msgid ""
 msgstr ""
