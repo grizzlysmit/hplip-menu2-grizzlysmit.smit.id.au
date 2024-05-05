@@ -364,7 +364,7 @@ export default class Hplip_menu2_Extension extends Extension {
         this.cmds = [
             { type: "submenu", text: _("Printers..."),                  actions: [
                 { type: "desktop", text: _("System Printers..."),             action: "gnome-printers-panel.desktop",                                      alt: ["gnome-control-center", "printers"] },
-                { type: "desktop", text: _("Additional Printer Settings..."), action: "system-config-printer",       alt: "system-config-printer.py", errorMessage: {title: _("could not run the old printer settings"), 
+                { type: "desktop", text: _("Additional Printer Settings..."), action: "system-config-printer.desktop",       alt: "system-config-printer.py", errorMessage: {title: _("could not run the old printer settings"), 
                                                                                                                                                                                                            text:  _("error running '/usr/share/system-config-printer/system-config-printer.py'" 
                                                                                                                                                                                                                   + "check if the relevant package is installed")}  },
                 { type: "separator" },
