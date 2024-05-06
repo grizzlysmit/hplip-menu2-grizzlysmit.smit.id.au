@@ -187,6 +187,9 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         group2.set_title(_("About"));
         group2.set_name("Hplip_menu2_About");
 
+        this.notebook = new Gtk.Notebook();
+        const vbox0    = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: true, hexpand: true });
+
         let title = null;
         title = _("Copyright") + ": ©2022, ©2023 &amp; ©2024 Francis Grizzly Smit:";
         const row0 = new Adw.ActionRow({ title });
@@ -195,7 +198,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         licence.set_halign(Gtk.Align.START);
         row0.add_suffix(licence);
         row0.activatable_widget = licence;
-        group2.add(row0);
+        vbox0.prepend(row0);
 
         title = "url:";
         const row1 = new Adw.ActionRow({ title });
@@ -205,7 +208,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         link0.set_halign(Gtk.Align.START);
         row1.add_suffix(link0);
         row1.activatable_widget = link0;
-        group2.add(row1);
+        vbox0.append(row1);
 
         title = _("Author") + ": Francis Grizzly Smit©";
         const row2 = new Adw.ActionRow({ title });
@@ -214,7 +217,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         link1.set_halign(Gtk.Align.START);
         row2.add_suffix(link1);
         row2.activatable_widget = link1;
-        group2.add(row2);
+        vbox0.append(row2);
 
         title = _("Dutch localisation") + ": Vistaus (Heimen Stoffels)";
         const row3 = new Adw.ActionRow({ title });
@@ -223,11 +226,14 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         link2.set_halign(Gtk.Align.START);
         row3.add_suffix(link2);
         row3.activatable_widget = link2;
-        group2.add(row3);
+        vbox0.append(row3);
+        this.notebook.append_page(vbox0, new Gtk.Label({ label: _("This plugin"), }));
+
+        const vbox1    = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: true, hexpand: true });
 
         title = _("Compact mode code taken from") + ": Apps Menu by fmuellner" + _("and others") + ":";
         const row4 = new Adw.ActionRow({ title });
-        group2.add(row4);
+        vbox1.prepend(row4);
         title = "";
         const row5 = new Adw.ActionRow({ title });
         const uri3 = "https://extensions.gnome.org/extension/6/applications-menu/";
@@ -236,57 +242,56 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         link3.set_halign(Gtk.Align.START);
         row5.add_suffix(link3);
         row5.activatable_widget = link3;
-        group2.add(row5);
+        vbox1.append(row5);
 
         title = "©2013 fmuellner";
         const row6 = new Adw.ActionRow({ title });
-        group2.add(row6);
-        title = "";
-        const row7 = new Adw.ActionRow({ title });
         const uri4 = "https://extensions.gnome.org/accounts/profile/fmuellner";
         const link4 = new Gtk.LinkButton({uri: uri4, label: "https://extensions.gnome.org/accounts/profile/fmuellner" });
         link4.set_use_underline(true);
         link4.set_halign(Gtk.Align.START);
-        row7.add_suffix(link4);
-        row7.activatable_widget = link4;
-        group2.add(row7);
+        row6.add_suffix(link4);
+        row6.activatable_widget = link4;
+        vbox1.append(row6);
 
         title = "©2013 Debarshi Ray";
-        const row8 = new Adw.ActionRow({ title });
-        group2.add(row8);
-        title = "";
-        const row9 = new Adw.ActionRow({ title });
+        const row7 = new Adw.ActionRow({ title });
         const link5 = new Gtk.LinkButton({uri: "https://wiki.gnome.org/DebarshiRay", label: "https://wiki.gnome.org/DebarshiRay" });
         link5.set_use_underline(true);
         link5.set_halign(Gtk.Align.START);
-        row9.add_suffix(link5);
-        row9.activatable_widget = link5;
-        group2.add(row9);
+        row7.add_suffix(link5);
+        row7.activatable_widget = link5;
+        vbox1.append(row7);
 
         title = "©2011 Giovanni Campagna";
-        const row10 = new Adw.ActionRow({ title });
-        group2.add(row10);
-        title = "";
-        const row11 = new Adw.ActionRow({ title });
+        const row8 = new Adw.ActionRow({ title });
+        vbox1.append(row8);
         const uri6 = "https://wiki.gnome.org/GiovanniCampagna?highlight=%28%5CbCategoryHomepage%5Cb%29";
+        const _link6 = new Gtk.LinkButton({uri: uri6, label: "→" });
+        _link6.set_use_underline(false);
+        _link6.set_halign(Gtk.Align.START);
+        row8.add_suffix(_link6);
+        row8.activatable_widget = _link6;
+        title = "";
+        const row9 = new Adw.ActionRow({ title });
         const link6 = new Gtk.LinkButton({uri: uri6, label: "https://wiki.gnome.org/GiovanniCampagna?highlight=%28%5CbCategoryHomepage%5Cb%29" });
         link6.set_use_underline(true);
         link6.set_halign(Gtk.Align.START);
-        row11.add_suffix(link6);
-        row11.activatable_widget = link6;
-        group2.add(row11);
+        row9.add_suffix(link6);
+        row9.activatable_widget = link6;
+        vbox1.append(row9);
 
         title = "©Vamsi Krishna Brahmajosyula";
-        const row12 = new Adw.ActionRow({ title });
-        group2.add(row12);
-        title = "";
-        const row13 = new Adw.ActionRow({ title });
-        const link7 = new Gtk.LinkButton({uri: "https://github.com/vamsikrishna-brahmajosyula", label: "https://github.com/vamsikrishna-brahmajosyula" });
+        const row10 = new Adw.ActionRow({ title });
+        const uri7  = "https://github.com/vamsikrishna-brahmajosyula";
+        const link7 = new Gtk.LinkButton({uri: uri7, label: "https://github.com/vamsikrishna-brahmajosyula" });
         link7.set_use_underline(true);
         link7.set_halign(Gtk.Align.START);
-        row13.add_suffix(link7);
-        row13.activatable_widget = link7;
-        group2.add(row13);
+        row10.add_suffix(link7);
+        row10.activatable_widget = link7;
+        vbox1.append(row10);
+        this.notebook.append_page(vbox1, new Gtk.Label({ label: _("Code used from other plugins"), } ));
+        group2.add(this.notebook);
 
         page2.add(group2);
         window.connect("close-request", () => {

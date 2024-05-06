@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-04 06:51+1000\n"
+"POT-Creation-Date: 2024-05-06 21:49+1000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -61,36 +61,52 @@ msgstr ""
 msgid "Compact Menu."
 msgstr ""
 
-#: prefs.js:121
+#: prefs.js:122
 msgid "Save Settings"
 msgstr ""
 
-#: prefs.js:149
+#: prefs.js:153
 msgid "Settings"
 msgstr ""
 
-#: prefs.js:155
+#: prefs.js:159
 msgid "Hplip menu2 settings"
 msgstr ""
 
-#: prefs.js:177
+#: prefs.js:181
 msgid "Credits"
 msgstr ""
 
-#: prefs.js:183
+#: prefs.js:187
 msgid "About"
 msgstr ""
 
-#: prefs.js:187
+#: prefs.js:194
 msgid "Copyright"
 msgstr ""
 
-#: prefs.js:199
+#: prefs.js:213
 msgid "Author"
 msgstr ""
 
-#: prefs.js:204
+#: prefs.js:222
 msgid "Dutch localisation"
+msgstr ""
+
+#: prefs.js:230
+msgid "This plugin"
+msgstr ""
+
+#: prefs.js:234
+msgid "Compact mode code taken from"
+msgstr ""
+
+#: prefs.js:234
+msgid "and others"
+msgstr ""
+
+#: prefs.js:293
+msgid "Code used from other plugins"
 msgstr ""
 
 #: extension.js:352
