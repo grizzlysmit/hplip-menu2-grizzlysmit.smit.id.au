@@ -182,12 +182,28 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         page2.set_name("hplip_menu2_page2");
         page2.set_icon_name("help-about-symbolic");
 
+        /*****************************************
+         *                                       *
+         *                                       *
+         *                                       *
+         *           the credits page.           *
+         *                                       *
+         *                                       *
+         *                                       *
+         *                                       *
+         ******************************************/
         // group2
         const group2 = Adw.PreferencesGroup.new();
         group2.set_title(_("About"));
         group2.set_name("Hplip_menu2_About");
 
+        // The inner set of tabbed pages (or Notebook) //
         this.notebook = new Gtk.Notebook();
+        /**************************************
+        *                                     *
+        *  The credits for this plugin itself *
+        *                                     *
+        ***************************************/
         const vbox0    = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: true, hexpand: true });
 
         let title = null;
@@ -229,6 +245,14 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         vbox0.append(row3);
         this.notebook.append_page(vbox0, new Gtk.Label({ label: _("This plugin"), }));
 
+        /*********************************************************
+         *                                                       *
+         *                                                       *
+         *      The compact mode credits as I took much code     *
+         *      from "Apps Menu" by fmuellner and others.        *
+         *                                                       *
+         *                                                       *
+         *********************************************************/
         const vbox1    = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: true, hexpand: true });
 
         title = _("Compact mode code taken from") + ": Apps Menu by fmuellner" + _("and others") + ":";

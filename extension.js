@@ -314,7 +314,7 @@ class ExtensionImpl extends PanelMenu.Button {
     _onDestroy() {
         super.destroy();
     }
-}
+} // class ExtensionImpl extends PanelMenu.Button //
 
 
 
@@ -497,5 +497,5 @@ export default class Hplip_menu2_Extension extends Extension {
         this.disable();
         this.enable();
     }
-}
+} // export default class Hplip_menu2_Extension extends Extension //
 

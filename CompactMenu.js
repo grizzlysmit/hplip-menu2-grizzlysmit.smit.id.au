@@ -428,7 +428,7 @@ class ApplicationsMenu extends PopupMenu.PopupMenu {
             this._button.selectCategory(null);
         super.toggle();
     }
-}
+} // class ApplicationsMenu extends PopupMenu.PopupMenu //
 
 class DesktopTarget extends EventEmitter {
     constructor() {
@@ -544,7 +544,7 @@ class DesktopTarget extends EventEmitter {
 
         return true;
     }
-}
+} // class DesktopTarget extends EventEmitter //
 
 class MainLayout extends Clutter.BoxLayout {
     static {
@@ -558,7 +558,7 @@ class MainLayout extends Clutter.BoxLayout {
 
         return [minHeight, natHeight + MENU_HEIGHT_OFFSET];
     }
-}
+} // class MainLayout extends Clutter.BoxLayout //
 
 export class ApplicationsButton extends PanelMenu.Button {
     static {
