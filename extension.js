@@ -282,8 +282,7 @@ class ExtensionImpl extends PanelMenu.Button {
     callback_desktop(item, action, alt, errorMessage){
         let currentAction = action;
         // Save context variable for binding //
-        let def = Shell.AppSystem.get_default();
-        let app = def.lookup_app(currentAction);
+        let app = this._caller.appSys.lookup_app(currentAction);
         if(app !== null){
             app.activate();
             return true;
@@ -445,6 +444,7 @@ export default class Hplip_menu2_Extension extends Extension {
             { type: "settings", text: _("Settings..."),                   action: [] ,                                                                     alt: [] }
         ];
 
+        this.appSys = Shell.AppSystem.get_default();
         this.settings = this.getSettings();
         if(this.settings.get_boolean("first-time")){ // grab legacy settings //
             this.settings_data = JSON.parse(this.settings.get_string("settings-json"));
@@ -490,6 +490,9 @@ export default class Hplip_menu2_Extension extends Extension {
         this.settings.disconnect(this.settingsID_icon);
         this.settings.disconnect(this.settingsID_pos);
         this.settings.disconnect(this.settingsID_comp);
+        delete this.appSys;
+        delete this.settings;
+        delete this.settings_data;
         delete this._ext;
     }
 

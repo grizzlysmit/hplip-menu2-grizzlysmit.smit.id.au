@@ -16,7 +16,8 @@ import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
-import Gtk from 'gi://Gtk';
+//import Gtk from 'gi://Gtk';
+//import [DirectionType, PolicyType] from 'gi://Gtk';
 import Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
@@ -30,12 +31,20 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
-const appSys = Shell.AppSystem.get_default();
 
 const APPLICATION_ICON_SIZE = 32;
 const HORIZ_FACTOR = 5;
 const MENU_HEIGHT_OFFSET = 132;
 const NAVIGATION_REGION_OVERSHOOT = 50;
+
+// can't use Gtk so porting these constants here //
+// originally from Gtk.DirectionType an enum in Gtk //
+const Gtk_DirectionType_LEFT   = 4;
+const Gtk_DirectionType_RIGHT  = 5;
+
+// originally from Gtk.PolicyType an enum in Gtk //
+const Gtk_PolicyType_AUTOMATIC = 1;
+const Gtk_PolicyType_NEVER     = 2;
 
 Gio._promisify(Gio._LocalFilePrototype, 'query_info_async', 'query_info_finish');
 Gio._promisify(Gio._LocalFilePrototype, 'set_attributes_async', 'set_attributes_finish');
@@ -58,7 +67,7 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
                 action       = this._item?.action;
                 break;
         } // switch (this.item.type) //
-        if(action) this._app = appSys.lookup_app(action);
+        if(action) this._app = this._button.appSys.lookup_app(action);
 
         this._iconBin = new St.Bin();
         this.add_child(this._iconBin);
@@ -168,7 +177,7 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
     callback_desktop(item, action, alt, errorMessage){
         let currentAction = action;
         // Save context variable for binding //
-        let app = appSys.lookup_app(currentAction);
+        let app = this._button.appSys.lookup_app(currentAction);
         if(app){
             app.activate();
             return true;
@@ -248,18 +257,18 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
                 action       = this._item?.action;
                 alt          = this._item?.alt;
 
-                app = appSys.lookup_app(action);
-                if(!app) app = appSys.lookup_app(alt);
+                app = this._button.appSys.lookup_app(action);
+                if(!app) app = this._button.appSys.lookup_app(alt);
                 break;
             case "desktop":
                 action       = this._item?.action;
                 alt          = this._item?.alt;
 
-                app = appSys.lookup_app(action);
-                if(!app) app = appSys.lookup_app(alt);
+                app = this._button.appSys.lookup_app(action);
+                if(!app) app = this._button.appSys.lookup_app(alt);
                 break;
             case "settings":
-                app = appSys.lookup_app('org.gnome.Settings');
+                app = this._button.appSys.lookup_app('org.gnome.Settings');
                 break;
         } // switch (this.item.type) //
         if(!app){
@@ -569,6 +578,7 @@ export class ApplicationsButton extends PanelMenu.Button {
         super(1.0, null, false);
         this._caller = caller;
         this.cmds = _cmds;
+        this.appSys = this._caller.appSys;
 
 
         this.setMenu(new ApplicationsMenu(this, 1.0, St.Side.TOP, this));
@@ -660,7 +670,7 @@ export class ApplicationsButton extends PanelMenu.Button {
         let symbol = event.get_key_symbol();
         if (symbol === Clutter.KEY_Left || symbol === Clutter.KEY_Right) {
             let direction = symbol === Clutter.KEY_Left
-                ? Gtk.DirectionType.LEFT : Gtk.DirectionType.RIGHT;
+                ? Gtk_DirectionType_LEFT : Gtk_DirectionType_RIGHT;
             if (this.menu.actor.navigate_focus(global.stage.key_focus, direction, false))
                 return true;
         }
@@ -740,7 +750,7 @@ export class ApplicationsButton extends PanelMenu.Button {
             style_class: 'apps-menu vfade',
             x_expand: true,
         });
-        this.applicationsScrollBox.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
+        this.applicationsScrollBox.set_policy(Gtk_PolicyType_NEVER, Gtk_PolicyType_AUTOMATIC);
         let vscroll = this.applicationsScrollBox.get_vscroll_bar();
         vscroll.connect('scroll-start', () => {
             this.menu.passEvents = true;
@@ -751,7 +761,7 @@ export class ApplicationsButton extends PanelMenu.Button {
         this.categoriesScrollBox = new St.ScrollView({
             style_class: 'vfade',
         });
-        this.categoriesScrollBox.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
+        this.categoriesScrollBox.set_policy(Gtk_PolicyType_NEVER, Gtk_PolicyType_AUTOMATIC);
         vscroll = this.categoriesScrollBox.get_vscroll_bar();
         vscroll.connect('scroll-start', () => (this.menu.passEvents = true));
         vscroll.connect('scroll-stop', () => (this.menu.passEvents = false));
