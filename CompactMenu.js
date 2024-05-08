@@ -16,8 +16,6 @@ import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
-//import Gtk from 'gi://Gtk';
-//import [DirectionType, PolicyType] from 'gi://Gtk';
 import Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
@@ -36,15 +34,6 @@ const APPLICATION_ICON_SIZE = 32;
 const HORIZ_FACTOR = 5;
 const MENU_HEIGHT_OFFSET = 132;
 const NAVIGATION_REGION_OVERSHOOT = 50;
-
-// can't use Gtk so porting these constants here //
-// originally from Gtk.DirectionType an enum in Gtk //
-const Gtk_DirectionType_LEFT   = 4;
-const Gtk_DirectionType_RIGHT  = 5;
-
-// originally from Gtk.PolicyType an enum in Gtk //
-const Gtk_PolicyType_AUTOMATIC = 1;
-const Gtk_PolicyType_NEVER     = 2;
 
 Gio._promisify(Gio._LocalFilePrototype, 'query_info_async', 'query_info_finish');
 Gio._promisify(Gio._LocalFilePrototype, 'set_attributes_async', 'set_attributes_finish');
@@ -670,7 +659,7 @@ export class ApplicationsButton extends PanelMenu.Button {
         let symbol = event.get_key_symbol();
         if (symbol === Clutter.KEY_Left || symbol === Clutter.KEY_Right) {
             let direction = symbol === Clutter.KEY_Left
-                ? Gtk_DirectionType_LEFT : Gtk_DirectionType_RIGHT;
+                ? St.DirectionType.LEFT : St.DirectionType.RIGHT;
             if (this.menu.actor.navigate_focus(global.stage.key_focus, direction, false))
                 return true;
         }
@@ -750,7 +739,7 @@ export class ApplicationsButton extends PanelMenu.Button {
             style_class: 'apps-menu vfade',
             x_expand: true,
         });
-        this.applicationsScrollBox.set_policy(Gtk_PolicyType_NEVER, Gtk_PolicyType_AUTOMATIC);
+        this.applicationsScrollBox.set_policy(St.PolicyType.NEVER, St.PolicyType.AUTOMATIC);
         let vscroll = this.applicationsScrollBox.get_vscroll_bar();
         vscroll.connect('scroll-start', () => {
             this.menu.passEvents = true;
@@ -761,7 +750,7 @@ export class ApplicationsButton extends PanelMenu.Button {
         this.categoriesScrollBox = new St.ScrollView({
             style_class: 'vfade',
         });
-        this.categoriesScrollBox.set_policy(Gtk_PolicyType_NEVER, Gtk_PolicyType_AUTOMATIC);
+        this.categoriesScrollBox.set_policy(St.PolicyType.NEVER, St.PolicyType.AUTOMATIC);
         vscroll = this.categoriesScrollBox.get_vscroll_bar();
         vscroll.connect('scroll-start', () => (this.menu.passEvents = true));
         vscroll.connect('scroll-stop', () => (this.menu.passEvents = false));
