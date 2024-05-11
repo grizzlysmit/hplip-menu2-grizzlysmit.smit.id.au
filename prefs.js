@@ -9,6 +9,7 @@
 import Adw from 'gi://Adw';
 import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 import Gtk from 'gi://Gtk';
+import Gio from 'gi://Gio';
 
 export default class HpExtensionPreferences extends ExtensionPreferences {
 
@@ -51,32 +52,47 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
     }
 
     save_clicked(){
-        // update the values
-        this._window._settings.set_string("area", this.area);
-        this._window._settings.set_string("icon-name", this.icon_name);
-        if(0 <= this.position_input.get_value() && this.position_input.get_value() <= 25){
-            this._window._settings.set_int("position", this.position_input.get_value());
-        }
-        this._window._settings.set_boolean("compact", this.compact_switch.get_state());
+        if(this._window?._dirty){
+            // update the values
+            this._window._settings.set_string("area", this.area);
+            this._window._settings.set_string("icon-name", this.icon_name);
+            if(0 <= this.position_input.get_value() && this.position_input.get_value() <= 25){
+                this._window._settings.set_int("position", this.position_input.get_value());
+            }
+            this._window._settings.set_boolean("compact", this.compact_switch.get_state());
 
-        this._window._settings.apply(); // save the settings //
+            //this._window._settings.apply(); // save the settings //
+            this._window._dirty = false;
+        }
     }
 
     area_dropdown_clicked(combo){
         let activeItem = combo.get_active();
-        if(activeItem >= 0){
-            if (activeItem === 0) this.area = "left";
-            if (activeItem === 1) this.area = "center";
-            if (activeItem === 2) this.area = "right";
+        switch(activeItem){
+            case 0:
+                this.area = "left";
+                break;
+            case 1:
+                this.area = "center";
+                break;
+            case 2:
+                this.area = "right";
+                break;
         }
+        this._window._dirty = true;
     }
 
     icon_dropdown_clicked(combo){
         let activeItem = combo.get_active();
-        if(activeItem >= 0){
-            if (activeItem === 0) this.icon_name = "printer";
-            if (activeItem === 1) this.icon_name = "/usr/share/hplip/data/images/16x16/hp_logo.png";
+        switch(activeItem){
+            case 0:
+                this.icon_name = "printer";
+                break;
+            case 1:
+                this.icon_name = "/usr/share/hplip/data/images/16x16/hp_logo.png";
+                break;
         }
+        this._window._dirty = true;
     }
 
     _position_box(){
@@ -92,7 +108,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         });
         slider.set_draw_value(true);
         slider.set_value(this._window._settings.get_int("position"));
-        //slider.connect('value-changed', (sw) => settings.set_int("position", sw.get_value()));
+        slider.connect('value-changed', (_sw) => { this._window._dirty = true; });
         slider.set_size_request(400, 15);
         row.add_suffix(slider);
         row.activatable_widget = slider;
@@ -111,6 +127,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         row.add_suffix(compact_switch);
         row.activatable_widget = compact_switch;
         this.compact_switch = compact_switch;
+        compact_switch.connect("state-set", (_sw, _state) => { this._window._dirty = true; });
         return row;
     }
 
@@ -129,6 +146,22 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         return row;
     }
 
+    _close_row(){
+        const title = "";
+        const row = new Adw.ActionRow({ title });
+        row.set_subtitle("");
+        this.close_button = new Gtk.Button({
+                                                        label: _("Exit Settings"),
+                                                         css_classes: ["suggested-action"],
+                                                         valign: Gtk.Align.CENTER,
+                                                    });
+        row.add_suffix(this.close_button);
+        row.activatable_widget = this.close_button;
+        this.close_button.connect("clicked", () => { this._window.close(); });
+
+        return row;
+    }
+
     fillPreferencesWindow(window) {
         this.area = "left";
         this.icon_name = "printer";
@@ -138,6 +171,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         this.position_input = null;
         this.save_settings_button = null;
         this._window = window;
+        this._window._dirty = false;
 
         window._settings = this.getSettings();
         if(window._settings.get_boolean("first-time")){ // grab legacy _settings //
@@ -146,8 +180,12 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             window._settings.set_string("icon-name", window.settings_data.icon_name);
             window._settings.set_int("position", window.settings_data.position);
             window._settings.set_boolean("first-time", false); // old _settings obtained //
-            window._settings.apply(); // save _settings //
+            //window._settings.apply(); // save _settings //
         }
+        this.area      = this._window._settings.get_string("area");
+        this.icon_name = this._window._settings.get_string("icon-name");
+        this.position  = this._window._settings.get_int("position");
+        this.compact   = this._window._settings.get_boolean("compact");
 
         const page1 = Adw.PreferencesPage.new();
         page1.set_title(_("Settings"));
@@ -171,16 +209,12 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         let save_settings_box = this._save_settings_box();
         this.save_settings_button.connect("clicked", this.save_clicked.bind(this));
         group1.add(save_settings_box);
+        let close_row = this._close_row();
+        group1.add(close_row);
         let hbox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, vexpand: true, hexpand: true, });
         let bottom_spacer = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: true, hexpand: true });
         hbox.prepend(bottom_spacer);
         group1.add(hbox);
-
-                //page2
-        const page2 = Adw.PreferencesPage.new();
-        page2.set_title(_("Credits"));
-        page2.set_name("hplip_menu2_page2");
-        page2.set_icon_name("help-about-symbolic");
 
         /*****************************************
          *                                       *
@@ -192,6 +226,12 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
          *                                       *
          *                                       *
          ******************************************/
+                //page2
+        const page2 = Adw.PreferencesPage.new();
+        page2.set_title(_("Credits"));
+        page2.set_name("hplip_menu2_page2");
+        page2.set_icon_name("help-about-symbolic");
+
         // group2
         const group2 = Adw.PreferencesGroup.new();
         group2.set_title(_("About"));
@@ -243,6 +283,8 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         row3.add_suffix(link2);
         row3.activatable_widget = link2;
         vbox0.append(row3);
+        let close_row_credits0 = this._close_row();
+        vbox0.append(close_row_credits0);
         this.notebook.append_page(vbox0, new Gtk.Label({ label: _("This plugin"), }));
 
         /*********************************************************
@@ -314,11 +356,46 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         row10.add_suffix(link7);
         row10.activatable_widget = link7;
         vbox1.append(row10);
+        let close_row_credits1 = this._close_row();
+        vbox1.append(close_row_credits1);
         this.notebook.append_page(vbox1, new Gtk.Label({ label: _("Code used from other plugins"), } ));
         group2.add(this.notebook);
 
         page2.add(group2);
-        window.connect("close-request", () => {
+        //window.set_can_close(false);
+        window.connect("close-request", (_win) => {
+            //*
+            if(this._window?._dirty){
+                let do_close = true;
+                const dlg = new Gtk.AlertDialog();
+                dlg.set_modal(true);
+                dlg.set_buttons(["Cancel", "Exit Without Saving", "Save"]);
+                dlg.set_cancel_button(0);
+                dlg.set_default_button(2);
+                dlg.set_message("Save Changes?");
+                dlg.set_detail("You have unsaved changes");
+                const can = new Gio.Cancellable();
+                can.connect(() => { 
+
+                    let result = new Gio.Task(win, null, (_source, _res, _data) => {});
+                    let choice = dlg.choose_finish(result);
+                    switch (choice) {
+                        case 0: // "cancel" button //
+                            do_close = true;
+                            break;
+                        case 1: // "Exit Without Saving" button //
+                            break;
+                        case 2: // "Save" button //
+                            this.save_clicked();
+                            break;
+                    }
+                });
+                dlg.choose(this?._window, can);
+                if(!do_close){
+                    return true;
+                }
+            }
+            // */
             this.area = null;
             this.icon_name = null;
             this.area_token_box = null;
@@ -329,10 +406,22 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             this._window = null;
             this.area_token_input = null;
             this.settings_data = null;
+            //this.force_close();
+            return false;
         });
+        /*
+        this.close_id = window.connect("close-request", () => {
+        });
+        // */
         window.add(page1);
         window.add(page2);
         window.set_default_size(865, 575);
+        /*
+        this.settingsID_area = window._settings.connect("changed::area", this.onSettingsChanged.bind(this)); 
+        this.settingsID_icon = window._settings.connect("changed::icon-name", this.onSettingsChanged.bind(this)); 
+        this.settingsID_pos  = window._settings.connect("changed::position", this.onSettingsChanged.bind(this)); 
+        this.settingsID_comp = window._settings.connect("changed::compact", this.onSettingsChanged.bind(this)); 
+        // */
     } // fillPreferencesWindow(window) //
 } // export default class HpExtensionPreferences extends ExtensionPreferences //
 
