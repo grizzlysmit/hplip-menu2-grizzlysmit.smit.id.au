@@ -54,15 +54,21 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
     save_clicked(){
         if(this._window?._dirty){
             // update the values
-            this._window._settings.set_string("area", this.area);
-            this._window._settings.set_string("icon-name", this.icon_name);
+            if(this.area !== this._window._settings.get_string("area"))
+                this._window._settings.set_string("area", this.area);
+            //*
+            if(this.icon_name !== this._window._settings.get_string("icon-name"))
+                this._window._settings.set_string("icon-name", this.icon_name);
             if(0 <= this.position_input.get_value() && this.position_input.get_value() <= 25){
-                this._window._settings.set_int("position", this.position_input.get_value());
+                if(this.position_input.get_value() !== this._window._settings.get_int("position"))
+                    this._window._settings.set_int("position", this.position_input.get_value());
             }
-            this._window._settings.set_boolean("compact", this.compact_switch.get_state());
+            if(this.compact_switch.get_state() !== this._window._settings.get_boolean("compact"))
+                this._window._settings.set_boolean("compact", this.compact_switch.get_state());
+            // */
 
-            //this._window._settings.apply(); // save the settings //
             this._window._dirty = false;
+            //this._window._settings.apply(); // save the settings //
         }
     }
 
@@ -364,7 +370,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         page2.add(group2);
         //window.set_can_close(false);
         window.connect("close-request", (_win) => {
-            //*
+            /*
             if(this._window?._dirty){
                 let do_close = true;
                 const dlg = new Gtk.AlertDialog();
@@ -374,7 +380,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                 dlg.set_default_button(2);
                 dlg.set_message("Save Changes?");
                 dlg.set_detail("You have unsaved changes");
-                const can = new Gio.Cancellable();
+                let can = new Gio.Cancellable();
                 can.connect(() => { 
 
                     let result = new Gio.Task(win, null, (_source, _res, _data) => {});

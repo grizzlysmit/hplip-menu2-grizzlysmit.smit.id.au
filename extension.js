@@ -28,10 +28,8 @@ class ExtensionImpl extends PanelMenu.Button {
         this._caller = caller;
         this.cmds = _cmds;
 
-        if (this._caller.icon_name) {
-            this.icon_name = this._caller.get_settings().get_string("icon-name");
-        } else {
-            this.icon_name = "printer";
+        if (!this._caller.icon_name) {
+            this._caller.icon_name = "printer";
         }
         this.icon = new St.Icon({
             style_class: 'menu-button',
@@ -39,20 +37,20 @@ class ExtensionImpl extends PanelMenu.Button {
         let gicon/*, icon*/;
         let re = /^.*\.png$/;
         let re2 = /^\/.*\.png$/;
-        if (!re.test(this.icon_name) ){
-            gicon = Gio.icon_new_for_string(this.icon_name);
-        } else if (re2.test(this.icon_name)) {
+        if (!re.test(this._caller.icon_name) ){
+            gicon = Gio.icon_new_for_string(this._caller.icon_name);
+        } else if (re2.test(this._caller.icon_name)) {
             try {
-                gicon = Gio.icon_new_for_string(this.icon_name);
+                gicon = Gio.icon_new_for_string(this._caller.icon_name);
             } catch(err) {
                 gicon = false;
             }
             if (!gicon) {
-                this.icon_name = "printer";
-                gicon = Gio.icon_new_for_string(this.icon_name);
+                this._caller.icon_name = "printer";
+                gicon = Gio.icon_new_for_string(this._caller.icon_name);
             }
         } else {
-            gicon = Gio.icon_new_for_string(this._caller.path + "/icons/" + this.icon_name);
+            gicon = Gio.icon_new_for_string(this._caller.path + "/icons/" + this._caller.icon_name);
         }
         this.icon.gicon = gicon;
         this.icon.icon_size = 17;
@@ -105,6 +103,35 @@ class ExtensionImpl extends PanelMenu.Button {
 
         } // for(let x = 0; x < this.cmds.length; x++) //
     } // constructor(caller, _cmds) //
+
+    change_icon(){
+        if (!this._caller.icon_name) {
+            this._caller.icon_name = "printer";
+        }
+        this.icon = new St.Icon({
+            style_class: 'menu-button',
+        });
+        let gicon/*, icon*/;
+        let re = /^.*\.png$/;
+        let re2 = /^\/.*\.png$/;
+        if (!re.test(this._caller.icon_name) ){
+            gicon = Gio.icon_new_for_string(this._caller.icon_name);
+        } else if (re2.test(this._caller.icon_name)) {
+            try {
+                gicon = Gio.icon_new_for_string(this._caller.icon_name);
+            } catch(err) {
+                gicon = false;
+            }
+            if (!gicon) {
+                this._caller.icon_name = "printer";
+                gicon = Gio.icon_new_for_string(this._caller.icon_name);
+            }
+        } else {
+            gicon = Gio.icon_new_for_string(this._caller.path + "/icons/" + this._caller.icon_name);
+        }
+        this.icon.gicon = gicon;
+        this.icon.icon_size = 17;
+    }
     
     menu_item_command(text, action, alt, errorMessage) {
         let item = null;
@@ -311,6 +338,7 @@ class ExtensionImpl extends PanelMenu.Button {
     }
 
     _onDestroy() {
+        Main.panel.menuManager.removeMenu(this.menu);
         super.destroy();
     }
 } // class ExtensionImpl extends PanelMenu.Button //
@@ -476,29 +504,56 @@ export default class Hplip_menu2_Extension extends Extension {
         let id = this.uuid;
         let indx = id.indexOf('@');
         Main.panel.addToStatusArea(id.substr(0, indx), this._ext, this.settings.get_int("position"), this.settings.get_string("area"));
-        this.settingsID_area = this.settings.connect("changed::area", this.onSettingsChanged.bind(this)); 
-        this.settingsID_icon = this.settings.connect("changed::icon-name", this.onSettingsChanged.bind(this)); 
-        this.settingsID_pos  = this.settings.connect("changed::position", this.onSettingsChanged.bind(this)); 
-        this.settingsID_comp = this.settings.connect("changed::compact", this.onSettingsChanged.bind(this)); 
+        this.settingsID_area = this.settings.connect("changed::area", this.onPositionChanged.bind(this)); 
+        this.settingsID_pos  = this.settings.connect("changed::position", this.onPositionChanged.bind(this)); 
+        this.settingsID_icon = this.settings.connect("changed::icon-name", this.onIconOrCompactChanged.bind(this)); 
+        this.settingsID_comp = this.settings.connect("changed::compact", this.onIconOrCompactChanged.bind(this)); 
     }
 
     disable() {
         this.cmds = null;
-        Main.panel.menuManager.removeMenu(this._ext.menu);
+        //Main.panel.menuManager.removeMenu(this._ext.menu);
         this._ext?.destroy();
         this.settings.disconnect(this.settingsID_area);
-        this.settings.disconnect(this.settingsID_icon);
         this.settings.disconnect(this.settingsID_pos);
-        this.settings.disconnect(this.settingsID_comp);
+        this.settings.disconnect(this.settingsID_icon);
+        //this.settings.disconnect(this.settingsID_comp);
         delete this.appSys;
         delete this.settings;
         delete this.settings_data;
         delete this._ext;
     }
 
-    onSettingsChanged(){
-        this.disable();
-        this.enable();
+    onPositionChanged(){
+        let id = this.uuid;
+        let indx = id.indexOf('@');
+        let name = id.substr(0, indx);
+        Main.panel.statusArea[name] = null;
+        this.area      = this.settings.get_string("area");
+        this.icon_name = this.settings.get_string("icon-name");
+        this.position  = this.settings.get_int("position");
+        this.compact   = this.settings.get_boolean("compact");
+        Main.panel.addToStatusArea(name, this._ext, this.position, this.area);
+    }
+
+    onIconOrCompactChanged(){
+        this.area      = this.settings.get_string("area");
+        this.icon_name = this.settings.get_string("icon-name");
+        this.position  = this.settings.get_int("position");
+        this.compact   = this.settings.get_boolean("compact");
+        let id = this.uuid;
+        let indx = id.indexOf('@');
+        let name = id.substr(0, indx);
+        //Main.panel.menuManager.removeMenu(this._ext.menu);
+        Main.panel.statusArea[name] = null;
+        this._ext?._onDestroy();
+        this._ext = null;
+        if(this.compact){
+            this._ext = new CompactMenu.ApplicationsButton(this, this.cmds);
+        } else {
+            this._ext = new ExtensionImpl(this, this.cmds);
+        }
+        Main.panel.addToStatusArea(name, this._ext, this.position, this.area);
     }
 } // export default class Hplip_menu2_Extension extends Extension //
 

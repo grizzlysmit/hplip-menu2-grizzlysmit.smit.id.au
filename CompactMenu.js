@@ -309,7 +309,7 @@ class CategoryMenuItem extends PopupMenu.PopupBaseMenuItem {
         this.add_child(new St.Label({text: name}));
         this.connect('motion-event', this._onMotionEvent.bind(this));
         this.connect('notify::active', this._onActiveChanged.bind(this));
-    }
+    } // constructor(button, category) //
 
     activate(event) {
         this._button.selectCategory(this?._category ?? null);
@@ -582,10 +582,8 @@ export class ApplicationsButton extends PanelMenu.Button {
             this._caller.set_settings(this._caller.getSettings());
             this._caller.set_settings_data(JSON.parse(this._caller.get_settings().get_string("settings-json")));
         }
-        if (this._caller.get_settings().get_string("icon-name")) {
-            this.icon_name = this._caller.get_settings().get_string("icon-name");
-        } else {
-            this.icon_name = "printer";
+        if (!this._caller.get_settings().get_string("icon-name")) {
+            this._caller.icon_name = "printer";
         }
         this.icon = new St.Icon({
             style_class: 'menu-button',
@@ -593,26 +591,25 @@ export class ApplicationsButton extends PanelMenu.Button {
         let gicon/*, icon*/;
         let re = /^.*\.png$/;
         let re2 = /^\/.*\.png$/;
-        if (!re.test(this.icon_name) ){
-            gicon = Gio.icon_new_for_string(this.icon_name);
-        } else if (re2.test(this.icon_name)) {
+        if (!re.test(this._caller.icon_name) ){
+            gicon = Gio.icon_new_for_string(this._caller.icon_name);
+        } else if (re2.test(this._caller.icon_name)) {
             try {
-                gicon = Gio.icon_new_for_string(this.icon_name);
+                gicon = Gio.icon_new_for_string(this._caller.icon_name);
             } catch(err) {
                 gicon = false;
             }
             if (!gicon) {
-                this.icon_name = "printer";
-                gicon = Gio.icon_new_for_string(this.icon_name);
+                this._caller.icon_name = "printer";
+                gicon = Gio.icon_new_for_string(this._caller.icon_name);
             }
         } else {
-            gicon = Gio.icon_new_for_string(this._caller.path + "/icons/" + this.icon_name);
+            gicon = Gio.icon_new_for_string(this._caller.path + "/icons/" + this._caller.icon_name);
         }
         this.icon.gicon = gicon;
         this.icon.icon_size = 17;
         this.add_child(this.icon);
 
-        this.add_child(this.icon);
         this.name = 'hplip-menu2';
         this.icon_actor = this.icon;
 
@@ -647,12 +644,42 @@ export class ApplicationsButton extends PanelMenu.Button {
         this._display();
     } // constructor(caller, _cmds) //
 
+    change_icon(){
+        if (!this._caller.icon_name) {
+            this._caller.icon_name = "printer";
+        }
+        this.icon = new St.Icon({
+            style_class: 'menu-button',
+        });
+        let gicon/*, icon*/;
+        let re = /^.*\.png$/;
+        let re2 = /^\/.*\.png$/;
+        if (!re.test(this._caller.icon_name) ){
+            gicon = Gio.icon_new_for_string(this._caller.icon_name);
+        } else if (re2.test(this._caller.icon_name)) {
+            try {
+                gicon = Gio.icon_new_for_string(this._caller.icon_name);
+            } catch(err) {
+                gicon = false;
+            }
+            if (!gicon) {
+                this._caller.icon_name = "printer";
+                gicon = Gio.icon_new_for_string(this._caller.icon_name);
+            }
+        } else {
+            gicon = Gio.icon_new_for_string(this._caller.path + "/icons/" + this._caller.icon_name);
+        }
+        this.icon.gicon = gicon;
+        this.icon.icon_size = 17;
+    }
+
     _onDestroy() {
         super._onDestroy();
 
         Main.wm.removeKeybinding('apps-menu-toggle-menu');
 
         this._desktopTarget.destroy();
+        Main.panel.menuManager.removeMenu(this.menu);
     }
 
     _onMenuKeyPress(actor, event) {
