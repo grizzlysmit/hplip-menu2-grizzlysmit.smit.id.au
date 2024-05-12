@@ -338,7 +338,7 @@ class ExtensionImpl extends PanelMenu.Button {
     }
 
     _onDestroy() {
-        Main.panel.menuManager.removeMenu(this.menu);
+        //Main.panel.menuManager.removeMenu(this.menu);
         super.destroy();
     }
 } // class ExtensionImpl extends PanelMenu.Button //
@@ -513,7 +513,7 @@ export default class Hplip_menu2_Extension extends Extension {
     disable() {
         this.cmds = null;
         //Main.panel.menuManager.removeMenu(this._ext.menu);
-        this._ext?.destroy();
+        this._ext?._onDestroy();
         this.settings.disconnect(this.settingsID_area);
         this.settings.disconnect(this.settingsID_pos);
         this.settings.disconnect(this.settingsID_icon);
