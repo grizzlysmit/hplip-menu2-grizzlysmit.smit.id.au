@@ -339,7 +339,7 @@ class ExtensionImpl extends PanelMenu.Button {
 
     _onDestroy() {
         //Main.panel.menuManager.removeMenu(this.menu);
-        super.destroy();
+        super._onDestroy();
     }
 } // class ExtensionImpl extends PanelMenu.Button //
 
@@ -517,7 +517,7 @@ export default class Hplip_menu2_Extension extends Extension {
         this.settings.disconnect(this.settingsID_area);
         this.settings.disconnect(this.settingsID_pos);
         this.settings.disconnect(this.settingsID_icon);
-        //this.settings.disconnect(this.settingsID_comp);
+        this.settings.disconnect(this.settingsID_comp);
         delete this.appSys;
         delete this.settings;
         delete this.settings_data;
@@ -538,18 +538,31 @@ export default class Hplip_menu2_Extension extends Extension {
 
     onIconOrCompactChanged(){
         this.area      = this.settings.get_string("area");
-        this.icon_name = this.settings.get_string("icon-name");
         this.position  = this.settings.get_int("position");
+        this.icon_name = this.settings.get_string("icon-name");
         this.compact   = this.settings.get_boolean("compact");
         let id = this.uuid;
         let indx = id.indexOf('@');
         let name = id.substr(0, indx);
         //Main.panel.menuManager.removeMenu(this._ext.menu);
         Main.panel.statusArea[name] = null;
-        this._ext?._onDestroy();
-        this._ext = null;
+        try {
+            this._ext?._onDestroy();
+            this._ext = null;
+        }
+        catch(e){
+            let dialog    = new Gzz.GzzMessageDialog("Exception", "line 554 " + (e?.message ? e.message : e));
+            dialog.open();
+        }
         if(this.compact){
-            this._ext = new CompactMenu.ApplicationsButton(this, this.cmds);
+            try {
+                this._ext = new CompactMenu.ApplicationsButton(this, this.cmds);
+            }
+            catch(e){
+                let dialog    = new Gzz.GzzMessageDialog("Exception", "line 562 " + (e?.message ? e.message : e));
+                dialog.open();
+                return;
+            }
         } else {
             this._ext = new ExtensionImpl(this, this.cmds);
         }
