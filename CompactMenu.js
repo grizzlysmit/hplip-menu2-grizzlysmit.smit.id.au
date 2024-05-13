@@ -585,6 +585,12 @@ export class ApplicationsButton extends PanelMenu.Button {
         if (!this._caller.get_settings().get_string("icon-name")) {
             this._caller.icon_name = "printer";
         }
+        const panelBox = new St.BoxLayout({
+            x_align: Clutter.ActorAlign.FILL,
+            y_align: Clutter.ActorAlign.FILL,
+            style_class: 'panel-status-menu-box',
+        });
+        this.add_child(panelBox);
         this.icon = new St.Icon({
             style_class: 'menu-button',
         });
@@ -608,7 +614,7 @@ export class ApplicationsButton extends PanelMenu.Button {
         }
         this.icon.gicon = gicon;
         this.icon.icon_size = 17;
-        this.add_child(this.icon);
+        panelBox.add_child(this.icon);
 
         this.name = 'hplip-menu2';
         this.icon_actor = this.icon;
@@ -644,7 +650,14 @@ export class ApplicationsButton extends PanelMenu.Button {
         this._display();
     } // constructor(caller, _cmds) //
 
+    display_message(title, message) {
+        let dialog = new Gzz.GzzMessageDialog(title, message);
+        dialog.open();
+    } // display_message(title, message) //
+
     change_icon(){
+        //this.remove_child(this.icon);
+        this.icon.hide();
         if (!this._caller.icon_name) {
             this._caller.icon_name = "printer";
         }
@@ -669,9 +682,11 @@ export class ApplicationsButton extends PanelMenu.Button {
         } else {
             gicon = Gio.icon_new_for_string(this._caller.path + "/icons/" + this._caller.icon_name);
         }
-        this.icon.gicon = gicon;
-        this.icon.icon_size = 17;
-    }
+        this.icon.set_gicon(gicon);
+        this.icon.set_icon_size(17);
+        //this.add_child(this.icon);
+        this.icon.show();
+    } // change_icon //
 
     _onDestroy() {
         super._onDestroy();

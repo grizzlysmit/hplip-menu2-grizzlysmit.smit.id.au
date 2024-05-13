@@ -9,9 +9,43 @@
 import Adw from 'gi://Adw';
 import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 import Gtk from 'gi://Gtk';
-import Gio from 'gi://Gio';
 
 export default class HpExtensionPreferences extends ExtensionPreferences {
+
+    async _close_request(win){
+        if(this._window?._dirty){
+            const dlg = new Gtk.AlertDialog();
+            dlg.set_modal(true);
+            dlg.set_buttons(["Cancel", "Exit Without Saving", "Save"]);
+            dlg.set_cancel_button(0);
+            dlg.set_default_button(2);
+            dlg.set_message("Save Changes?");
+            dlg.set_detail("You have unsaved changes");
+            await dlg.choose(win, null, (_sourceObject, result) => {
+                try {
+                    const choice = dlg.choose_finish(result);
+                    switch (choice) {
+                        case 0: // "cancel" button //
+                            break;
+                        case 1: // "Exit Without Saving" button //
+                            this._window.close();
+                            break;
+                        case 2: // "Save" button //
+                            this.save_clicked();
+                            this._window.close();
+                            break;
+                    } //switch (choice) //
+                } catch (e) {
+                    console.error(e);
+                }
+            });
+            return true;
+        }else{ // if(this._window?._dirty) //
+            //this.force_close();
+            this._window.close();
+            return false;
+        }
+    } // async _close_request(win) //
 
     _area_token_box(){
         const title = _("Area");
@@ -19,10 +53,12 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         row.set_subtitle(_("Area in the panel"));
         this.area = this._window._settings.get_string("area");
         this.area_token_input = new Gtk.ComboBoxText();
+        let _areas = ["left", "center", "right"];
         let areas = [_("Left"), _("Center"), _("Right")];
         let cur = 0;
         for (let i = 0; i < areas.length; i++){
-            if(this.area === areas[i]) cur = i;
+            let a = _areas[i];
+            if(this.area === a) cur = i;
             this.area_token_input.append_text(areas[i]);
         }
         this.area_token_input.set_active(cur);
@@ -163,7 +199,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                                                     });
         row.add_suffix(this.close_button);
         row.activatable_widget = this.close_button;
-        this.close_button.connect("clicked", () => { this._window.close(); });
+        this.close_button.connect("clicked", () => { this._close_request(this._window); });
 
         return row;
     }
@@ -368,40 +404,8 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         group2.add(this.notebook);
 
         page2.add(group2);
-        //window.set_can_close(false);
+        window.set_deletable(false);
         window.connect("close-request", (_win) => {
-            /*
-            if(this._window?._dirty){
-                let do_close = true;
-                const dlg = new Gtk.AlertDialog();
-                dlg.set_modal(true);
-                dlg.set_buttons(["Cancel", "Exit Without Saving", "Save"]);
-                dlg.set_cancel_button(0);
-                dlg.set_default_button(2);
-                dlg.set_message("Save Changes?");
-                dlg.set_detail("You have unsaved changes");
-                let can = new Gio.Cancellable();
-                can.connect(() => { 
-
-                    let result = new Gio.Task(win, null, (_source, _res, _data) => {});
-                    let choice = dlg.choose_finish(result);
-                    switch (choice) {
-                        case 0: // "cancel" button //
-                            do_close = true;
-                            break;
-                        case 1: // "Exit Without Saving" button //
-                            break;
-                        case 2: // "Save" button //
-                            this.save_clicked();
-                            break;
-                    }
-                });
-                dlg.choose(this?._window, can);
-                if(!do_close){
-                    return true;
-                }
-            }
-            // */
             this.area = null;
             this.icon_name = null;
             this.area_token_box = null;
@@ -412,22 +416,10 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             this._window = null;
             this.area_token_input = null;
             this.settings_data = null;
-            //this.force_close();
-            return false;
         });
-        /*
-        this.close_id = window.connect("close-request", () => {
-        });
-        // */
         window.add(page1);
         window.add(page2);
         window.set_default_size(865, 575);
-        /*
-        this.settingsID_area = window._settings.connect("changed::area", this.onSettingsChanged.bind(this)); 
-        this.settingsID_icon = window._settings.connect("changed::icon-name", this.onSettingsChanged.bind(this)); 
-        this.settingsID_pos  = window._settings.connect("changed::position", this.onSettingsChanged.bind(this)); 
-        this.settingsID_comp = window._settings.connect("changed::compact", this.onSettingsChanged.bind(this)); 
-        // */
     } // fillPreferencesWindow(window) //
 } // export default class HpExtensionPreferences extends ExtensionPreferences //
 

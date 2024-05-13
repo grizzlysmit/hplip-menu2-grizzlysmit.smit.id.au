@@ -8,6 +8,8 @@ import Shell from 'gi://Shell';
 import St from 'gi://St';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
+import Clutter from 'gi://Clutter';
+
 import * as Gzz from './gzzDialog.js';
 import * as CompactMenu from './CompactMenu.js';
 
@@ -31,6 +33,12 @@ class ExtensionImpl extends PanelMenu.Button {
         if (!this._caller.icon_name) {
             this._caller.icon_name = "printer";
         }
+        const panelBox = new St.BoxLayout({
+            x_align: Clutter.ActorAlign.FILL,
+            y_align: Clutter.ActorAlign.FILL,
+            style_class: 'panel-status-menu-box',
+        });
+        this.add_child(panelBox);
         this.icon = new St.Icon({
             style_class: 'menu-button',
         });
@@ -54,7 +62,7 @@ class ExtensionImpl extends PanelMenu.Button {
         }
         this.icon.gicon = gicon;
         this.icon.icon_size = 17;
-        this.add_child(this.icon);
+        panelBox.add_child(this.icon);
 
         let item         = null;
         let action       = null;
@@ -104,7 +112,19 @@ class ExtensionImpl extends PanelMenu.Button {
         } // for(let x = 0; x < this.cmds.length; x++) //
     } // constructor(caller, _cmds) //
 
+    display_message(title, message) {
+        let dialog = new Gzz.GzzMessageDialog(title, message);
+        dialog.open();
+    } // display_message(title, message) //
+
     change_icon(){
+        //this.remove_child(this.icon);
+        this.icon.hide();
+        this.icon.destroy();
+        this.icon = null;
+        this.icon = new St.Icon({
+            style_class: 'menu-button',
+        });
         if (!this._caller.icon_name) {
             this._caller.icon_name = "printer";
         }
@@ -129,9 +149,11 @@ class ExtensionImpl extends PanelMenu.Button {
         } else {
             gicon = Gio.icon_new_for_string(this._caller.path + "/icons/" + this._caller.icon_name);
         }
-        this.icon.gicon = gicon;
-        this.icon.icon_size = 17;
-    }
+        this.icon.set_gicon(gicon);
+        this.icon.set_icon_size(17);
+        //this.add_child(this.icon);
+        this.icon.show();
+    } // change_icon() //
     
     menu_item_command(text, action, alt, errorMessage) {
         let item = null;
@@ -506,8 +528,8 @@ export default class Hplip_menu2_Extension extends Extension {
         Main.panel.addToStatusArea(id.substr(0, indx), this._ext, this.settings.get_int("position"), this.settings.get_string("area"));
         this.settingsID_area = this.settings.connect("changed::area", this.onPositionChanged.bind(this)); 
         this.settingsID_pos  = this.settings.connect("changed::position", this.onPositionChanged.bind(this)); 
-        this.settingsID_icon = this.settings.connect("changed::icon-name", this.onIconOrCompactChanged.bind(this)); 
-        this.settingsID_comp = this.settings.connect("changed::compact", this.onIconOrCompactChanged.bind(this)); 
+        this.settingsID_icon = this.settings.connect("changed::icon-name", this.onIconChanged.bind(this)); 
+        this.settingsID_comp = this.settings.connect("changed::compact", this.onCompactChanged.bind(this)); 
     }
 
     disable() {
@@ -524,6 +546,32 @@ export default class Hplip_menu2_Extension extends Extension {
         delete this._ext;
     }
 
+    onIconChanged(){
+        this.icon_name = this.settings.get_string("icon-name");
+        const summary = "Relogin required for changes to take effect!";
+        const body    = "Due to programming problems I have yet to solve "
+                        + "you will need to logout and log back in to "
+                        + "see the changes to Icon and Compact take effect.";
+        Main.notify(summary, body).setTimeout(40000000);
+        /****************************************************************
+         *                                                              *
+         *      This code bellow currently does not work, shell I will  *
+         *      replace it when I know how or the bug in gnome shell    *
+         *      is gone if it is a bug.                                 *
+         *                                                              *
+         ****************************************************************/
+        let id = this.uuid;
+        let indx = id.indexOf('@');
+        let name = id.substr(0, indx);
+        Main.panel.statusArea[name] = null;
+        this.area      = this.settings.get_string("area");
+        this.icon_name = this.settings.get_string("icon-name");
+        this.position  = this.settings.get_int("position");
+        this.compact   = this.settings.get_boolean("compact");
+        this.ext.change_icon();
+        Main.panel.addToStatusArea(name, this._ext, this.position, this.area);
+    }
+
     onPositionChanged(){
         let id = this.uuid;
         let indx = id.indexOf('@');
@@ -536,7 +584,21 @@ export default class Hplip_menu2_Extension extends Extension {
         Main.panel.addToStatusArea(name, this._ext, this.position, this.area);
     }
 
-    onIconOrCompactChanged(){
+    onCompactChanged(){
+        this.compact   = this.settings.get_boolean("compact");
+        const summary = "Relogin required for changes to take effect!";
+        const body    = "Due to programming problems I have yet to solve "
+                        + "you will need to logout and log back in to "
+                        + "see the changes to Icon and Compact take effect.";
+        Main.notify(summary, body).setTimeout(40000000);
+        /****************************************************************
+         *                                                              *
+         *      This code bellow currently crashes gnome shell I will   *
+         *      replace it when I know how or the bug in gnome shell    *
+         *      is gone, given it is a bug.                             *
+         *                                                              *
+         ****************************************************************/
+        /*
         this.area      = this.settings.get_string("area");
         this.position  = this.settings.get_int("position");
         this.icon_name = this.settings.get_string("icon-name");
@@ -551,22 +613,24 @@ export default class Hplip_menu2_Extension extends Extension {
             this._ext = null;
         }
         catch(e){
-            let dialog    = new Gzz.GzzMessageDialog("Exception", "line 554 " + (e?.message ? e.message : e));
-            dialog.open();
+            console.log(`Error: Hplip_menu2_Extension: ${e}`);
+            return;
         }
         if(this.compact){
             try {
                 this._ext = new CompactMenu.ApplicationsButton(this, this.cmds);
             }
             catch(e){
-                let dialog    = new Gzz.GzzMessageDialog("Exception", "line 562 " + (e?.message ? e.message : e));
-                dialog.open();
+                console.log(`Error: Hplip_menu2_Extension: ${e}`);
+                //let dialog    = new Gzz.GzzMessageDialog("Exception", "line 562 " + (e?.message ? e.message : e));
+                //dialog.open();
                 return;
             }
         } else {
             this._ext = new ExtensionImpl(this, this.cmds);
         }
         Main.panel.addToStatusArea(name, this._ext, this.position, this.area);
+        // */
     }
 } // export default class Hplip_menu2_Extension extends Extension //
 
