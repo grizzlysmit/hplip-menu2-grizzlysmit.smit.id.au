@@ -622,8 +622,6 @@ export default class Hplip_menu2_Extension extends Extension {
             }
             catch(e){
                 console.log(`Error: Hplip_menu2_Extension: ${e}`);
-                //let dialog    = new Gzz.GzzMessageDialog("Exception", "line 562 " + (e?.message ? e.message : e));
-                //dialog.open();
                 return;
             }
         } else {

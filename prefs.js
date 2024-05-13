@@ -92,7 +92,6 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             // update the values
             if(this.area !== this._window._settings.get_string("area"))
                 this._window._settings.set_string("area", this.area);
-            //*
             if(this.icon_name !== this._window._settings.get_string("icon-name"))
                 this._window._settings.set_string("icon-name", this.icon_name);
             if(0 <= this.position_input.get_value() && this.position_input.get_value() <= 25){
@@ -101,7 +100,6 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             }
             if(this.compact_switch.get_state() !== this._window._settings.get_boolean("compact"))
                 this._window._settings.set_boolean("compact", this.compact_switch.get_state());
-            // */
 
             this._window._dirty = false;
             //this._window._settings.apply(); // save the settings //
@@ -419,7 +417,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         });
         window.add(page1);
         window.add(page2);
-        window.set_default_size(865, 575);
+        window.set_default_size(925, 575);
     } // fillPreferencesWindow(window) //
 } // export default class HpExtensionPreferences extends ExtensionPreferences //
 
