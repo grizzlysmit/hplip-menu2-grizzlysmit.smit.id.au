@@ -552,7 +552,7 @@ export default class Hplip_menu2_Extension extends Extension {
         const body    = "Due to programming problems I have yet to solve "
                         + "you will need to logout and log back in to "
                         + "see the changes to Icon and Compact take effect.";
-        Main.notify(summary, body).setTimeout(40000000);
+        Main.notify(summary, body).setTimeout(60000000);
         /****************************************************************
          *                                                              *
          *      This code bellow currently does not work, shell I will  *
@@ -590,7 +590,7 @@ export default class Hplip_menu2_Extension extends Extension {
         const body    = "Due to programming problems I have yet to solve "
                         + "you will need to logout and log back in to "
                         + "see the changes to Icon and Compact take effect.";
-        Main.notify(summary, body).setTimeout(40000000);
+        Main.notify(summary, body).setTimeout(60000000);
         /****************************************************************
          *                                                              *
          *      This code bellow currently crashes gnome shell I will   *
