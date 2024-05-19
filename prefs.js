@@ -432,12 +432,12 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         // returning true from "close-request" didn't stop the window closing too?? //
         // The question is is it a bug??? most likely!!!                            //
         window.connect("close-request", (_win) => {
-            if(this.properties_width !== this._window._settings.get_int("properties-width")
-                && this.properties_height !== this._window._settings.get_int("properties-height")){
-                this._window._settings.set_int("properties-width", this.properties_width);
-                this._window._settings.set_int("properties-height", this.properties_height);
-            } /* if(this.properties_width !== this._window._settings.get_int("properties-width")
-                     && this.properties_height !== this._window._settings.get_int("properties-height")) */
+            const width  = window.default_width;
+            const height = window.default_height;
+            if(width !== this.properties_width && height !== this.properties_height){
+                this._window._settings.set_int("properties-width",  width);
+                this._window._settings.set_int("properties-height", height);
+            } // if(width !== this.properties_width && height !== this.properties_height) //
             this.area = null;
             this.icon_name = null;
             this.area_token_box = null;
