@@ -9,6 +9,7 @@
 import Adw from 'gi://Adw';
 import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 import Gtk from 'gi://Gtk';
+import Gio from 'gi://Gio';
 
 export default class HpExtensionPreferences extends ExtensionPreferences {
 
@@ -48,44 +49,46 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
     } // async _close_request(win) //
 
     _area_token_box(){
-        const title = _("Area");
-        const row = new Adw.ActionRow({ title });
-        row.set_subtitle(_("Area in the panel"));
+        const title = _("Area in the panel");
+        const panelPositions = new Gtk.StringList();
         this.area = this._window._settings.get_string("area");
-        this.area_token_input = new Gtk.ComboBoxText();
         let _areas = ["left", "center", "right"];
         let areas = [_("Left"), _("Center"), _("Right")];
         let cur = 0;
         for (let i = 0; i < areas.length; i++){
             let a = _areas[i];
             if(this.area === a) cur = i;
-            this.area_token_input.append_text(areas[i]);
+            panelPositions.append(areas[i]);
         }
-        this.area_token_input.set_active(cur);
-        this.area_token_input.connect("changed", this.area_dropdown_clicked.bind(this));
-        row.add_suffix(this.area_token_input);
-        row.activatable_widget = this.area_token_input;
+        const row = new Adw.ComboRow({
+            title,
+            model: panelPositions,
+            selected: cur,
+            use_subtitle: true, 
+        });
+        row.connect('notify::selected', this.area_dropdown_clicked.bind(this));
         return row;
-    }
+    } // _area_token_box() //
 
     _icon_token_box(){
+        const panelicons = new Gtk.StringList();
         const title = _("Icon Name");
-        const row = new Adw.ActionRow({ title });
-        row.set_subtitle(_("The name of the icon"));
-        this.icon_token_input = new Gtk.ComboBoxText();
         let icons = ["printer", "/usr/share/hplip/data/images/16x16/hp_logo.png"];
         this.icon_name = this._window._settings.get_string("icon-name");
         let cur = 0;
         for (let i = 0; i < icons.length; i++){
             if(this.icon_name === icons[i]) cur = i;
-            this.icon_token_input.append_text(icons[i]);
+            panelicons.append(icons[i]);
         }
-        this.icon_token_input.set_active(cur);
-        this.icon_token_input.connect ("changed", this.icon_dropdown_clicked.bind(this));
-        row.add_suffix(this.icon_token_input);
-        row.activatable_widget = this.icon_token_input;
+        const row = new Adw.ComboRow({
+            title,
+            model: panelicons,
+            selected: cur,
+            use_subtitle: true,
+        });
+        row.connect('notify::selected', this.icon_dropdown_clicked.bind(this));
         return row;
-    }
+    } // _icon_token_box() //
 
     save_clicked(){
         if(this._window?._dirty){
@@ -104,11 +107,10 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             this._window._dirty = false;
             //this._window._settings.apply(); // save the settings //
         }
-    }
+    } // save_clicked() //
 
     area_dropdown_clicked(combo){
-        let activeItem = combo.get_active();
-        switch(activeItem){
+        switch(combo.selected){
             case 0:
                 this.area = "left";
                 break;
@@ -120,11 +122,10 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                 break;
         }
         this._window._dirty = true;
-    }
+    } // area_dropdown_clicked(combo) //
 
     icon_dropdown_clicked(combo){
-        let activeItem = combo.get_active();
-        switch(activeItem){
+        switch(combo.selected){
             case 0:
                 this.icon_name = "printer";
                 break;
@@ -133,7 +134,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                 break;
         }
         this._window._dirty = true;
-    }
+    } // icon_dropdown_clicked(combo) //
 
     _position_box(){
         const title = _("Position");
@@ -154,22 +155,19 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         row.activatable_widget = slider;
         this.position_input = slider;
         return row;
-    }
+    } // _position_box() //
 
     _compact_row(){
         const title = _("Compact");
-        const row = new Adw.ActionRow({ title });
-        row.set_subtitle(_("Compact Menu."));
-        const compact_switch = new Gtk.Switch({
-          active: this._window._settings.get_boolean("compact"),
-          valign: Gtk.Align.CENTER,
+        const row = new Adw.SwitchRow({
+            title,
+            active: this._window._settings.get_boolean("compact"),
         });
-        row.add_suffix(compact_switch);
-        row.activatable_widget = compact_switch;
-        this.compact_switch = compact_switch;
-        compact_switch.connect("state-set", (_sw, _state) => { this._window._dirty = true; });
+        row.set_subtitle(_("Compact Menu."));
+        this.compact_switch = row.activatable_widget; // get the internal Gtk.Switch //
+        this.compact_switch.connect("state-set", (_sw, _state) => { this._window._dirty = true; });
         return row;
-    }
+    } // _compact_row() //
 
     _save_settings_box(){
         const title = "";
@@ -184,7 +182,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         row.activatable_widget = this.save_settings_button;
 
         return row;
-    }
+    } // _save_settings_box() //
 
     _close_row(){
         const title = "";
@@ -200,16 +198,16 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         this.close_button.connect("clicked", () => { this._close_request(this._window); });
 
         return row;
-    }
+    } // _close_row() //
 
     fillPreferencesWindow(window) {
         this.area = "left";
         this.icon_name = "printer";
         this.area_token_box = null;
         this.icon_token_box = null;
-        this.icon_token_input = null;
         this.position_input = null;
         this.save_settings_button = null;
+        this.compact_switch = null;
         this._window = window;
         this._window._dirty = false;
 
@@ -222,10 +220,12 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             window._settings.set_boolean("first-time", false); // old _settings obtained //
             //window._settings.apply(); // save _settings //
         }
-        this.area      = this._window._settings.get_string("area");
-        this.icon_name = this._window._settings.get_string("icon-name");
-        this.position  = this._window._settings.get_int("position");
-        this.compact   = this._window._settings.get_boolean("compact");
+        this.area              = this._window._settings.get_string("area");
+        this.icon_name         = this._window._settings.get_string("icon-name");
+        this.position          = this._window._settings.get_int("position");
+        this.properties_width  = this._window._settings.get_int("properties-width");
+        this.properties_height = this._window._settings.get_int("properties-height");
+        this.compact           = this._window._settings.get_boolean("compact");
 
         const page1 = Adw.PreferencesPage.new();
         page1.set_title(_("Settings"));
@@ -251,8 +251,8 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         group1.add(save_settings_box);
         let close_row = this._close_row();
         group1.add(close_row);
-        let hbox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, vexpand: true, hexpand: true, });
-        let bottom_spacer = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: true, hexpand: true });
+        const hbox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, vexpand: true, hexpand: true, });
+        const bottom_spacer = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: true, hexpand: true });
         hbox.prepend(bottom_spacer);
         group1.add(hbox);
 
@@ -284,7 +284,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         *  The credits for this plugin itself *
         *                                     *
         ***************************************/
-        const vbox0    = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: true, hexpand: true });
+        const vbox0    = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: false, hexpand: true });
 
         let title = null;
         title = _("Copyright") + ": ©2022, ©2023 &amp; ©2024 Francis Grizzly Smit:";
@@ -335,7 +335,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
          *                                                       *
          *                                                       *
          *********************************************************/
-        const vbox1    = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: true, hexpand: true });
+        const vbox1    = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: false, hexpand: true });
 
         title = _("Compact mode code taken from") + ": Apps Menu by fmuellner" + _("and others") + ":";
         const row4 = new Adw.ActionRow({ title });
@@ -400,16 +400,50 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         vbox1.append(close_row_credits1);
         this.notebook.append_page(vbox1, new Gtk.Label({ label: _("Code used from other plugins"), } ));
         group2.add(this.notebook);
+        const hbox1 = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, vexpand: true, hexpand: true, });
+        const bottom_spacer1 = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: true, hexpand: true });
+        hbox1.prepend(bottom_spacer1);
+        group2.add(hbox1);
 
         page2.add(group2);
         window.set_deletable(false);
+        /*
+        // This doesn't work due to window being a Adw.Window not a straight Gtk.Window //
+        // I will keep it here while I see if there is another way to do it.            //
+        let preferences = new Gio.Settings({schema_id: 'org.gnome.desktop.wm.preferences'});
+        let buttonLayout = preferences.get_string('button-layout');
+        const headerbar = new Gtk.HeaderBar();
+        const closebutton = new Gtk.Button({
+                                                 //label: "",
+                                                 css_classes: ["suggested-action"],
+                                                 valign: Gtk.Align.CENTER,
+                                                 icon_name: 'window-close-symbolic', 
+                                            });
+        closebutton.connect("clicked", () => { this._close_request(this._window); });
+        if(buttonLayout.startsWith(':')){
+            headerbar.pack_start(closebutton);
+        }else{
+            headerbar.pack_end(closebutton);
+        }
+        // this is the problem changing the titlebar is not supported in Adw.Window //
+        window.set_titlebar(headerbar);
+        // */
+        // The differences between Gtk.Window andd Adw.Window may well explain why  //
+        // returning true from "close-request" didn't stop the window closing too?? //
+        // The question is is it a bug??? most likely!!!                            //
         window.connect("close-request", (_win) => {
+            if(this.properties_width !== this._window._settings.get_int("properties-width")
+                && this.properties_height !== this._window._settings.get_int("properties-height")){
+                this._window._settings.set_int("properties-width", this.properties_width);
+                this._window._settings.set_int("properties-height", this.properties_height);
+            } /* if(this.properties_width !== this._window._settings.get_int("properties-width")
+                     && this.properties_height !== this._window._settings.get_int("properties-height")) */
             this.area = null;
             this.icon_name = null;
             this.area_token_box = null;
             this.icon_token_box = null;
-            this.icon_token_input = null;
             this.position_input = null;
+            this.compact_switch = null;
             this.save_settings_button = null;
             this._window = null;
             this.area_token_input = null;
@@ -417,7 +451,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         });
         window.add(page1);
         window.add(page2);
-        window.set_default_size(925, 575);
+        window.set_default_size(this.properties_width, this.properties_height);
     } // fillPreferencesWindow(window) //
 } // export default class HpExtensionPreferences extends ExtensionPreferences //
 

@@ -534,7 +534,7 @@ export default class Hplip_menu2_Extension extends Extension {
 
     disable() {
         this.cmds = null;
-        //Main.panel.menuManager.removeMenu(this._ext.menu);
+        Main.panel.menuManager.removeMenu(this._ext.menu);
         this._ext?._onDestroy();
         this.settings.disconnect(this.settingsID_area);
         this.settings.disconnect(this.settingsID_pos);
@@ -563,6 +563,7 @@ export default class Hplip_menu2_Extension extends Extension {
         let id = this.uuid;
         let indx = id.indexOf('@');
         let name = id.substr(0, indx);
+        Main.panel.menuManager.removeMenu(this._ext.menu);
         Main.panel.statusArea[name] = null;
         this.area      = this.settings.get_string("area");
         this.icon_name = this.settings.get_string("icon-name");
@@ -576,6 +577,7 @@ export default class Hplip_menu2_Extension extends Extension {
         let id = this.uuid;
         let indx = id.indexOf('@');
         let name = id.substr(0, indx);
+        Main.panel.menuManager.removeMenu(this._ext.menu);
         Main.panel.statusArea[name] = null;
         this.area      = this.settings.get_string("area");
         this.icon_name = this.settings.get_string("icon-name");
@@ -606,7 +608,7 @@ export default class Hplip_menu2_Extension extends Extension {
         let id = this.uuid;
         let indx = id.indexOf('@');
         let name = id.substr(0, indx);
-        //Main.panel.menuManager.removeMenu(this._ext.menu);
+        Main.panel.menuManager.removeMenu(this._ext.menu);
         Main.panel.statusArea[name] = null;
         try {
             this._ext?._onDestroy();

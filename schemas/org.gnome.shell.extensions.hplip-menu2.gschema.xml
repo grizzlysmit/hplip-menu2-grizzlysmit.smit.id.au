@@ -27,6 +27,16 @@
             <summary>The position in the area.</summary>
             <description>The position to place the button in the area 0 to 25.</description>
         </key>
+        <key type="i" name="properties-width">
+            <default>925</default>
+            <summary>The window width.</summary>
+            <description>The users chosen window width.</description>
+        </key>
+        <key type="i" name="properties-height">
+            <default>575</default>
+            <summary>The window height.</summary>
+            <description>The users chosen window height.</description>
+        </key>
         <key type="b" name="compact">
             <default>false</default>
             <summary>Traditional or Compacted</summary>
