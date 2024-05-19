@@ -9,7 +9,7 @@
 import Adw from 'gi://Adw';
 import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 import Gtk from 'gi://Gtk';
-import Gio from 'gi://Gio';
+//import Gio from 'gi://Gio';
 
 export default class HpExtensionPreferences extends ExtensionPreferences {
 
