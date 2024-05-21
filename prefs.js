@@ -448,6 +448,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             this._window = null;
             this.area_token_input = null;
             this.settings_data = null;
+            window.destroy();
         });
         window.add(page1);
         window.add(page2);

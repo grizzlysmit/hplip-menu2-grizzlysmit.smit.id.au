@@ -26,7 +26,7 @@ class ExtensionImpl extends PanelMenu.Button {
     }
 
     constructor(caller, _cmds){
-        super(0.5, "Hplip-menu2");
+        super(0.5, "hplip-menu2");
         this._caller = caller;
         this.cmds = _cmds;
 
@@ -555,7 +555,7 @@ export default class Hplip_menu2_Extension extends Extension {
         Main.notify(summary, body).setTimeout(60000000);
         /****************************************************************
          *                                                              *
-         *      This code bellow currently does not work, shell I will  *
+         *      This code bellow currently does not work, so I will     *
          *      replace it when I know how or the bug in gnome shell    *
          *      is gone if it is a bug.                                 *
          *                                                              *
