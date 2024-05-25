@@ -26,7 +26,7 @@ class ExtensionImpl extends PanelMenu.Button {
     }
 
     constructor(caller, _cmds){
-        super(0.5, "hplip-menu2");
+        super(0.5, caller.name);
         this._caller = caller;
         this.cmds = _cmds;
 
@@ -118,20 +118,10 @@ class ExtensionImpl extends PanelMenu.Button {
     } // display_message(title, message) //
 
     change_icon(){
-        //this.remove_child(this.icon);
-        this.icon.hide();
-        this.icon.destroy();
-        this.icon = null;
-        this.icon = new St.Icon({
-            style_class: 'menu-button',
-        });
         if (!this._caller.icon_name) {
             this._caller.icon_name = "printer";
         }
-        this.icon = new St.Icon({
-            style_class: 'menu-button',
-        });
-        let gicon/*, icon*/;
+        let gicon;
         let re = /^.*\.png$/;
         let re2 = /^\/.*\.png$/;
         if (!re.test(this._caller.icon_name) ){
@@ -149,10 +139,7 @@ class ExtensionImpl extends PanelMenu.Button {
         } else {
             gicon = Gio.icon_new_for_string(this._caller.path + "/icons/" + this._caller.icon_name);
         }
-        this.icon.set_gicon(gicon);
-        this.icon.set_icon_size(17);
-        //this.add_child(this.icon);
-        this.icon.show();
+        this.icon.gicon = gicon;
     } // change_icon() //
     
     menu_item_command(text, action, alt, errorMessage) {
@@ -360,7 +347,7 @@ class ExtensionImpl extends PanelMenu.Button {
     }
 
     _onDestroy() {
-        //Main.panel.menuManager.removeMenu(this.menu);
+        Main.panel.menuManager.removeMenu(this.menu);
         super._onDestroy();
     }
 } // class ExtensionImpl extends PanelMenu.Button //
@@ -375,6 +362,9 @@ export default class Hplip_menu2_Extension extends Extension {
         this.settings_data = null;
         this.settingsID    = null;
         this.cmds          = null;
+        const id = this.uuid;
+        const indx = id.indexOf('@');
+        this.name = id.substr(0, indx);
     } // constructor(metadata) //
 
     get_cmds(){
@@ -523,9 +513,7 @@ export default class Hplip_menu2_Extension extends Extension {
         } else {
             this._ext = new ExtensionImpl(this, this.cmds);
         }
-        let id = this.uuid;
-        let indx = id.indexOf('@');
-        Main.panel.addToStatusArea(id.substr(0, indx), this._ext, this.settings.get_int("position"), this.settings.get_string("area"));
+        Main.panel.addToStatusArea(this.name, this._ext, this.settings.get_int("position"), this.settings.get_string("area"));
         this.settingsID_area = this.settings.connect("changed::area", this.onPositionChanged.bind(this)); 
         this.settingsID_pos  = this.settings.connect("changed::position", this.onPositionChanged.bind(this)); 
         this.settingsID_icon = this.settings.connect("changed::icon-name", this.onIconChanged.bind(this)); 
@@ -534,7 +522,7 @@ export default class Hplip_menu2_Extension extends Extension {
 
     disable() {
         this.cmds = null;
-        Main.panel.menuManager.removeMenu(this._ext.menu);
+        //Main.panel.menuManager.removeMenu(this._ext.menu);
         this._ext?._onDestroy();
         this.settings.disconnect(this.settingsID_area);
         this.settings.disconnect(this.settingsID_pos);
@@ -560,25 +548,19 @@ export default class Hplip_menu2_Extension extends Extension {
          *      is gone if it is a bug.                                 *
          *                                                              *
          ****************************************************************/
-        let id = this.uuid;
-        let indx = id.indexOf('@');
-        let name = id.substr(0, indx);
-        Main.panel.menuManager.removeMenu(this._ext.menu);
-        Main.panel.statusArea[name] = null;
-        this.area      = this.settings.get_string("area");
+        //Main.panel.menuManager.removeMenu(this._ext.menu);
+        //Main.panel.statusArea[name] = null;
+        //this.area      = this.settings.get_string("area");
         this.icon_name = this.settings.get_string("icon-name");
-        this.position  = this.settings.get_int("position");
-        this.compact   = this.settings.get_boolean("compact");
+        //this.position  = this.settings.get_int("position");
+        //this.compact   = this.settings.get_boolean("compact");
         this.ext.change_icon();
-        Main.panel.addToStatusArea(name, this._ext, this.position, this.area);
+        //Main.panel.addToStatusArea(this.name, this._ext, this.position, this.area);
     }
 
     onPositionChanged(){
-        let id = this.uuid;
-        let indx = id.indexOf('@');
-        let name = id.substr(0, indx);
         Main.panel.menuManager.removeMenu(this._ext.menu);
-        Main.panel.statusArea[name] = null;
+        Main.panel.statusArea[this.name] = null;
         this.area      = this.settings.get_string("area");
         this.icon_name = this.settings.get_string("icon-name");
         this.position  = this.settings.get_int("position");
@@ -600,18 +582,19 @@ export default class Hplip_menu2_Extension extends Extension {
          *      is gone, given it is a bug.                             *
          *                                                              *
          ****************************************************************/
-        /*
+        //*
+        this.settings.disconnect(this.settingsID_area);
+        this.settings.disconnect(this.settingsID_pos);
+        this.settings.disconnect(this.settingsID_icon);
+        this.settings.disconnect(this.settingsID_comp);
         this.area      = this.settings.get_string("area");
         this.position  = this.settings.get_int("position");
         this.icon_name = this.settings.get_string("icon-name");
         this.compact   = this.settings.get_boolean("compact");
-        let id = this.uuid;
-        let indx = id.indexOf('@');
-        let name = id.substr(0, indx);
-        Main.panel.menuManager.removeMenu(this._ext.menu);
-        Main.panel.statusArea[name] = null;
         try {
             this._ext?._onDestroy();
+            //Main.panel.menuManager.removeMenu(this._ext.menu);
+            Main.panel.statusArea[this.name] = null;
             this._ext = null;
         }
         catch(e){
@@ -629,7 +612,11 @@ export default class Hplip_menu2_Extension extends Extension {
         } else {
             this._ext = new ExtensionImpl(this, this.cmds);
         }
-        Main.panel.addToStatusArea(name, this._ext, this.position, this.area);
+        Main.panel.addToStatusArea(this.name, this._ext, this.position, this.area);
+        this.settingsID_area = this.settings.connect("changed::area", this.onPositionChanged.bind(this)); 
+        this.settingsID_pos  = this.settings.connect("changed::position", this.onPositionChanged.bind(this)); 
+        this.settingsID_icon = this.settings.connect("changed::icon-name", this.onIconChanged.bind(this)); 
+        this.settingsID_comp = this.settings.connect("changed::compact", this.onCompactChanged.bind(this)); 
         // */
     }
 } // export default class Hplip_menu2_Extension extends Extension //

@@ -571,7 +571,9 @@ export class ApplicationsButton extends PanelMenu.Button {
 
 
         this.setMenu(new ApplicationsMenu(this, 1.0, St.Side.TOP, this));
-        Main.panel.menuManager.addMenu(this.menu);
+        if (Main.panel._menus === undefined)
+          Main.panel.menuManager.addMenu(this.menu);
+        else Main.panel._menus.addMenu(this.menu);
 
         // At this moment applications menu is not keyboard navigable at
         // all (so not accessible), so it doesn't make sense to set as
@@ -616,7 +618,7 @@ export class ApplicationsButton extends PanelMenu.Button {
         this.icon.icon_size = 17;
         panelBox.add_child(this.icon);
 
-        this.name = 'hplip-menu2';
+        this.name = this._caller.name;
         this.icon_actor = this.icon;
 
         Main.overview.connectObject(
@@ -624,7 +626,7 @@ export class ApplicationsButton extends PanelMenu.Button {
             'hiding', () => this.remove_accessible_state(Atk.StateType.CHECKED),
             this);
 
-        let extensionObject = Extension.lookupByUUID('hplip-menu2@grizzlysmit.smit.id.au');
+        let extensionObject = Extension.lookupByUUID(this._caller.uuid);
         let extensionSettings = extensionObject.getSettings();
         Main.wm.addKeybinding(
             'apps-menu-toggle-menu',
@@ -656,15 +658,10 @@ export class ApplicationsButton extends PanelMenu.Button {
     } // display_message(title, message) //
 
     change_icon(){
-        //this.remove_child(this.icon);
-        this.icon.hide();
         if (!this._caller.icon_name) {
             this._caller.icon_name = "printer";
         }
-        this.icon = new St.Icon({
-            style_class: 'menu-button',
-        });
-        let gicon/*, icon*/;
+        let gicon;
         let re = /^.*\.png$/;
         let re2 = /^\/.*\.png$/;
         if (!re.test(this._caller.icon_name) ){
@@ -682,10 +679,7 @@ export class ApplicationsButton extends PanelMenu.Button {
         } else {
             gicon = Gio.icon_new_for_string(this._caller.path + "/icons/" + this._caller.icon_name);
         }
-        this.icon.set_gicon(gicon);
-        this.icon.set_icon_size(17);
-        //this.add_child(this.icon);
-        this.icon.show();
+        this.icon.gicon = gicon;
     } // change_icon //
 
     _onDestroy() {
