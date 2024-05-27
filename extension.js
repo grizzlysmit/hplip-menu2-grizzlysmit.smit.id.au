@@ -8,7 +8,7 @@ import Shell from 'gi://Shell';
 import St from 'gi://St';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
-import Clutter from 'gi://Clutter';
+import Meta from 'gi://Meta';
 
 import * as Gzz from './gzzDialog.js';
 import * as CompactMenu from './CompactMenu.js';
@@ -33,12 +33,6 @@ class ExtensionImpl extends PanelMenu.Button {
         if (!this._caller.icon_name) {
             this._caller.icon_name = "printer";
         }
-        const panelBox = new St.BoxLayout({
-            x_align: Clutter.ActorAlign.FILL,
-            y_align: Clutter.ActorAlign.FILL,
-            style_class: 'panel-status-menu-box',
-        });
-        this.add_child(panelBox);
         this.icon = new St.Icon({
             style_class: 'menu-button',
         });
@@ -62,7 +56,14 @@ class ExtensionImpl extends PanelMenu.Button {
         }
         this.icon.gicon = gicon;
         this.icon.icon_size = 17;
-        panelBox.add_child(this.icon);
+        this.add_child(this.icon);
+
+        Main.wm.addKeybinding(
+            'hplip-menu-toggle-menu',
+            this._caller.settings,
+            Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
+            Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
+            () => this.menu.toggle());
 
         let item         = null;
         let action       = null;
@@ -349,6 +350,8 @@ class ExtensionImpl extends PanelMenu.Button {
     _onDestroy() {
         Main.panel.menuManager.removeMenu(this.menu);
         super._onDestroy();
+
+        Main.wm.removeKeybinding('hplip-menu-toggle-menu');
     }
 } // class ExtensionImpl extends PanelMenu.Button //
 
@@ -513,12 +516,15 @@ export default class Hplip_menu2_Extension extends Extension {
         } else {
             this._ext = new ExtensionImpl(this, this.cmds);
         }
+        if(Main.panel.statusArea[this.name]){
+            Main.panel.statusArea[this.name] = null;
+        }
         Main.panel.addToStatusArea(this.name, this._ext, this.settings.get_int("position"), this.settings.get_string("area"));
         this.settingsID_area = this.settings.connect("changed::area", this.onPositionChanged.bind(this)); 
         this.settingsID_pos  = this.settings.connect("changed::position", this.onPositionChanged.bind(this)); 
         this.settingsID_icon = this.settings.connect("changed::icon-name", this.onIconChanged.bind(this)); 
         this.settingsID_comp = this.settings.connect("changed::compact", this.onCompactChanged.bind(this)); 
-    }
+    } // enable() //
 
     disable() {
         this.cmds = null;
@@ -536,53 +542,18 @@ export default class Hplip_menu2_Extension extends Extension {
 
     onIconChanged(){
         this.icon_name = this.settings.get_string("icon-name");
-        const summary = "Relogin required for changes to take effect!";
-        const body    = "Due to programming problems I have yet to solve "
-                        + "you will need to logout and log back in to "
-                        + "see the changes to Icon and Compact take effect.";
-        Main.notify(summary, body).setTimeout(60000000);
-        /****************************************************************
-         *                                                              *
-         *      This code bellow currently does not work, so I will     *
-         *      replace it when I know how or the bug in gnome shell    *
-         *      is gone if it is a bug.                                 *
-         *                                                              *
-         ****************************************************************/
-        //Main.panel.menuManager.removeMenu(this._ext.menu);
-        //Main.panel.statusArea[name] = null;
-        //this.area      = this.settings.get_string("area");
-        this.icon_name = this.settings.get_string("icon-name");
-        //this.position  = this.settings.get_int("position");
-        //this.compact   = this.settings.get_boolean("compact");
-        this.ext.change_icon();
-        //Main.panel.addToStatusArea(this.name, this._ext, this.position, this.area);
+        this._ext.change_icon();
     }
 
     onPositionChanged(){
         Main.panel.menuManager.removeMenu(this._ext.menu);
         Main.panel.statusArea[this.name] = null;
         this.area      = this.settings.get_string("area");
-        this.icon_name = this.settings.get_string("icon-name");
         this.position  = this.settings.get_int("position");
-        this.compact   = this.settings.get_boolean("compact");
-        Main.panel.addToStatusArea(name, this._ext, this.position, this.area);
+        Main.panel.addToStatusArea(this.name, this._ext, this.position, this.area);
     }
 
     onCompactChanged(){
-        this.compact   = this.settings.get_boolean("compact");
-        const summary = "Relogin required for changes to take effect!";
-        const body    = "Due to programming problems I have yet to solve "
-                        + "you will need to logout and log back in to "
-                        + "see the changes to Icon and Compact take effect.";
-        Main.notify(summary, body).setTimeout(60000000);
-        /****************************************************************
-         *                                                              *
-         *      This code bellow currently crashes gnome shell I will   *
-         *      replace it when I know how or the bug in gnome shell    *
-         *      is gone, given it is a bug.                             *
-         *                                                              *
-         ****************************************************************/
-        //*
         this.settings.disconnect(this.settingsID_area);
         this.settings.disconnect(this.settingsID_pos);
         this.settings.disconnect(this.settingsID_icon);
@@ -593,9 +564,8 @@ export default class Hplip_menu2_Extension extends Extension {
         this.compact   = this.settings.get_boolean("compact");
         try {
             this._ext?._onDestroy();
-            //Main.panel.menuManager.removeMenu(this._ext.menu);
             Main.panel.statusArea[this.name] = null;
-            this._ext = null;
+            delete this._ext;
         }
         catch(e){
             console.log(`Error: Hplip_menu2_Extension: ${e}`);
@@ -603,16 +573,28 @@ export default class Hplip_menu2_Extension extends Extension {
         }
         if(this.compact){
             try {
+                if(Main.panel.statusArea[this.name]){
+                    Main.panel.statusArea[this.name] = null;
+                }
                 this._ext = new CompactMenu.ApplicationsButton(this, this.cmds);
+                Main.panel.addToStatusArea(this.name, this._ext, this.position, this.area);
             }
             catch(e){
                 console.log(`Error: Hplip_menu2_Extension: ${e}`);
+                if(Main.panel.statusArea[this.name]){
+                    Main.panel.statusArea[this.name] = null;
+                }
+                this._ext = new ExtensionImpl(this, this.cmds);
+                Main.panel.addToStatusArea(this.name, this._ext, this.position, this.area);
                 return;
             }
         } else {
+            if(Main.panel.statusArea[this.name]){
+                Main.panel.statusArea[this.name] = null;
+            }
             this._ext = new ExtensionImpl(this, this.cmds);
+            Main.panel.addToStatusArea(this.name, this._ext, this.position, this.area);
         }
-        Main.panel.addToStatusArea(this.name, this._ext, this.position, this.area);
         this.settingsID_area = this.settings.connect("changed::area", this.onPositionChanged.bind(this)); 
         this.settingsID_pos  = this.settings.connect("changed::position", this.onPositionChanged.bind(this)); 
         this.settingsID_icon = this.settings.connect("changed::icon-name", this.onIconChanged.bind(this)); 

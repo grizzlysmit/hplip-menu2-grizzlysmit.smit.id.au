@@ -22,7 +22,7 @@ import St from 'gi://St';
 import {EventEmitter} from 'resource:///org/gnome/shell/misc/signals.js';
 import * as Gzz from './gzzDialog.js';
 
-import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
+import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import * as DND from 'resource:///org/gnome/shell/ui/dnd.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
@@ -587,12 +587,6 @@ export class ApplicationsButton extends PanelMenu.Button {
         if (!this._caller.get_settings().get_string("icon-name")) {
             this._caller.icon_name = "printer";
         }
-        const panelBox = new St.BoxLayout({
-            x_align: Clutter.ActorAlign.FILL,
-            y_align: Clutter.ActorAlign.FILL,
-            style_class: 'panel-status-menu-box',
-        });
-        this.add_child(panelBox);
         this.icon = new St.Icon({
             style_class: 'menu-button',
         });
@@ -616,7 +610,7 @@ export class ApplicationsButton extends PanelMenu.Button {
         }
         this.icon.gicon = gicon;
         this.icon.icon_size = 17;
-        panelBox.add_child(this.icon);
+        this.add_child(this.icon);
 
         this.name = this._caller.name;
         this.icon_actor = this.icon;
@@ -626,11 +620,9 @@ export class ApplicationsButton extends PanelMenu.Button {
             'hiding', () => this.remove_accessible_state(Atk.StateType.CHECKED),
             this);
 
-        let extensionObject = Extension.lookupByUUID(this._caller.uuid);
-        let extensionSettings = extensionObject.getSettings();
         Main.wm.addKeybinding(
-            'apps-menu-toggle-menu',
-            extensionSettings,
+            'hplip-menu-toggle-menu',
+            this._caller.settings,
             Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
             Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
             () => this.menu.toggle());
@@ -683,12 +675,12 @@ export class ApplicationsButton extends PanelMenu.Button {
     } // change_icon //
 
     _onDestroy() {
+        Main.panel.menuManager.removeMenu(this.menu);
         super._onDestroy();
 
-        Main.wm.removeKeybinding('apps-menu-toggle-menu');
+        Main.wm.removeKeybinding('hplip-menu-toggle-menu');
 
         this._desktopTarget.destroy();
-        Main.panel.menuManager.removeMenu(this.menu);
     }
 
     _onMenuKeyPress(actor, event) {

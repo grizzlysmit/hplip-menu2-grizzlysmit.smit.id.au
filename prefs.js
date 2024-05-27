@@ -10,43 +10,159 @@ import Adw from 'gi://Adw';
 import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 import Gtk from 'gi://Gtk';
 //import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
+import GObject from 'gi://GObject';
+import Gdk from 'gi://Gdk';
+
+import * as Config from 'resource:///org/gnome/Shell/Extensions/js/misc/config.js';
+
+class AboutPage extends Adw.PreferencesPage {
+    static {
+        GObject.registerClass(this);
+    }
+
+    constructor(caller, metadata){
+        super({
+            title: _('About'),
+            icon_name: 'help-about-symbolic',
+            name: 'AboutPage',
+        });
+        this._caller = caller;
+        
+        const PROJECT_TITLE = _('Alternate Menu for Hplip2');
+        const PROJECT_DESCRIPTION = _('Some usefule menus, plus the original printer stuff, espcially the hp-toolbox entrypoint to hplip');
+
+        // Project Logo, title, description-------------------------------------
+        const projectHeaderGroup = new Adw.PreferencesGroup();
+        const projectHeaderBox = new Gtk.Box({
+            orientation: Gtk.Orientation.VERTICAL,
+            hexpand: false,
+            vexpand: false,
+        });
+
+        const projectTitleLabel = new Gtk.Label({
+            label: _(PROJECT_TITLE),
+            css_classes: ['title-1'],
+            vexpand: true,
+            valign: Gtk.Align.FILL,
+        });
+
+        const projectDescriptionLabel = new Gtk.Label({
+            label: _(PROJECT_DESCRIPTION),
+            hexpand: false,
+            vexpand: false,
+        });
+        projectHeaderBox.append(projectTitleLabel);
+        projectHeaderBox.append(projectDescriptionLabel);
+        projectHeaderGroup.add(projectHeaderBox);
+
+        this.add(projectHeaderGroup);
+        // -----------------------------------------------------------------------
+
+        // Extension/OS Info and Links Group------------------------------------------------
+        const infoGroup = new Adw.PreferencesGroup();
+
+        const projectVersionRow = new Adw.ActionRow({
+            title: _('Hplip-menu2 Version'),
+        });
+        projectVersionRow.add_suffix(new Gtk.Label({
+            label: metadata.version.toString(),
+            css_classes: ['dim-label'],
+        }));
+        infoGroup.add(projectVersionRow);
+
+        if (metadata.commit) {
+            const commitRow = new Adw.ActionRow({
+                title: _('Git Commit'),
+            });
+            commitRow.add_suffix(new Gtk.Label({
+                label: metadata.commit.toString(),
+                css_classes: ['dim-label'],
+            }));
+            infoGroup.add(commitRow);
+        }
+
+        const gnomeVersionRow = new Adw.ActionRow({
+            title: _('GNOME Version'),
+        });
+        gnomeVersionRow.add_suffix(new Gtk.Label({
+            label: Config.PACKAGE_VERSION.toString(),
+            css_classes: ['dim-label'],
+        }));
+        infoGroup.add(gnomeVersionRow);
+
+        const osRow = new Adw.ActionRow({
+            title: _('OS Name'),
+        });
+
+        const name = GLib.get_os_info('NAME');
+        const prettyName = GLib.get_os_info('PRETTY_NAME');
+
+        osRow.add_suffix(new Gtk.Label({
+            label: prettyName ? prettyName : name,
+            css_classes: ['dim-label'],
+        }));
+        infoGroup.add(osRow);
+
+        const sessionTypeRow = new Adw.ActionRow({
+            title: _('Windowing System'),
+        });
+        sessionTypeRow.add_suffix(new Gtk.Label({
+            label: GLib.getenv('XDG_SESSION_TYPE') === 'wayland' ? 'Wayland' : 'X11',
+            css_classes: ['dim-label'],
+        }));
+        infoGroup.add(sessionTypeRow);
+
+        const githubRow = this._createLinkRow(_('Hplip-menu2 Github'), metadata.url);
+        infoGroup.add(githubRow);
+
+        const closeRow = this._close_row();
+        infoGroup.add(closeRow);
+
+        this.add(infoGroup);
+    }
+
+    _createLinkRow(title, uri) {
+        const image = new Gtk.Image({
+            icon_name: 'adw-external-link-symbolic',
+            valign: Gtk.Align.CENTER,
+        });
+        const linkRow = new Adw.ActionRow({
+            title: _(title),
+            activatable: true,
+        });
+        linkRow.connect('activated', () => {
+            Gtk.show_uri(this.get_root(), uri, Gdk.CURRENT_TIME);
+        });
+        linkRow.add_suffix(image);
+
+        return linkRow;
+    }
+    
+    _close_row(){
+        const title = "";
+        const row = new Adw.ActionRow({ title });
+        row.set_subtitle("");
+        const close_button = new Gtk.Button({
+                                                        label: _("Exit Settings"),
+                                                         css_classes: ["suggested-action"],
+                                                         valign: Gtk.Align.CENTER,
+                                                    });
+        row.add_suffix(close_button);
+        row.activatable_widget = close_button;
+        close_button.connect("clicked", () => { this._caller._close_request(this._caller._window); });
+
+        return row;
+    } // _close_row() //
+
+} // class AboutPage extends Adw.PreferencesPage //
 
 export default class HpExtensionPreferences extends ExtensionPreferences {
 
-    async _close_request(win){
-        if(this._window?._dirty){
-            const dlg = new Gtk.AlertDialog();
-            dlg.set_modal(true);
-            dlg.set_buttons(["Cancel", "Exit Without Saving", "Save"]);
-            dlg.set_cancel_button(0);
-            dlg.set_default_button(2);
-            dlg.set_message("Save Changes?");
-            dlg.set_detail("You have unsaved changes");
-            await dlg.choose(win, null, (_sourceObject, result) => {
-                try {
-                    const choice = dlg.choose_finish(result);
-                    switch (choice) {
-                        case 0: // "cancel" button //
-                            break;
-                        case 1: // "Exit Without Saving" button //
-                            this._window.close();
-                            break;
-                        case 2: // "Save" button //
-                            this.save_clicked();
-                            this._window.close();
-                            break;
-                    } //switch (choice) //
-                } catch (e) {
-                    console.error(e);
-                }
-            });
-            return true;
-        }else{ // if(this._window?._dirty) //
-            //this.force_close();
-            this._window.close();
-            return false;
-        }
-    } // async _close_request(win) //
+    _close_request(_win){
+        this._window.close();
+        return false;
+    } // _close_request(_win) //
 
     _area_token_box(){
         const title = _("Area in the panel");
@@ -90,25 +206,6 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         return row;
     } // _icon_token_box() //
 
-    save_clicked(){
-        if(this._window?._dirty){
-            // update the values
-            if(this.area !== this._window._settings.get_string("area"))
-                this._window._settings.set_string("area", this.area);
-            if(this.icon_name !== this._window._settings.get_string("icon-name"))
-                this._window._settings.set_string("icon-name", this.icon_name);
-            if(0 <= this.position_input.get_value() && this.position_input.get_value() <= 25){
-                if(this.position_input.get_value() !== this._window._settings.get_int("position"))
-                    this._window._settings.set_int("position", this.position_input.get_value());
-            }
-            if(this.compact_switch.get_state() !== this._window._settings.get_boolean("compact"))
-                this._window._settings.set_boolean("compact", this.compact_switch.get_state());
-
-            this._window._dirty = false;
-            //this._window._settings.apply(); // save the settings //
-        }
-    } // save_clicked() //
-
     area_dropdown_clicked(combo){
         switch(combo.selected){
             case 0:
@@ -121,7 +218,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                 this.area = "right";
                 break;
         }
-        this._window._dirty = true;
+        this._window._settings.set_string("area", this.area);
     } // area_dropdown_clicked(combo) //
 
     icon_dropdown_clicked(combo){
@@ -133,7 +230,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                 this.icon_name = "/usr/share/hplip/data/images/16x16/hp_logo.png";
                 break;
         }
-        this._window._dirty = true;
+        this._window._settings.set_string("icon-name", this.icon_name);
     } // icon_dropdown_clicked(combo) //
 
     _position_box(){
@@ -141,7 +238,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         const row = new Adw.ActionRow({ title });
         row.set_subtitle(_("Position in the area of the panel."));
         const slider = new Gtk.Scale({
-            digits: 2,
+            digits: 0,
             adjustment: new Gtk.Adjustment({ lower: 0, upper: 25, stepIncrement: 1 }),
             value_pos: Gtk.PositionType.RIGHT,
             hexpand: true,
@@ -149,7 +246,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         });
         slider.set_draw_value(true);
         slider.set_value(this._window._settings.get_int("position"));
-        slider.connect('value-changed', (_sw) => { this._window._dirty = true; });
+        slider.connect('value-changed', (_sw) => { this._window._settings.set_int("position", slider.get_value()); });
         slider.set_size_request(400, 15);
         row.add_suffix(slider);
         row.activatable_widget = slider;
@@ -165,24 +262,11 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         });
         row.set_subtitle(_("Compact Menu."));
         this.compact_switch = row.activatable_widget; // get the internal Gtk.Switch //
-        this.compact_switch.connect("state-set", (_sw, _state) => { this._window._dirty = true; });
+        this.compact_switch.connect("state-set", (_sw, state) => {
+            this._window._settings.set_boolean("compact", state);
+        });
         return row;
     } // _compact_row() //
-
-    _save_settings_box(){
-        const title = "";
-        const row = new Adw.ActionRow({ title });
-        row.set_subtitle("");
-        this.save_settings_button = new Gtk.Button({
-                                                        label: _("Save Settings"),
-                                                         css_classes: ["suggested-action"],
-                                                         valign: Gtk.Align.CENTER,
-                                                    });
-        row.add_suffix(this.save_settings_button);
-        row.activatable_widget = this.save_settings_button;
-
-        return row;
-    } // _save_settings_box() //
 
     _close_row(){
         const title = "";
@@ -206,10 +290,8 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         this.area_token_box = null;
         this.icon_token_box = null;
         this.position_input = null;
-        this.save_settings_button = null;
         this.compact_switch = null;
         this._window = window;
-        this._window._dirty = false;
 
         window._settings = this.getSettings();
         if(window._settings.get_boolean("first-time")){ // grab legacy _settings //
@@ -218,7 +300,6 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             window._settings.set_string("icon-name", window.settings_data.icon_name);
             window._settings.set_int("position", window.settings_data.position);
             window._settings.set_boolean("first-time", false); // old _settings obtained //
-            //window._settings.apply(); // save _settings //
         }
         this.area              = this._window._settings.get_string("area");
         this.icon_name         = this._window._settings.get_string("icon-name");
@@ -246,15 +327,14 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         group1.add(this.position_box);
         this.compact_row = this._compact_row();
         group1.add(this.compact_row);
-        let save_settings_box = this._save_settings_box();
-        this.save_settings_button.connect("clicked", this.save_clicked.bind(this));
-        group1.add(save_settings_box);
-        let close_row = this._close_row();
+        const close_row = this._close_row();
         group1.add(close_row);
         const hbox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, vexpand: true, hexpand: true, });
         const bottom_spacer = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: true, hexpand: true });
         hbox.prepend(bottom_spacer);
         group1.add(hbox);
+
+        const aboutPage = new AboutPage(this, this.metadata);
 
         /*****************************************
          *                                       *
@@ -270,11 +350,11 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         const page2 = Adw.PreferencesPage.new();
         page2.set_title(_("Credits"));
         page2.set_name("hplip_menu2_page2");
-        page2.set_icon_name("help-about-symbolic");
+        page2.set_icon_name("copyright-symbolic");
 
         // group2
         const group2 = Adw.PreferencesGroup.new();
-        group2.set_title(_("About"));
+        group2.set_title(_("Acknowledgements"));
         group2.set_name("Hplip_menu2_About");
 
         // The inner set of tabbed pages (or Notebook) //
@@ -406,31 +486,6 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         group2.add(hbox1);
 
         page2.add(group2);
-        window.set_deletable(false);
-        /*
-        // This doesn't work due to window being a Adw.Window not a straight Gtk.Window //
-        // I will keep it here while I see if there is another way to do it.            //
-        let preferences = new Gio.Settings({schema_id: 'org.gnome.desktop.wm.preferences'});
-        let buttonLayout = preferences.get_string('button-layout');
-        const headerbar = new Gtk.HeaderBar();
-        const closebutton = new Gtk.Button({
-                                                 //label: "",
-                                                 css_classes: ["suggested-action"],
-                                                 valign: Gtk.Align.CENTER,
-                                                 icon_name: 'window-close-symbolic', 
-                                            });
-        closebutton.connect("clicked", () => { this._close_request(this._window); });
-        if(buttonLayout.startsWith(':')){
-            headerbar.pack_start(closebutton);
-        }else{
-            headerbar.pack_end(closebutton);
-        }
-        // this is the problem changing the titlebar is not supported in Adw.Window //
-        window.set_titlebar(headerbar);
-        // */
-        // The differences between Gtk.Window andd Adw.Window may well explain why  //
-        // returning true from "close-request" didn't stop the window closing too?? //
-        // The question is is it a bug??? most likely!!!                            //
         window.connect("close-request", (_win) => {
             const width  = window.default_width;
             const height = window.default_height;
@@ -444,13 +499,13 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             this.icon_token_box = null;
             this.position_input = null;
             this.compact_switch = null;
-            this.save_settings_button = null;
             this._window = null;
             this.area_token_input = null;
             this.settings_data = null;
             window.destroy();
         });
         window.add(page1);
+        window.add(aboutPage);
         window.add(page2);
         window.set_default_size(this.properties_width, this.properties_height);
     } // fillPreferencesWindow(window) //

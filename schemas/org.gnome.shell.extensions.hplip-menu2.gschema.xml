@@ -47,5 +47,10 @@
             <summary>First time used settings.</summary>
             <description>This is the first time used with the new schema so check for legacy settings-json.</description>
         </key>
+        <key name="hplip-menu-toggle-menu" type="as">
+            <default>["&lt;Alt&gt;F3"]</default>
+            <summary>Keybinding to open hplip-menu2</summary>
+            <description>Keybinding to open hplip-menu2.</description>
+        </key>
     </schema>
 </schemalist>
