@@ -295,11 +295,15 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
 
         window._settings = this.getSettings();
         if(window._settings.get_boolean("first-time")){ // grab legacy _settings //
-            window.settings_data = JSON.parse(window._settings.get_string("_settings-json"));
-            window._settings.set_string("area", window.settings_data.area);
-            window._settings.set_string("icon-name", window.settings_data.icon_name);
-            window._settings.set_int("position", window.settings_data.position);
-            window._settings.set_boolean("first-time", false); // old _settings obtained //
+            try {
+                window.settings_data = JSON.parse(window._settings.get_string("_settings-json"));
+                window._settings.set_string("area", window.settings_data.area);
+                window._settings.set_string("icon-name", window.settings_data.icon_name);
+                window._settings.set_int("position", window.settings_data.position);
+            }catch(e){
+                console.log(`possible error: ${e}`);
+            }
+            window._settings.set_boolean("first-time", false); // old _settings obtained or not we don't try again //
         }
         this.area              = this._window._settings.get_string("area");
         this.icon_name         = this._window._settings.get_string("icon-name");

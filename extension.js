@@ -490,13 +490,19 @@ export default class Hplip_menu2_Extension extends Extension {
         this.appSys = Shell.AppSystem.get_default();
         this.settings = this.getSettings();
         if(this.settings.get_boolean("first-time")){ // grab legacy settings //
-            this.settings_data = JSON.parse(this.settings.get_string("settings-json"));
-            this.settings.set_string("area", this.settings_data.area);
-            this.settings.set_string("icon-name", this.settings_data.icon_name);
-            this.settings.set_int("position", this.settings_data.position);
-            this.settings.set_boolean("first-time", false); // old settings obtained //
-            this.settings.set_boolean("compact", this.settings.get_boolean("compact")); // make sure it is saved to dconf db //
-            this.settings.apply(); // save settings //
+            try {
+                this.settings_data = JSON.parse(this.settings.get_string("settings-json"));
+                this.settings.set_string("area", this.settings_data.area);
+                this.settings.set_string("icon-name", this.settings_data.icon_name);
+                this.settings.set_int("position", this.settings_data.position);
+                this.settings.set_boolean("first-time", false); // old settings obtained //
+                this.settings.set_boolean("compact", this.settings.get_boolean("compact")); // make sure it is saved to dconf db //
+                this.settings.apply(); // save settings //
+            }catch(e){
+                console.log(`possible error: ${e}`);
+                this.settings.set_boolean("first-time", false); // old settings not obtained but we will not try again //
+                this.settings.apply(); // save settings //
+            }
             this.area      = this.settings.get_string("area");
             this.icon_name = this.settings.get_string("icon-name");
             this.position  = this.settings.get_int("position");
