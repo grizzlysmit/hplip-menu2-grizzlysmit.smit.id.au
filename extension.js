@@ -9,6 +9,7 @@ import St from 'gi://St';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import Meta from 'gi://Meta';
+import Clutter from 'gi://Clutter';
 
 import * as Gzz from './gzzDialog.js';
 import * as CompactMenu from './CompactMenu.js';
@@ -18,6 +19,109 @@ import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
+
+const APPLICATION_ICON_SIZE = 32;
+
+class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
+    static {
+        GObject.registerClass(this);
+    }
+
+    constructor(button, item) {
+        super();
+        this._menuitem = this;
+        this._item = item;
+        this._button = button;
+
+        let action = null;
+        switch (this._item.type) {
+            case "command":
+            case "desktop":
+                action       = this._item?.action;
+                if(action instanceof Array)
+                    action = action[0];
+                break;
+        } // switch (this.item.type) //
+        if(action) this._app = this._button.appSys.lookup_app(action);
+
+        if(this._item.type === 'settings')
+            this._app = this._button.appSys.lookup_app('org.gnome.Settings');
+
+        this._iconBin = new St.Bin();
+        this.add_child(this._iconBin);
+
+        let menuitemLabel = new St.Label({
+            text: this._item?.text ?? '<Error bad value for this_item.text>',
+            y_expand: true,
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+        this.add_child(menuitemLabel);
+        this.label_actor = menuitemLabel;
+
+        let textureCache = St.TextureCache.get_default();
+        textureCache.connectObject('icon-theme-changed',
+            () => this._updateIcon(), this);
+        this._updateIcon();
+
+    } // constructor(button, item) //
+
+    getIcon() {
+        let action       = null;
+        let alt          = null;
+        let app          = null;
+        switch (this._item.type) {
+            case "command":
+                action       = this._item?.action;
+                alt          = this._item?.alt;
+
+                if(action instanceof Array)
+                    action = action[0];
+                app = this._button.appSys.lookup_app(action);
+                if(!app){
+                    if(alt instanceof Array)
+                        alt = alt[0];
+                    app = this._button.appSys.lookup_app(alt);
+                }
+                break;
+            case "desktop":
+                action       = this._item?.action;
+                alt          = this._item?.alt;
+
+                if(action instanceof Array)
+                    action = action[0];
+                app = this._button.appSys.lookup_app(action);
+                if(!app){
+                    if(alt instanceof Array)
+                        alt = alt[0];
+                    app = this._button.appSys.lookup_app(alt);
+                }
+                break;
+            case "settings":
+                app = this._button.appSys.lookup_app('org.gnome.Settings');
+                break;
+        } // switch (this.item.type) //
+        if(!app){
+            let icon = new St.Icon({
+                style_class: 'icon-dropshadow',
+            });
+            let gicon;
+            let icon_name = "printer";
+            gicon = Gio.icon_new_for_string(icon_name);
+            icon.gicon = gicon;
+            icon.icon_size = 17;
+            return icon;
+        }
+        return app.create_icon_texture(APPLICATION_ICON_SIZE);
+    }
+
+    _updateIcon() {
+        let icon = this.getIcon();
+        if(icon){
+            icon.style_class = 'icon-dropshadow';
+            this._iconBin.set_child(icon);
+        }
+    }
+} // class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem //
 
 
 class ExtensionImpl extends PanelMenu.Button {
@@ -29,6 +133,7 @@ class ExtensionImpl extends PanelMenu.Button {
         super(0.5, caller.name);
         this._caller = caller;
         this.cmds = _cmds;
+        this.appSys = this._caller.appSys;
 
         if (!this._caller.icon_name) {
             this._caller.icon_name = "printer";
@@ -78,7 +183,7 @@ class ExtensionImpl extends PanelMenu.Button {
                     action       = this.cmds[x].action;
                     alt          = this.cmds[x].alt;
                     errorMessage = this.cmds[x].errorMessage;
-                    item = new PopupMenu.PopupMenuItem(this.cmds[x].text);
+                    item         = new ApplicationMenuItem(this, this.cmds[x]);
                     item.connect("activate", this.callback_command.bind(this, item, action, alt, errorMessage));
                     this.menu.addMenuItem(item);
                     break;
@@ -87,12 +192,12 @@ class ExtensionImpl extends PanelMenu.Button {
                     alt          = this.cmds[x].alt;
                     errorMessage = this.cmds[x].errorMessage;
 
-                    item         = new PopupMenu.PopupMenuItem(this.cmds[x].text);
+                    item         = new ApplicationMenuItem(this, this.cmds[x]);
                     item.connect("activate", this.callback_desktop.bind(this, item, action, alt, errorMessage));
                     this.menu.addMenuItem(item);
                     break;
                 case "settings":
-                    item = new PopupMenu.PopupMenuItem(this.cmds[x].text);
+                    item         = new ApplicationMenuItem(this, this.cmds[x]);
                     item.connect("activate", () => { this._caller.openPreferences(); });
                     this.menu.addMenuItem(item);
                     break;
@@ -143,56 +248,48 @@ class ExtensionImpl extends PanelMenu.Button {
         this.icon.gicon = gicon;
     } // change_icon() //
     
-    menu_item_command(text, action, alt, errorMessage) {
+    menu_item_command(cmd) {
         let item = null;
-        item = new PopupMenu.PopupMenuItem(text);
+        const action       = cmd.action;
+        const alt          = cmd.alt;
+        const errorMessage = cmd.errorMessage;
+        item = new ApplicationMenuItem(this, cmd);
         item.connect("activate", this.callback_command.bind(this, item, action, alt, errorMessage));
         return item;
-    } // menu_item_command(text, action, alt, errorMessage)  //
+    } // menu_item_command(cmd)  //
 
-    menu_item_desktop(text, action, alt, errorMessage) {
+    menu_item_desktop(cmd) {
         let item = null;
-        item = new PopupMenu.PopupMenuItem(text);
+        const action       = cmd.action;
+        const alt          = cmd.alt;
+        const errorMessage = cmd.errorMessage;
+        item = new ApplicationMenuItem(this, cmd);
         item.connect("activate", this.callback_desktop.bind(this, item, action, alt, errorMessage));
         return item;
-    } // menu_item_desktop(text, action, alt, errorMessage) //
+    } // menu_item_desktop(cmd) //
 
-    menu_item_settings(text) {
+    menu_item_settings(cmd) {
         let item = null;
-        item = new PopupMenu.PopupMenuItem(text);
+        item = new ApplicationMenuItem(this, cmd);
         item.connect("activate", () => { this._caller.openPreferences(); });
         return item;
-    } // menu_item_settings(text) //
+    } // menu_item_settings(cmd) //
 
     build_opt_menu(thesubmenu, actions){
         //let item         = null;
-        let action       = null;
-        let alt          = null;
-        let errorMessage = null;
-        let text         = null;
         let submenu      = null;
         for(let x = 0; x < actions.length; x++){
+            let text = null;
 
             switch (actions[x].type) {
                 case "command":
-                    action       = actions[x].action;
-                    alt          = actions[x].alt;
-                    errorMessage = actions[x].errorMessage;
-                    text = actions[x].text;
-
-                    thesubmenu.menu.addMenuItem(this.menu_item_command(text, action, alt, errorMessage));
+                    thesubmenu.menu.addMenuItem(this.menu_item_command(actions[x]));
                     break;
                 case "desktop":
-                    action       = actions[x].action;
-                    alt          = actions[x].alt;
-                    errorMessage = actions[x].errorMessage;
-                    text = actions[x].text;
-
-                    thesubmenu.menu.addMenuItem(this.menu_item_desktop(text, action, alt, errorMessage));
+                    thesubmenu.menu.addMenuItem(this.menu_item_desktop(actions[x]));
                     break;
                 case "settings":
-                    text = actions[x].text;
-                    thesubmenu.menu.addMenuItem(this.menu_item_settings(text));
+                    thesubmenu.menu.addMenuItem(this.menu_item_settings(actions[x]));
                     break;
                 case "separator":
                     thesubmenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
@@ -210,32 +307,17 @@ class ExtensionImpl extends PanelMenu.Button {
 
     build_menu(thesubmenu, actions){
         //let item         = null;
-        let action       = null;
-        let alt          = null;
-        let errorMessage = null;
-        let text         = null;
         for(let x = 0; x < actions.length; x++){
 
             switch (actions[x].type) {
                 case "command":
-                    action       = actions[x].action;
-                    alt          = actions[x].alt;
-                    errorMessage = actions[x].errorMessage;
-                    text = actions[x].text;
-
-                    thesubmenu.menu.addMenuItem(this.menu_item_command(text, action, alt, errorMessage));
+                    thesubmenu.menu.addMenuItem(this.menu_item_command(actions[x]));
                     break;
                 case "desktop":
-                    action       = actions[x].action;
-                    alt          = actions[x].alt;
-                    errorMessage = actions[x].errorMessage;
-                    text = actions[x].text;
-
-                    thesubmenu.menu.addMenuItem(this.menu_item_desktop(text, action, alt, errorMessage));
+                    thesubmenu.menu.addMenuItem(this.menu_item_desktop(actions[x]));
                     break;
                 case "settings":
-                    text = actions[x].text;
-                    thesubmenu.menu.addMenuItem(this.menu_item_settings(text));
+                    thesubmenu.menu.addMenuItem(this.menu_item_settings(actions[x]));
                     break;
                 case "separator":
                     thesubmenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());

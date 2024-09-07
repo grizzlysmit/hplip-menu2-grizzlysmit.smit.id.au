@@ -54,6 +54,8 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
             case "command":
             case "desktop":
                 action       = this._item?.action;
+                if(action instanceof Array)
+                    action = action[0];
                 break;
         } // switch (this.item.type) //
         if(action) this._app = this._button.appSys.lookup_app(action);
@@ -246,15 +248,27 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
                 action       = this._item?.action;
                 alt          = this._item?.alt;
 
+                if(action instanceof Array)
+                    action = action[0];
                 app = this._button.appSys.lookup_app(action);
-                if(!app) app = this._button.appSys.lookup_app(alt);
+                if(!app){
+                    if(alt instanceof Array)
+                        alt = alt[0];
+                    app = this._button.appSys.lookup_app(alt);
+                }
                 break;
             case "desktop":
                 action       = this._item?.action;
                 alt          = this._item?.alt;
 
+                if(action instanceof Array)
+                    action = action[0];
                 app = this._button.appSys.lookup_app(action);
-                if(!app) app = this._button.appSys.lookup_app(alt);
+                if(!app){
+                    if(alt instanceof Array)
+                        alt = alt[0];
+                    app = this._button.appSys.lookup_app(alt);
+                }
                 break;
             case "settings":
                 app = this._button.appSys.lookup_app('org.gnome.Settings');
