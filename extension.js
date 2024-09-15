@@ -149,7 +149,7 @@ class ExtensionImpl extends PanelMenu.Button {
         } else if (re2.test(this._caller.icon_name)) {
             try {
                 gicon = Gio.icon_new_for_string(this._caller.icon_name);
-            } catch(err) {
+            } catch(_err) {
                 gicon = false;
             }
             if (!gicon) {
@@ -235,7 +235,7 @@ class ExtensionImpl extends PanelMenu.Button {
         } else if (re2.test(this._caller.icon_name)) {
             try {
                 gicon = Gio.icon_new_for_string(this._caller.icon_name);
-            } catch(err) {
+            } catch(_err) {
                 gicon = false;
             }
             if (!gicon) {

@@ -9,7 +9,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* global global:writable, Map:writable */
+/* global global:writable */
 
 import Atk from 'gi://Atk';
 import Clutter from 'gi://Clutter';
@@ -612,7 +612,7 @@ export class ApplicationsButton extends PanelMenu.Button {
         } else if (re2.test(this._caller.icon_name)) {
             try {
                 gicon = Gio.icon_new_for_string(this._caller.icon_name);
-            } catch(err) {
+            } catch(_err) {
                 gicon = false;
             }
             if (!gicon) {
@@ -675,7 +675,7 @@ export class ApplicationsButton extends PanelMenu.Button {
         } else if (re2.test(this._caller.icon_name)) {
             try {
                 gicon = Gio.icon_new_for_string(this._caller.icon_name);
-            } catch(err) {
+            } catch(_err) {
                 gicon = false;
             }
             if (!gicon) {
