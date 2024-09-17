@@ -488,7 +488,7 @@ export default class Hplip_menu2_Extension extends Extension {
         this.cmds = [
             { type: "submenu", text: _("Printers..."),                  actions: [
                 { type: "desktop", text: _("System Printers..."),             action: "gnome-printers-panel.desktop",                                      alt: ["gnome-control-center", "printers"] },
-                { type: "desktop", text: _("Additional Printer Settings..."), action: "system-config-printer.desktop",       alt: "system-config-printer.py", errorMessage: {title: _("could not run the old printer settings"), 
+                { type: "desktop", text: _("Additional Printer Settings..."), action: "system-config-printer.desktop",       alt: "system-config-printer", errorMessage: {title: _("could not run the old printer settings"), 
                                                                                                                                                                                                            text:  _("error running '/usr/share/system-config-printer/system-config-printer.py'" 
                                                                                                                                                                                                                   + "check if the relevant package is installed")}  },
                 { type: "separator" },
@@ -500,7 +500,7 @@ export default class Hplip_menu2_Extension extends Extension {
                 { type: "desktop", text: _("Gnome Tweaks..."),               action: "org.gnome.tweaks.desktop",                                               alt: ["gnome-tweaks"], errorMessage: {title: _("gnome-tweaks missing"), text: _("install the gnome-tweaks package")}  },
                 { type: "desktop", text: _("Gnome Settings..."),             action: "org.gnome.Settings.desktop",                                           alt: ["gnome-control-center"]  },
                 { type: "desktop", text: _("Extensions..."),                 action: "org.gnome.Extensions.desktop",                                           alt: ["gnome-extensions-app"]  },
-                { type: "desktop", text: _("Extension Mangager..."),         action: "com.mattjakeman.ExtensionManager.desktop",                               alt: ["extension-manager"], errorMessage: {title: _("extension-manager missing"), text: _("install the extension-manager package")}   },
+                { type: "desktop", text: _("Extension Manager..."),         action: "com.mattjakeman.ExtensionManager.desktop",                               alt: ["extension-manager"], errorMessage: {title: _("extension-manager missing"), text: _("install the extension-manager package")}   },
             ] }, 
             { type: "separator" },
             { type: "optsubmenu", text: _("Gnone Settings..."),                     actions: [
