@@ -5,7 +5,7 @@ glib-compile-schemas schemas
 DIR="po"
 SUFFIX="po"
 
-xgettext --from-code='utf-8' -k_ -kN_ -o $DIR/hplip-menu2.pot prefs.js extension.js gzzDialog.js
+xgettext --from-code='utf-8' -k_ -kN_ -o $DIR/hplip-menu2.pot prefs.js extension.js gzzDialog.js CompactMenu.js
 
 for file in "$DIR"/*.$SUFFIX
 do 

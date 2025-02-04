@@ -65,6 +65,8 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
 
     } // constructor(button, item) //
 
+
+
     getIcon() {
         let action       = null;
         let alt          = null;
@@ -130,7 +132,7 @@ class ExtensionImpl extends PanelMenu.Button {
     }
 
     constructor(caller, _cmds){
-        super(0.5, caller.name);
+        super(0.5, caller._name);
         this._caller = caller;
         this.cmds = _cmds;
         this.appSys = this._caller.appSys;
@@ -449,7 +451,7 @@ export default class Hplip_menu2_Extension extends Extension {
         this.cmds          = null;
         const id = this.uuid;
         const indx = id.indexOf('@');
-        this.name = id.substr(0, indx);
+        this._name = id.substr(0, indx);
     } // constructor(metadata) //
 
     get_cmds(){
@@ -604,10 +606,10 @@ export default class Hplip_menu2_Extension extends Extension {
         } else {
             this._ext = new ExtensionImpl(this, this.cmds);
         }
-        if(Main.panel.statusArea[this.name]){
-            Main.panel.statusArea[this.name] = null;
+        if(Main.panel.statusArea[this._name]){
+            Main.panel.statusArea[this._name] = null;
         }
-        Main.panel.addToStatusArea(this.name, this._ext, this.settings.get_int("position"), this.settings.get_string("area"));
+        Main.panel.addToStatusArea(this._name, this._ext, this.settings.get_int("position"), this.settings.get_string("area"));
         this.settingsID_area = this.settings.connect("changed::area", this.onPositionChanged.bind(this)); 
         this.settingsID_pos  = this.settings.connect("changed::position", this.onPositionChanged.bind(this)); 
         this.settingsID_icon = this.settings.connect("changed::icon-name", this.onIconChanged.bind(this)); 
@@ -635,10 +637,10 @@ export default class Hplip_menu2_Extension extends Extension {
 
     onPositionChanged(){
         Main.panel.menuManager.removeMenu(this._ext.menu);
-        Main.panel.statusArea[this.name] = null;
+        Main.panel.statusArea[this._name] = null;
         this.area      = this.settings.get_string("area");
         this.position  = this.settings.get_int("position");
-        Main.panel.addToStatusArea(this.name, this._ext, this.position, this.area);
+        Main.panel.addToStatusArea(this._name, this._ext, this.position, this.area);
     }
 
     onCompactChanged(){
@@ -652,7 +654,7 @@ export default class Hplip_menu2_Extension extends Extension {
         this.compact   = this.settings.get_boolean("compact");
         try {
             this._ext?._onDestroy();
-            Main.panel.statusArea[this.name] = null;
+            Main.panel.statusArea[this._name] = null;
             delete this._ext;
         }
         catch(e){
@@ -661,27 +663,27 @@ export default class Hplip_menu2_Extension extends Extension {
         }
         if(this.compact){
             try {
-                if(Main.panel.statusArea[this.name]){
-                    Main.panel.statusArea[this.name] = null;
+                if(Main.panel.statusArea[this._name]){
+                    Main.panel.statusArea[this._name] = null;
                 }
                 this._ext = new CompactMenu.ApplicationsButton(this, this.cmds);
-                Main.panel.addToStatusArea(this.name, this._ext, this.position, this.area);
+                Main.panel.addToStatusArea(this._name, this._ext, this.position, this.area);
             }
             catch(e){
                 console.log(`Error: Hplip_menu2_Extension: ${e}`);
-                if(Main.panel.statusArea[this.name]){
-                    Main.panel.statusArea[this.name] = null;
+                if(Main.panel.statusArea[this._name]){
+                    Main.panel.statusArea[this._name] = null;
                 }
                 this._ext = new ExtensionImpl(this, this.cmds);
-                Main.panel.addToStatusArea(this.name, this._ext, this.position, this.area);
+                Main.panel.addToStatusArea(this._name, this._ext, this.position, this.area);
                 return;
             }
         } else {
-            if(Main.panel.statusArea[this.name]){
-                Main.panel.statusArea[this.name] = null;
+            if(Main.panel.statusArea[this._name]){
+                Main.panel.statusArea[this._name] = null;
             }
             this._ext = new ExtensionImpl(this, this.cmds);
-            Main.panel.addToStatusArea(this.name, this._ext, this.position, this.area);
+            Main.panel.addToStatusArea(this._name, this._ext, this.position, this.area);
         }
         this.settingsID_area = this.settings.connect("changed::area", this.onPositionChanged.bind(this)); 
         this.settingsID_pos  = this.settings.connect("changed::position", this.onPositionChanged.bind(this)); 
