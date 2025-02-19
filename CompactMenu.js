@@ -626,7 +626,7 @@ export class ApplicationsButton extends PanelMenu.Button {
         this.icon.icon_size = 17;
         this.add_child(this.icon);
 
-        this.name = this._caller.name;
+        this.name = this._caller._name;
         this.icon_actor = this.icon;
 
         Main.overview.connectObject(
@@ -782,20 +782,32 @@ export class ApplicationsButton extends PanelMenu.Button {
             x_expand: true,
         });
         this.applicationsScrollBox.set_policy(St.PolicyType.NEVER, St.PolicyType.AUTOMATIC);
-        let vscroll = this.applicationsScrollBox.get_vscroll_bar();
-        vscroll.connect('scroll-start', () => {
+        //let vscroll = this.applicationsScrollBox.get_vscroll_bar();
+        /*
+        this.applicationsScrollBox.connect('notify::scroll-start', () => {
+            console.log('hplip: applicationsScrollBox->notify::scroll-start');
             this.menu.passEvents = true;
         });
-        vscroll.connect('scroll-stop', () => {
+        this.applicationsScrollBox.connect('notify::scroll-stop', () => {
+            console.log('hplip: applicationsScrollBox->notify::scroll-stop');
             this.menu.passEvents = false;
         });
+        // */
         this.categoriesScrollBox = new St.ScrollView({
             style_class: 'vfade',
         });
         this.categoriesScrollBox.set_policy(St.PolicyType.NEVER, St.PolicyType.AUTOMATIC);
-        vscroll = this.categoriesScrollBox.get_vscroll_bar();
-        vscroll.connect('scroll-start', () => (this.menu.passEvents = true));
-        vscroll.connect('scroll-stop', () => (this.menu.passEvents = false));
+        //vscroll = this.categoriesScrollBox.get_vscroll_bar();
+        /*
+        this.categoriesScrollBox.connect('notify::scroll-start', () => {
+            console.log('hplip: categoriesScrollBox->notify::scroll-start');
+            this.menu.passEvents = true
+        });
+        this.categoriesScrollBox.connect('notify::scroll-stop', () => {
+            console.log('hplip: categoriesScrollBox->notify::scroll-stop');
+            this.menu.passEvents = false
+        });
+        // */
         this.leftBox.add_child(this.categoriesScrollBox);
 
         this.applicationsBox = new St.BoxLayout({vertical: true});
