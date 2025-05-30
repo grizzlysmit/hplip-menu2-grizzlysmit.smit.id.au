@@ -228,8 +228,11 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         });
         row.connect('notify::selected', this.icon_dropdown_clicked.bind(this));
         const useCustomIcon = this._window._settings.get_boolean('use-custom-icon');
-        //row.set_sensitive(!useCustomIcon);
+        row.set_sensitive(!useCustomIcon);
         row.set_selectable(!useCustomIcon);
+        this.log_message(
+            'hplip_menu2', `NotesIconsPage::changed::use-custom-icon: !useCustomIcon == ${!useCustomIcon}`, new Error()
+        );
         return row;
     } // _icon_token_box() //
 
@@ -254,6 +257,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         this._window._settings.connect('changed::use-custom-icon', () => {
             const useCustomIcon = this._window._settings.get_boolean('use-custom-icon');
             this._icon_token_box.set_sensitive(!useCustomIcon);
+            this._icon_token_box.set_selectable(!useCustomIcon);
             customIconRow.set_enable_expansion(useCustomIcon)
             this.log_message(
                 'hplip_menu2', `NotesIconsPage::changed::use-custom-icon: useCustomIcon == ${useCustomIcon}`, new Error()
