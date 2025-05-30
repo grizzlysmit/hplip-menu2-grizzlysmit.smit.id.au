@@ -168,6 +168,21 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
 
     }
 
+    _show_logs_box(){
+        // Show logs for debugging //
+        const show_logs_switch_row = new Adw.SwitchRow({
+            title: _("Show logs for debugging."),
+            subtitle: _("Turn on the logging for this plugin if you don't know what this is the leave it off."),
+            active: this._window._settings.get_boolean('show-logs'), 
+        });
+        this.show_logs_switch = show_logs_switch_row.activatable_widget;
+        this.show_logs_switch.connect("state-set", (_sw, state) => {
+            this._window._settings.set_boolean("show-logs", state);
+        });
+        this._show_logs_switch_row  = show_logs_switch_row;
+        return show_logs_switch_row;
+    } // _show_logs_box() //
+
     _close_request(_win){
         this._window.close();
         return false;
@@ -213,7 +228,8 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         });
         row.connect('notify::selected', this.icon_dropdown_clicked.bind(this));
         const useCustomIcon = this._window._settings.get_boolean('use-custom-icon');
-        row.set_sensitive(!useCustomIcon);
+        //row.set_sensitive(!useCustomIcon);
+        row.set_selectable(!useCustomIcon);
         return row;
     } // _icon_token_box() //
 
@@ -229,7 +245,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         customIconRow.connect('notify::enable-expansion', () => {
             this._window._settings.set_boolean('use-custom-icon', customIconRow.enable_expansion);
             this.log_message(
-                'notes',
+                'hplip_menu2',
                 `NotesIconsPage::notify::enable-expansion: customIconRow.enable_expansion == ${customIconRow.enable_expansion}`,
                 new Error()
             );
@@ -240,7 +256,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             this._icon_token_box.set_sensitive(!useCustomIcon);
             customIconRow.set_enable_expansion(useCustomIcon)
             this.log_message(
-                'notes', `NotesIconsPage::changed::use-custom-icon: useCustomIcon == ${useCustomIcon}`, new Error()
+                'hplip_menu2', `NotesIconsPage::changed::use-custom-icon: useCustomIcon == ${useCustomIcon}`, new Error()
             );
         });
 
@@ -254,7 +270,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         });
 
         this.log_message(
-            'notes', `NotesIconsPage::constructor: customIconButton == ${customIconButton}`, new Error()
+            'hplip_menu2', `NotesIconsPage::constructor: customIconButton == ${customIconButton}`, new Error()
         );
 
         const customIconPreview = new Gtk.Image({
@@ -263,14 +279,19 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         });
 
         this.log_message(
-            'notes', `NotesIconsPage::constructor: customIconPreview == ${customIconPreview}`, new Error()
+            'hplip_menu2', `NotesIconsPage::constructor: customIconPreview == ${customIconPreview}`, new Error()
         );
 
         if(this._window._settings.get_string('icon-name')){
-            const custpath = this._window._settings.get_string('icon-name');
-            customIconPreview.set_from_file(custpath);
+            const path = this._window._settings.get_string('icon-name');
+            const fileExists = GLib.file_test(path, GLib.FileTest.IS_REGULAR);
+            if(fileExists){
+                customIconPreview.set_from_file(path);
+            }else{
+                customIconPreview.set_from_icon_name(path);
+            }
 
-            this.log_message('notes', `NotesIconsPage::constructor: custpath == ${custpath}`, new Error());
+            this.log_message('hplip_menu2', `NotesIconsPage::constructor: path == ${path}`, new Error());
         }
 
         customIconButton.connect('clicked', async () => {
@@ -279,12 +300,12 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                     name: "Images",
                 });
                 this.log_message(
-                    'notes', `NotesIconsPage::clicked: filter == ${filter}`, new Error()
+                    'hplip_menu2', `NotesIconsPage::clicked: filter == ${filter}`, new Error()
                 );
 
                 filter.add_pixbuf_formats();
                 this.log_message(
-                    'notes', `NotesIconsPage::clicked: filter == ${filter}`, new Error()
+                    'hplip_menu2', `NotesIconsPage::clicked: filter == ${filter}`, new Error()
                 );
 
                 const fileDialog = new Gtk.FileDialog({
@@ -292,19 +313,19 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                     modal: true,
                     default_filter: filter
                 });
-                this.log_message( 'notes', `NotesIconsPage::clicked: fileDialog == ${fileDialog}`, new Error());
+                this.log_message( 'hplip_menu2', `NotesIconsPage::clicked: fileDialog == ${fileDialog}`, new Error());
 
                 const file = await fileDialog.open(customIconButton.get_root(), null);
-                this.log_message( 'notes', `NotesIconsPage::clicked: file == ${file}`, new Error());
+                this.log_message( 'hplip_menu2', `NotesIconsPage::clicked: file == ${file}`, new Error());
                 if (file) {
                     const filename = file.get_path();
                     this._window._settings.set_string("icon-name", filename);
                     customIconPreview.set_from_file(filename);
-                    this.log_message( 'notes', `NotesIconsPage::clicked: filename == ${filename}`, new Error());
+                    this.log_message( 'hplip_menu2', `NotesIconsPage::clicked: filename == ${filename}`, new Error());
                 }
             } catch (error) {
-                this.log_message( 'notes', `NotesIconsPage::clicked: file == ${error}`, error);
-                console.error('notes::Error selecting custom icon:', error.message);
+                this.log_message( 'hplip_menu2', `NotesIconsPage::clicked: file == ${error}`, error);
+                console.error('hplip_menu2::Error selecting custom icon:', error.message);
             }
         });
 
@@ -396,15 +417,18 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
     } // _close_row() //
 
     fillPreferencesWindow(window) {
-        this.area = "left";
-        this.icon_name         = "printer";
-        this.area_token_box    = null;
-        this.icon_token_box    = null;
-        this.position_input    = null;
-        this.compact_switch    = null;
-        this._customIconRow    = null;
-        this._custom_icon_row_ = null;
-        this._window           = window;
+        this.area                   = "left";
+        this.icon_name              = "printer";
+        this.area_token_box         = null;
+        this.icon_token_box         = null;
+        this.position_input         = null;
+        this.compact_switch         = null;
+        this.compact_row            = null;
+        this.show_logs_box          = null;
+        this._show_logs_switch_row  = null;
+        this._customIconRow         = null;
+        this._custom_icon_row_      = null;
+        this._window                = window;
 
         window._settings = this.getSettings();
         if(window._settings.get_boolean("first-time")){ // grab legacy _settings //
@@ -446,6 +470,8 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         group1.add(this.position_box);
         this.compact_row = this._compact_row();
         group1.add(this.compact_row);
+        this.show_logs_box = this._show_logs_box();
+        group1.add(this.show_logs_box);
         const close_row = this._close_row();
         group1.add(close_row);
         const hbox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, vexpand: true, hexpand: true, });
@@ -612,17 +638,20 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                 this._window._settings.set_int("properties-width",  width);
                 this._window._settings.set_int("properties-height", height);
             } // if(width !== this.properties_width && height !== this.properties_height) //
-            this.area              = null;
-            this.icon_name         = null;
-            this.area_token_box    = null;
-            this.icon_token_box    = null;
-            this.position_input    = null;
-            this.compact_switch    = null;
-            this._customIconRow    = null;
-            this._custom_icon_row_ = null;
-            this._window           = null;
-            this.area_token_input  = null;
-            this.settings_data     = null;
+            this.area                   = null;
+            this.icon_name              = null;
+            this.area_token_box         = null;
+            this.icon_token_box         = null;
+            this.position_input         = null;
+            this.compact_switch         = null;
+            this.show_logs_box          = null;
+            this._show_logs_switch_row  = null;
+            this.compact_row            = null;
+            this._customIconRow         = null;
+            this._custom_icon_row_      = null;
+            this._window                = null;
+            this.area_token_input       = null;
+            this.settings_data          = null;
             window.destroy();
         });
         window.add(page1);
