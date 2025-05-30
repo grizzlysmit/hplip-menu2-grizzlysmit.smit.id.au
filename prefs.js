@@ -262,6 +262,12 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                 const ics = ['printer', '/usr/share/hplip/data/images/16x16/hp_logo.png', ];
                 const pos = this.icon_token_box.get_selected();
                 const icon_name = ((pos === Gtk.INVALID_LIST_POSITION) ? 'printer' : ics[pos]);
+                this.log_message(
+                    'hplip_menu2', `_custom_icon_row::changed::use-custom-icon: icon_name == ${icon_name}`, new Error()
+                );
+                if(this.customIconPreview){
+                    this.customIconPreview.set_from_icon_name(icon_name);
+                }
                 this._window._settings.set_string("icon-name", icon_name);
             }
             customIconRow.set_enable_expansion(useCustomIcon)
@@ -283,22 +289,22 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             'hplip_menu2', `_custom_icon_row::constructor: customIconButton == ${customIconButton}`, new Error()
         );
 
-        const customIconPreview = new Gtk.Image({
+        this.customIconPreview = new Gtk.Image({
             icon_name: "start-here-symbolic",
             icon_size: Gtk.IconSize.LARGE,
         });
 
         this.log_message(
-            'hplip_menu2', `_custom_icon_row::constructor: customIconPreview == ${customIconPreview}`, new Error()
+            'hplip_menu2', `_custom_icon_row::constructor: this.customIconPreview == ${this.customIconPreview}`, new Error()
         );
 
         if(this._window._settings.get_string('icon-name')){
             const path = this._window._settings.get_string('icon-name');
             const fileExists = GLib.file_test(path, GLib.FileTest.IS_REGULAR);
             if(fileExists){
-                customIconPreview.set_from_file(path);
+                this.customIconPreview.set_from_file(path);
             }else{
-                customIconPreview.set_from_icon_name(path);
+                this.customIconPreview.set_from_icon_name(path);
             }
 
             this.log_message('hplip_menu2', `_custom_icon_row::constructor: path == ${path}`, new Error());
@@ -330,7 +336,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                 if (file) {
                     const filename = file.get_path();
                     this._window._settings.set_string("icon-name", filename);
-                    customIconPreview.set_from_file(filename);
+                    this.customIconPreview.set_from_file(filename);
                     this.log_message( 'hplip_menu2', `_custom_icon_row::clicked: filename == ${filename}`, new Error());
                 }
             } catch (error) {
@@ -339,7 +345,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             }
         });
 
-        customIconSelectionRow.add_suffix(customIconPreview);
+        customIconSelectionRow.add_suffix(this.customIconPreview);
         customIconSelectionRow.add_suffix(customIconButton);
         customIconRow.add_row(customIconSelectionRow);
 
