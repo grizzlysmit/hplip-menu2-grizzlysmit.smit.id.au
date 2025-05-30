@@ -10,6 +10,7 @@ import Adw from 'gi://Adw';
 import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 import Gtk from 'gi://Gtk';
 //import Gio from 'gi://Gio';
+import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Gdk from 'gi://Gdk';
@@ -157,7 +158,15 @@ class AboutPage extends Adw.PreferencesPage {
 
 } // class AboutPage extends Adw.PreferencesPage //
 
+Gio._promisify(Gtk.FileDialog.prototype, "open", "open_finish");
 export default class HpExtensionPreferences extends ExtensionPreferences {
+
+    log_message(id, text, e){
+        if(this._window._settings.get_boolean('show-logs')){
+            console.log(`${id}:${text}: ${e.fileName}:${e.lineNumber}:${e.columnNumber}`);
+        }
+
+    }
 
     _close_request(_win){
         this._window.close();
@@ -200,11 +209,113 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             title,
             model: panelicons,
             selected: cur,
-            use_subtitle: true,
+            use_subtitle: false,
         });
         row.connect('notify::selected', this.icon_dropdown_clicked.bind(this));
+        const useCustomIcon = this._window._settings.get_boolean('use-custom-icon');
+        row.set_sensitive(!useCustomIcon);
         return row;
     } // _icon_token_box() //
+
+    _custom_icon_row(){
+        // Custom Icon //
+
+        const customIconRow = new Adw.ExpanderRow({
+            title: _('Use Custom Icon'),
+            show_enable_switch: true,
+            enable_expansion: this._window._settings.get_boolean('use-custom-icon'),
+        });
+
+        customIconRow.connect('notify::enable-expansion', () => {
+            this._window._settings.set_boolean('use-custom-icon', customIconRow.enable_expansion);
+            this.log_message(
+                'notes',
+                `NotesIconsPage::notify::enable-expansion: customIconRow.enable_expansion == ${customIconRow.enable_expansion}`,
+                new Error()
+            );
+        });
+
+        this._window._settings.connect('changed::use-custom-icon', () => {
+            const useCustomIcon = this._window._settings.get_boolean('use-custom-icon');
+            this._icon_token_box.set_sensitive(!useCustomIcon);
+            customIconRow.set_enable_expansion(useCustomIcon)
+            this.log_message(
+                'notes', `NotesIconsPage::changed::use-custom-icon: useCustomIcon == ${useCustomIcon}`, new Error()
+            );
+        });
+
+        const customIconSelectionRow = new Adw.ActionRow({
+            title: _('Selected Icon'),
+        });
+
+        const customIconButton = new Gtk.Button({
+            icon_name: 'document-open-symbolic',
+            valign: Gtk.Align.CENTER,
+        });
+
+        this.log_message(
+            'notes', `NotesIconsPage::constructor: customIconButton == ${customIconButton}`, new Error()
+        );
+
+        const customIconPreview = new Gtk.Image({
+            icon_name: "start-here-symbolic",
+            icon_size: Gtk.IconSize.LARGE,
+        });
+
+        this.log_message(
+            'notes', `NotesIconsPage::constructor: customIconPreview == ${customIconPreview}`, new Error()
+        );
+
+        if(this._window._settings.get_string('icon-name')){
+            const custpath = this._window._settings.get_string('icon-name');
+            customIconPreview.set_from_file(custpath);
+
+            this.log_message('notes', `NotesIconsPage::constructor: custpath == ${custpath}`, new Error());
+        }
+
+        customIconButton.connect('clicked', async () => {
+            try {
+                const filter = new Gtk.FileFilter({
+                    name: "Images",
+                });
+                this.log_message(
+                    'notes', `NotesIconsPage::clicked: filter == ${filter}`, new Error()
+                );
+
+                filter.add_pixbuf_formats();
+                this.log_message(
+                    'notes', `NotesIconsPage::clicked: filter == ${filter}`, new Error()
+                );
+
+                const fileDialog = new Gtk.FileDialog({
+                    title: _('Select a Custom Icon'),
+                    modal: true,
+                    default_filter: filter
+                });
+                this.log_message( 'notes', `NotesIconsPage::clicked: fileDialog == ${fileDialog}`, new Error());
+
+                const file = await fileDialog.open(customIconButton.get_root(), null);
+                this.log_message( 'notes', `NotesIconsPage::clicked: file == ${file}`, new Error());
+                if (file) {
+                    const filename = file.get_path();
+                    this._window._settings.set_string("icon-name", filename);
+                    customIconPreview.set_from_file(filename);
+                    this.log_message( 'notes', `NotesIconsPage::clicked: filename == ${filename}`, new Error());
+                }
+            } catch (error) {
+                this.log_message( 'notes', `NotesIconsPage::clicked: file == ${error}`, error);
+                console.error('notes::Error selecting custom icon:', error.message);
+            }
+        });
+
+        customIconSelectionRow.add_suffix(customIconPreview);
+        customIconSelectionRow.add_suffix(customIconButton);
+        customIconRow.add_row(customIconSelectionRow);
+
+        this._customIconRow = customIconRow;
+
+        return customIconRow;
+    } // _custom_icon_row() //
 
     area_dropdown_clicked(combo){
         switch(combo.selected){
@@ -286,12 +397,14 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
 
     fillPreferencesWindow(window) {
         this.area = "left";
-        this.icon_name = "printer";
-        this.area_token_box = null;
-        this.icon_token_box = null;
-        this.position_input = null;
-        this.compact_switch = null;
-        this._window = window;
+        this.icon_name         = "printer";
+        this.area_token_box    = null;
+        this.icon_token_box    = null;
+        this.position_input    = null;
+        this.compact_switch    = null;
+        this._customIconRow    = null;
+        this._custom_icon_row_ = null;
+        this._window           = window;
 
         window._settings = this.getSettings();
         if(window._settings.get_boolean("first-time")){ // grab legacy _settings //
@@ -327,6 +440,8 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
 
         this.icon_token_box = this._icon_token_box();
         group1.add(this.icon_token_box);
+        this._custom_icon_row_ = this._custom_icon_row();
+        group1.add(this._custom_icon_row_);
         this.position_box = this._position_box();
         group1.add(this.position_box);
         this.compact_row = this._compact_row();
@@ -497,15 +612,17 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                 this._window._settings.set_int("properties-width",  width);
                 this._window._settings.set_int("properties-height", height);
             } // if(width !== this.properties_width && height !== this.properties_height) //
-            this.area = null;
-            this.icon_name = null;
-            this.area_token_box = null;
-            this.icon_token_box = null;
-            this.position_input = null;
-            this.compact_switch = null;
-            this._window = null;
-            this.area_token_input = null;
-            this.settings_data = null;
+            this.area              = null;
+            this.icon_name         = null;
+            this.area_token_box    = null;
+            this.icon_token_box    = null;
+            this.position_input    = null;
+            this.compact_switch    = null;
+            this._customIconRow    = null;
+            this._custom_icon_row_ = null;
+            this._window           = null;
+            this.area_token_input  = null;
+            this.settings_data     = null;
             window.destroy();
         });
         window.add(page1);
