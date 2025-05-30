@@ -258,6 +258,12 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             const useCustomIcon = this._window._settings.get_boolean('use-custom-icon');
             this.icon_token_box.set_sensitive(!useCustomIcon);
             this.icon_token_box.set_selectable(!useCustomIcon);
+            if(!useCustomIcon){
+                const ics = ['printer', '/usr/share/hplip/data/images/16x16/hp_logo.png', ];
+                const pos = this.icon_token_box.get_selected();
+                const icon_name = ((pos === Gtk.INVALID_LIST_POSITION) ? 'printer' : ics[pos]);
+                this._window._settings.set_string("icon-name", icon_name);
+            }
             customIconRow.set_enable_expansion(useCustomIcon)
             this.log_message(
                 'hplip_menu2', `_custom_icon_row::changed::use-custom-icon: useCustomIcon == ${useCustomIcon}`, new Error()
