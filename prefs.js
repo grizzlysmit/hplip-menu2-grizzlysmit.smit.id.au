@@ -231,7 +231,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         row.set_sensitive(!useCustomIcon);
         row.set_selectable(!useCustomIcon);
         this.log_message(
-            'hplip_menu2', `NotesIconsPage::changed::use-custom-icon: !useCustomIcon == ${!useCustomIcon}`, new Error()
+            'hplip_menu2', `_icon_token_box::changed::use-custom-icon: !useCustomIcon == ${!useCustomIcon}`, new Error()
         );
         return row;
     } // _icon_token_box() //
@@ -249,18 +249,18 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             this._window._settings.set_boolean('use-custom-icon', customIconRow.enable_expansion);
             this.log_message(
                 'hplip_menu2',
-                `NotesIconsPage::notify::enable-expansion: customIconRow.enable_expansion == ${customIconRow.enable_expansion}`,
+                `_custom_icon_row::notify::enable-expansion: customIconRow.enable_expansion == ${customIconRow.enable_expansion}`,
                 new Error()
             );
         });
 
         this._window._settings.connect('changed::use-custom-icon', () => {
             const useCustomIcon = this._window._settings.get_boolean('use-custom-icon');
-            this._icon_token_box.set_sensitive(!useCustomIcon);
-            this._icon_token_box.set_selectable(!useCustomIcon);
+            this.icon_token_box.set_sensitive(!useCustomIcon);
+            this.icon_token_box.set_selectable(!useCustomIcon);
             customIconRow.set_enable_expansion(useCustomIcon)
             this.log_message(
-                'hplip_menu2', `NotesIconsPage::changed::use-custom-icon: useCustomIcon == ${useCustomIcon}`, new Error()
+                'hplip_menu2', `_custom_icon_row::changed::use-custom-icon: useCustomIcon == ${useCustomIcon}`, new Error()
             );
         });
 
@@ -274,7 +274,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         });
 
         this.log_message(
-            'hplip_menu2', `NotesIconsPage::constructor: customIconButton == ${customIconButton}`, new Error()
+            'hplip_menu2', `_custom_icon_row::constructor: customIconButton == ${customIconButton}`, new Error()
         );
 
         const customIconPreview = new Gtk.Image({
@@ -283,7 +283,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         });
 
         this.log_message(
-            'hplip_menu2', `NotesIconsPage::constructor: customIconPreview == ${customIconPreview}`, new Error()
+            'hplip_menu2', `_custom_icon_row::constructor: customIconPreview == ${customIconPreview}`, new Error()
         );
 
         if(this._window._settings.get_string('icon-name')){
@@ -295,7 +295,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                 customIconPreview.set_from_icon_name(path);
             }
 
-            this.log_message('hplip_menu2', `NotesIconsPage::constructor: path == ${path}`, new Error());
+            this.log_message('hplip_menu2', `_custom_icon_row::constructor: path == ${path}`, new Error());
         }
 
         customIconButton.connect('clicked', async () => {
@@ -304,12 +304,12 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                     name: "Images",
                 });
                 this.log_message(
-                    'hplip_menu2', `NotesIconsPage::clicked: filter == ${filter}`, new Error()
+                    'hplip_menu2', `_custom_icon_row::clicked: filter == ${filter}`, new Error()
                 );
 
                 filter.add_pixbuf_formats();
                 this.log_message(
-                    'hplip_menu2', `NotesIconsPage::clicked: filter == ${filter}`, new Error()
+                    'hplip_menu2', `_custom_icon_row::clicked: filter == ${filter}`, new Error()
                 );
 
                 const fileDialog = new Gtk.FileDialog({
@@ -317,18 +317,18 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                     modal: true,
                     default_filter: filter
                 });
-                this.log_message( 'hplip_menu2', `NotesIconsPage::clicked: fileDialog == ${fileDialog}`, new Error());
+                this.log_message( 'hplip_menu2', `_custom_icon_row::clicked: fileDialog == ${fileDialog}`, new Error());
 
                 const file = await fileDialog.open(customIconButton.get_root(), null);
-                this.log_message( 'hplip_menu2', `NotesIconsPage::clicked: file == ${file}`, new Error());
+                this.log_message( 'hplip_menu2', `_custom_icon_row::clicked: file == ${file}`, new Error());
                 if (file) {
                     const filename = file.get_path();
                     this._window._settings.set_string("icon-name", filename);
                     customIconPreview.set_from_file(filename);
-                    this.log_message( 'hplip_menu2', `NotesIconsPage::clicked: filename == ${filename}`, new Error());
+                    this.log_message( 'hplip_menu2', `_custom_icon_row::clicked: filename == ${filename}`, new Error());
                 }
             } catch (error) {
-                this.log_message( 'hplip_menu2', `NotesIconsPage::clicked: file == ${error}`, error);
+                this.log_message( 'hplip_menu2', `_custom_icon_row::clicked: file == ${error}`, error);
                 console.error('hplip_menu2::Error selecting custom icon:', error.message);
             }
         });
