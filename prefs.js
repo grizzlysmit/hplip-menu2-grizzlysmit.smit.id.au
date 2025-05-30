@@ -444,6 +444,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         this._show_logs_switch_row  = null;
         this._customIconRow         = null;
         this._custom_icon_row_      = null;
+        this.customIconPreview      = null;
         this._window                = window;
 
         window._settings = this.getSettings();
@@ -665,6 +666,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             this.compact_row            = null;
             this._customIconRow         = null;
             this._custom_icon_row_      = null;
+            this.customIconPreview      = null;
             this._window                = null;
             this.area_token_input       = null;
             this.settings_data          = null;
