@@ -579,7 +579,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
          *********************************************************/
         const vbox1    = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: false, hexpand: true });
 
-        title = _("Compact mode code taken from") + ": Apps Menu by fmuellner" + _("and others") + ":";
+        title = _("Compact mode code taken from") + ": Apps Menu by fmuellner " + _("and others") + ":";
         const row4 = new Adw.ActionRow({ title });
         vbox1.prepend(row4);
         title = "";
