@@ -455,6 +455,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         window._settings = this.getSettings();
         LogMessage.set_prog_id('hplip-menu2');
         LogMessage.set_show_logs(this._window._settings.get_boolean('show-logs'));
+        /*
         if(window._settings.get_boolean("first-time")){ // grab legacy _settings //
             try {
                 window.settings_data = JSON.parse(window._settings.get_string("_settings-json"));
@@ -466,6 +467,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             }
             window._settings.set_boolean("first-time", false); // old _settings obtained or not we don't try again //
         }
+        // */
         this.area              = this._window._settings.get_string("area");
         this.icon_name         = this._window._settings.get_string("icon-name");
         this.position          = this._window._settings.get_int("position");
