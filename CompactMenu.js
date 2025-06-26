@@ -50,6 +50,13 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
         this._item = item;
         this._button = button;
 
+        this.pages = {
+            settings:     0, 
+            about:        1, 
+            creditsThis:  2, 
+            creditsOther: 3, 
+        };
+
         let action = null;
         switch (this._item.type) {
             case "command":
@@ -225,6 +232,8 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
                     this.callback_desktop(this._button, this, action, alt, errorMessage);
                     break;
                 case "settings":
+                    this._button._caller.settings.set_boolean('goto-page', true);
+                    this._button._caller.settings.set_enum('page', this.pages[this._item.subtype]);
                     this._button._caller._extension.openPreferences();
                     break;
             } // switch (this._item.type) //
@@ -250,6 +259,8 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
         let action       = null;
         let alt          = null;
         let app          = null;
+        let gicon        = null;
+        let icon         = null;
         switch (this._item.type) {
             case "command":
                 action       = this._item?.action;
@@ -278,7 +289,42 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
                 }
                 break;
             case "settings":
-                app = this._button.appSys.lookup_app('org.gnome.Settings');
+                switch(this._item.subtype){
+                    case 'settings':
+                        icon = new St.Icon({
+                            style_class: 'icon-dropshadow',
+                        });
+                        gicon = Gio.icon_new_for_string('preferences-system');
+                        icon.gicon = gicon;
+                        icon.icon_size = 17;
+                        return icon;
+                    case 'about':
+                        icon = new St.Icon({
+                            style_class: 'icon-dropshadow',
+                        });
+                        gicon = Gio.icon_new_for_string('help-about');
+                        icon.gicon = gicon;
+                        icon.icon_size = 17;
+                        return icon;
+                    case 'credits->this':
+                        icon = new St.Icon({
+                            style_class: 'icon-dropshadow',
+                        });
+                        gicon = Gio.icon_new_for_string('copyright');
+                        icon.gicon = gicon;
+                        icon.icon_size = 17;
+                        return icon;
+                    case 'credits->other':
+                        icon = new St.Icon({
+                            style_class: 'icon-dropshadow',
+                        });
+                        gicon = Gio.icon_new_for_string('copyright');
+                        icon.gicon = gicon;
+                        icon.icon_size = 17;
+                        return icon;
+                    default:
+                        app = this._button.appSys.lookup_app('org.gnome.Settings');
+                } // switch(this._item.subtype) //
                 break;
         } // switch (this.item.type) //
         if(!app){

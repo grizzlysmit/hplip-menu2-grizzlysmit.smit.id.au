@@ -72,6 +72,8 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
         let action       = null;
         let alt          = null;
         let app          = null;
+        let gicon        = null;
+        let icon         = null;
         switch (this._item.type) {
             case "command":
                 action       = this._item?.action;
@@ -100,14 +102,48 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
                 }
                 break;
             case "settings":
-                app = this._button.appSys.lookup_app('org.gnome.Settings');
+                switch(this._item.subtype){
+                    case 'settings':
+                        icon = new St.Icon({
+                            style_class: 'icon-dropshadow',
+                        });
+                        gicon = Gio.icon_new_for_string('preferences-system');
+                        icon.gicon = gicon;
+                        icon.icon_size = 17;
+                        return icon;
+                    case 'about':
+                        icon = new St.Icon({
+                            style_class: 'icon-dropshadow',
+                        });
+                        gicon = Gio.icon_new_for_string('help-about');
+                        icon.gicon = gicon;
+                        icon.icon_size = 17;
+                        return icon;
+                    case 'credits->this':
+                        icon = new St.Icon({
+                            style_class: 'icon-dropshadow',
+                        });
+                        gicon = Gio.icon_new_for_string('copyright');
+                        icon.gicon = gicon;
+                        icon.icon_size = 17;
+                        return icon;
+                    case 'credits->other':
+                        icon = new St.Icon({
+                            style_class: 'icon-dropshadow',
+                        });
+                        gicon = Gio.icon_new_for_string('copyright');
+                        icon.gicon = gicon;
+                        icon.icon_size = 17;
+                        return icon;
+                    default:
+                        app = this._button.appSys.lookup_app('org.gnome.Settings');
+                } // switch(this._item.subtype) //
                 break;
         } // switch (this.item.type) //
         if(!app){
-            let icon = new St.Icon({
+            icon = new St.Icon({
                 style_class: 'icon-dropshadow',
             });
-            let gicon;
             let icon_name = "printer";
             gicon = Gio.icon_new_for_string(icon_name);
             icon.gicon = gicon;
@@ -137,6 +173,13 @@ class ExtensionImpl extends PanelMenu.Button {
         this._caller = caller;
         this.cmds = _cmds;
         this.appSys = this._caller.appSys;
+
+        this.pages = {
+            settings:     0, 
+            about:        1, 
+            creditsThis:  2, 
+            creditsOther: 3, 
+        };
 
         if (!this._caller.icon_name) {
             this._caller.icon_name = "printer";
@@ -201,7 +244,11 @@ class ExtensionImpl extends PanelMenu.Button {
                     break;
                 case "settings":
                     item         = new ApplicationMenuItem(this, this.cmds[x]);
-                    item.connect("activate", () => { this._caller._extension.openPreferences(); });
+                    item.connect("activate", () => {
+                        this._caller.settings.set_boolean('goto-page', true);
+                        this._caller.settings.set_enum('page', this.pages[this.cmds[x].subtype]);
+                        this._caller._extension.openPreferences();
+                    });
                     this.menu.addMenuItem(item);
                     break;
                 case "separator":
@@ -274,7 +321,11 @@ class ExtensionImpl extends PanelMenu.Button {
     menu_item_settings(cmd) {
         let item = null;
         item = new ApplicationMenuItem(this, cmd);
-        item.connect("activate", () => { this._caller._extension.openPreferences(); });
+        item.connect("activate", () => {
+            this._caller.settings.set_boolean('goto-page', true);
+            this._caller.settings.set_enum('page', this.pages[this.cmd.subtype]);
+            this._caller._extension.openPreferences();
+        });
         return item;
     } // menu_item_settings(cmd) //
 
@@ -538,8 +589,12 @@ class Intermediate {
                                                                                                                                                                                                                           text: _("perhaps you need to install 'gnome-software'")} },
             ] }, 
             { type: "separator" },
-            { type: "submenu", text: _("Settings & Stuff"),                  actions: [
-                { type: "settings", text: _("Settings..."),                   action: [] ,                                                                     alt: [] }
+            { type: "submenu", text: _("Settings & Stuff"),           actions: [
+                { type: "settings", text: _("Settings..."),                 action: [],   alt: [], subtype: 'settings' }, 
+                { type: "settings", text: _("About..."),                    action: [],  alt: [],  subtype: 'about' }, 
+                { type: "settings", text: _("Credits->This plugin..."),     action: [],  alt: [],  subtype: 'credtsThis' }, 
+                { type: "settings", text: _("Credits->Code used from other plugins..."),  action: [] , alt: [],
+                    subtype: 'credtsOther' }
             ] }
         ];
 

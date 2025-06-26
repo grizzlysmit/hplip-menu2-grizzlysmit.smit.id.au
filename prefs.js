@@ -468,6 +468,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             window._settings.set_boolean("first-time", false); // old _settings obtained or not we don't try again //
         }
         // */
+        this.pages             = ['settings', 'about', 'credtsThis', 'credtsOther', ];
         this.area              = this._window._settings.get_string("area");
         this.icon_name         = this._window._settings.get_string("icon-name");
         this.position          = this._window._settings.get_int("position");
@@ -475,16 +476,16 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         this.properties_height = this._window._settings.get_int("properties-height");
         this.compact           = this._window._settings.get_boolean("compact");
 
-        const page1 = Adw.PreferencesPage.new();
-        page1.set_title(_("Settings"));
-        page1.set_name("hplips_menu2_page1");
-        page1.set_icon_name("preferences-system-symbolic");
+        this.settingsPage = Adw.PreferencesPage.new();
+        this.settingsPage.set_title(_("Settings"));
+        this.settingsPage.set_name("hplips_menu2_page1");
+        this.settingsPage.set_icon_name("preferences-system-symbolic");
 
         // group1
         const group1 = Adw.PreferencesGroup.new();
         group1.set_title(_("Hplip menu2 settings"));
         group1.set_name("HpLip_menu2_global");
-        page1.add(group1);
+        this.settingsPage.add(group1);
         this.area_token_box = this._area_token_box();
         group1.add(this.area_token_box);
 
@@ -505,7 +506,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         hbox.prepend(bottom_spacer);
         group1.add(hbox);
 
-        const aboutPage = new AboutPage(this, this.metadata);
+        this.aboutPage = new AboutPage(this, this.metadata);
 
         /*****************************************
          *                                       *
@@ -517,11 +518,11 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
          *                                       *
          *                                       *
          ******************************************/
-                //page2
-        const page2 = Adw.PreferencesPage.new();
-        page2.set_title(_("Credits"));
-        page2.set_name("hplip_menu2_page2");
-        page2.set_icon_name("copyright-symbolic");
+                // creditsPage
+        this.creditsPage = Adw.PreferencesPage.new();
+        this.creditsPage.set_title(_("Credits"));
+        this.creditsPage.set_name("hplip_menu2_page2");
+        this.creditsPage.set_icon_name("copyright-symbolic");
 
         // group2
         const group2 = Adw.PreferencesGroup.new();
@@ -535,7 +536,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         *  The credits for this plugin itself *
         *                                     *
         ***************************************/
-        const vbox0    = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: false, hexpand: true });
+        this.vboxThisPlugin    = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: false, hexpand: true });
 
         let title = null;
         title = _("Copyright") + ": ©2022, ©2023 &amp; ©2024 Francis Grizzly Smit:";
@@ -545,7 +546,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         licence.set_halign(Gtk.Align.START);
         row0.add_suffix(licence);
         row0.activatable_widget = licence;
-        vbox0.prepend(row0);
+        this.vboxThisPlugin.prepend(row0);
 
         title = "url:";
         const row1 = new Adw.ActionRow({ title });
@@ -555,7 +556,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         link0.set_halign(Gtk.Align.START);
         row1.add_suffix(link0);
         row1.activatable_widget = link0;
-        vbox0.append(row1);
+        this.vboxThisPlugin.append(row1);
 
         title = _("Author") + ": Francis Grizzly Smit©";
         const row2 = new Adw.ActionRow({ title });
@@ -564,7 +565,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         link1.set_halign(Gtk.Align.START);
         row2.add_suffix(link1);
         row2.activatable_widget = link1;
-        vbox0.append(row2);
+        this.vboxThisPlugin.append(row2);
 
         title = _("Dutch localisation") + ": Vistaus (Heimen Stoffels)";
         const row3 = new Adw.ActionRow({ title });
@@ -573,10 +574,10 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         link2.set_halign(Gtk.Align.START);
         row3.add_suffix(link2);
         row3.activatable_widget = link2;
-        vbox0.append(row3);
+        this.vboxThisPlugin.append(row3);
         let close_row_credits0 = this._close_row();
-        vbox0.append(close_row_credits0);
-        this.notebook.append_page(vbox0, new Gtk.Label({ label: _("This plugin"), }));
+        this.vboxThisPlugin.append(close_row_credits0);
+        this.notebook.append_page(this.vboxThisPlugin, new Gtk.Label({ label: _("This plugin"), }));
 
         /*********************************************************
          *                                                       *
@@ -586,11 +587,11 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
          *                                                       *
          *                                                       *
          *********************************************************/
-        const vbox1    = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: false, hexpand: true });
+        this.vboxOther    = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: false, hexpand: true });
 
         title = _("Compact mode code taken from") + ": Apps Menu by fmuellner " + _("and others") + ":";
         const row4 = new Adw.ActionRow({ title });
-        vbox1.prepend(row4);
+        this.vboxOther.prepend(row4);
         title = "";
         const row5 = new Adw.ActionRow({ title });
         const uri3 = "https://extensions.gnome.org/extension/6/applications-menu/";
@@ -599,7 +600,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         link3.set_halign(Gtk.Align.START);
         row5.add_suffix(link3);
         row5.activatable_widget = link3;
-        vbox1.append(row5);
+        this.vboxOther.append(row5);
 
         title = "©2013 fmuellner";
         const row6 = new Adw.ActionRow({ title });
@@ -609,7 +610,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         link4.set_halign(Gtk.Align.START);
         row6.add_suffix(link4);
         row6.activatable_widget = link4;
-        vbox1.append(row6);
+        this.vboxOther.append(row6);
 
         title = "©2013 Debarshi Ray";
         const row7 = new Adw.ActionRow({ title });
@@ -618,11 +619,11 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         link5.set_halign(Gtk.Align.START);
         row7.add_suffix(link5);
         row7.activatable_widget = link5;
-        vbox1.append(row7);
+        this.vboxOther.append(row7);
 
         title = "©2011 Giovanni Campagna";
         const row8 = new Adw.ActionRow({ title });
-        vbox1.append(row8);
+        this.vboxOther.append(row8);
         const uri6 = "https://wiki.gnome.org/GiovanniCampagna?highlight=%28%5CbCategoryHomepage%5Cb%29";
         const _link6 = new Gtk.LinkButton({uri: uri6, label: "→" });
         _link6.set_use_underline(false);
@@ -636,7 +637,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         link6.set_halign(Gtk.Align.START);
         row9.add_suffix(link6);
         row9.activatable_widget = link6;
-        vbox1.append(row9);
+        this.vboxOther.append(row9);
 
         title = "©Vamsi Krishna Brahmajosyula";
         const row10 = new Adw.ActionRow({ title });
@@ -646,17 +647,17 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         link7.set_halign(Gtk.Align.START);
         row10.add_suffix(link7);
         row10.activatable_widget = link7;
-        vbox1.append(row10);
+        this.vboxOther.append(row10);
         let close_row_credits1 = this._close_row();
-        vbox1.append(close_row_credits1);
-        this.notebook.append_page(vbox1, new Gtk.Label({ label: _("Code used from other plugins"), } ));
+        this.vboxOther.append(close_row_credits1);
+        this.notebook.append_page(this.vboxOther, new Gtk.Label({ label: _("Code used from other plugins"), } ));
         group2.add(this.notebook);
         const hbox1 = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, vexpand: true, hexpand: true, });
         const bottom_spacer1 = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: true, hexpand: true });
         hbox1.prepend(bottom_spacer1);
         group2.add(hbox1);
 
-        page2.add(group2);
+        this.creditsPage.add(group2);
         window.connect("close-request", (_win) => {
             const width  = window.default_width;
             const height = window.default_height;
@@ -679,12 +680,69 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             this._window                = null;
             this.area_token_input       = null;
             this.settings_data          = null;
+            this.settingsPage           = null;
+            this.aboutPage              = null;
+            this.notebook               = null;
+            this.creditsPage            = null;
             window.destroy();
         });
-        window.add(page1);
-        window.add(aboutPage);
-        window.add(page2);
+        window.add(this.settingsPage);
+        window.add(this.aboutPage);
+        window.add(this.creditsPage);
+        this.settingsID_page       = this._window._settings.connect("changed::page", this.onPageChanged.bind(this));
         window.set_default_size(this.properties_width, this.properties_height);
+        if(this._window._settings.get_boolean('goto-page')){
+            this._window._settings.set_boolean('goto-page', false);
+            switch(this.pages[this._window._settings.get_enum('page')]){
+                case 'settings':
+                    this.page = this.settingsPage;
+                    this._window.set_visible_page(this.page);
+                    break;
+                case 'about':
+                    this.page = this.aboutPage;
+                    this._window.set_visible_page(this.page);
+                    break;
+                case 'credtsThis':
+                    this.page = this.creditsPage;
+                    this._window.set_visible_page(this.page);
+                    this.notebook.get_page(this.vboxThisPlugin).set_visible(true);
+                    this.notebook.set_current_page(0);
+                    break;
+                case 'credtsOther':
+                    this.page = this.creditsPage;
+                    this._window.set_visible_page(this.page);
+                    this.notebook.get_page(this.vboxOther).set_visible(true);
+                    this.notebook.set_current_page(1);
+                    break;
+            }
+        } // if(this._window._settings.get_boolean('goto-page')) //
     } // fillPreferencesWindow(window) //
+
+    onPageChanged(){
+        if(this._window._settings.get_boolean('goto-page')){
+            this._window._settings.set_boolean('goto-page', false);
+            switch(this.pages[this._window._settings.get_enum('page')]){
+                case 'settings':
+                    this.page = this.settingsPage;
+                    this._window.set_visible_page(this.page);
+                    break;
+                case 'about':
+                    this.page = this.aboutPage;
+                    this._window.set_visible_page(this.page);
+                    break;
+                case 'credtsThis':
+                    this.page = this.creditsPage;
+                    this._window.set_visible_page(this.page);
+                    this.notebook.set_current_page(0);
+                    break;
+                case 'credtsOther':
+                    this.page = this.creditsPage;
+                    this._window.set_visible_page(this.page);
+                    this.notebook.set_current_page(1);
+                    break;
+            }
+        } // if(this._window._settings.get_boolean('goto-page')) //
+    } // onPageChanged() //
+
 } // export default class HpExtensionPreferences extends ExtensionPreferences //
 

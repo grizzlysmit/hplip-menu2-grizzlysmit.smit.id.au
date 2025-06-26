@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <schemalist gettext-domain="hplip-menu2">
+    <enum id="org.gnome.shell.extensions.hplip-menu2.page">
+        <value value="0" nick="settings"/>
+        <value value="1" nick="about"/>
+        <value value="2" nick="credtsThis"/>
+        <value value="3" nick="credtsOther"/>
+    </enum>
     <schema path="/org/gnome/shell/extensions/hplip-menu2/" id="org.gnome.shell.extensions.hplip-menu2">
         <key type="s" name="area">
             <default>"left"</default>
@@ -45,6 +51,20 @@
             <default>["&lt;Alt&gt;F3"]</default>
             <summary>Keybinding to open hplip-menu2</summary>
             <description>Keybinding to open hplip-menu2.</description>
+        </key>
+        <key name="page" enum="org.gnome.shell.extensions.hplip-menu2.page">
+            <default>'settings'</default>
+            <summary>The Page to open on.</summary>
+            <description>
+                    Open on this page when first called (part of the communication between the plugin and it's preferences).
+            </description>
+        </key>
+        <key type="b" name="goto-page">
+            <default>false</default>
+            <summary>Goto Page.</summary>
+            <description>
+                    Goto Page if true (part of the communication between the plugin and it's preferences).
+            </description>
         </key>
     </schema>
 </schemalist>
