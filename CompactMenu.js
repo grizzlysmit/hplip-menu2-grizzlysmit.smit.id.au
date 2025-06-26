@@ -848,10 +848,10 @@ export class ApplicationsButton extends PanelMenu.Button {
         // Load categories
         this.applicationsByCategory = {};
         this.applicationsByCategory['Settings & Stuff'] = [];
-        let categoryMenuItem = new CategoryMenuItem(this, null);
-        this.categoriesBox.add_child(categoryMenuItem);
-        let text       = null;
-        let actions    = null;
+        const settingsAndStuffCategoryMenuItem = new CategoryMenuItem(this, null);
+        let categoryMenuItem = null;
+        let text             = null;
+        let actions          = null;
         for(let x = 0; x < this.cmds.length; x++){
             switch (this.cmds[x].type) {
                 case "command":
@@ -882,6 +882,8 @@ export class ApplicationsButton extends PanelMenu.Button {
                     break;
             } // switch (this.cmds[x].type) //
         } // for(let x = 0; x < this.cmds.length; x++) //
+
+        this.categoriesBox.add_child(settingsAndStuffCategoryMenuItem);
 
         // Load applications
         this._displayButtons(this._listApplications(null));
