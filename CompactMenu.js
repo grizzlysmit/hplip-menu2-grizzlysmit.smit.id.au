@@ -126,7 +126,8 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
     callback_command(item, action, _alt, errorMessage){
         let currentAction = action;
         let alt           = _alt;
-        if((currentAction === undefined || currentAction === null || currentAction.length === 0) && (alt === undefined || alt === null || alt.length === 0)){
+        if((currentAction === undefined || currentAction === null || currentAction.length === 0)
+                                        && (alt === undefined || alt === null || alt.length === 0)){
             let name = "<no defined action>.";
             
             let dialog;
