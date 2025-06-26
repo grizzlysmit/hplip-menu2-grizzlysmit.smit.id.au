@@ -452,9 +452,9 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         this.customIconPreview      = null;
         this._window                = window;
 
+        window._settings = this.getSettings();
         LogMessage.set_prog_id('hplip-menu2');
         LogMessage.set_show_logs(this._window._settings.get_boolean('show-logs'));
-        window._settings = this.getSettings();
         if(window._settings.get_boolean("first-time")){ // grab legacy _settings //
             try {
                 window.settings_data = JSON.parse(window._settings.get_string("_settings-json"));
