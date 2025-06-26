@@ -19,6 +19,8 @@ import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
+import * as LogMessage from './log_message.js';
+import Shell from 'gi://Shell';
 
 const APPLICATION_ICON_SIZE = 32;
 
@@ -440,52 +442,17 @@ class ExtensionImpl extends PanelMenu.Button {
 } // class ExtensionImpl extends PanelMenu.Button //
 
 
-
-export default class Hplip_menu2_Extension extends Extension {
-    constructor(metadata) {
-        super(metadata);
+class Intermediate {
+    constructor(extension){
+        this._extension    = extension;
         this._ext          = null;
         this.settings      = null;
         this.settings_data = null;
         this.settingsID    = null;
         this.cmds          = null;
-        const id = this.uuid;
+        const id = this._extension.uuid;
         const indx = id.indexOf('@');
         this._name = id.substr(0, indx);
-    } // constructor(metadata) //
-
-    get_cmds(){
-        return this.cmds;
-    }
-
-    get_settings(){
-        return this.settings;
-    }
-
-    set_settings(s){
-        this.settings = s;
-    }
-
-    get_settings_data(){
-        return this.settings_data;
-    }
-
-    set_settings_data(sd){
-        this.settings_data = sd;
-    }
-
-    get_title(name){
-        let t0 = _("could not run");
-        return `${t0} '${name}'`;
-    }
-
-    get_text(name){
-        let t0 = _("error running");
-        let t1 = _("it may not be installed you may need to install the packages containing");
-        return `${t0} '${name}' ${t1} '${name}'.`;
-    }
-
-    enable() {
 
         this.cmds = [
             { type: "submenu", text: _("Printers..."),                  actions: [
@@ -571,32 +538,15 @@ export default class Hplip_menu2_Extension extends Extension {
             { type: "settings", text: _("Settings..."),                   action: [] ,                                                                     alt: [] }
         ];
 
+        LogMessage.set_prog_id('hplip-menu2');
+        LogMessage.set_show_logs(this.settings.get_boolean('show-logs'));
         this.appSys = Shell.AppSystem.get_default();
-        this.settings = this.getSettings();
-        if(this.settings.get_boolean("first-time")){ // grab legacy settings //
-            try {
-                this.settings_data = JSON.parse(this.settings.get_string("settings-json"));
-                this.settings.set_string("area", this.settings_data.area);
-                this.settings.set_string("icon-name", this.settings_data.icon_name);
-                this.settings.set_int("position", this.settings_data.position);
-                this.settings.set_boolean("first-time", false); // old settings obtained //
-                this.settings.set_boolean("compact", this.settings.get_boolean("compact")); // make sure it is saved to dconf db //
-                this.settings.apply(); // save settings //
-            }catch(e){
-                console.log(`possible error: ${e}`);
-                this.settings.set_boolean("first-time", false); // old settings not obtained but we will not try again //
-                this.settings.apply(); // save settings //
-            }
-            this.area      = this.settings.get_string("area");
-            this.icon_name = this.settings.get_string("icon-name");
-            this.position  = this.settings.get_int("position");
-            this.compact   = this.settings.get_boolean("compact");
-        }else{
-            this.area      = this.settings.get_string("area");
-            this.icon_name = this.settings.get_string("icon-name");
-            this.position  = this.settings.get_int("position");
-            this.compact   = this.settings.get_boolean("compact");
-        }
+        this.settings = this._extension.getSettings();
+        this.settings.set_boolean("compact", this.settings.get_boolean("compact")); // make sure it is saved to dconf db //
+        this.area      = this.settings.get_string("area");
+        this.icon_name = this.settings.get_string("icon-name");
+        this.position  = this.settings.get_int("position");
+        this.compact   = this.settings.get_boolean("compact");
         if(this.settings.get_int("position") < 0 || this.settings.get_int("position") > 25) this.settings.set_int("position", 0);
         this.icon_name = this.settings.get_string("icon-name");
         this.area = this.settings.get_string("area");
@@ -614,9 +564,40 @@ export default class Hplip_menu2_Extension extends Extension {
         this.settingsID_pos  = this.settings.connect("changed::position", this.onPositionChanged.bind(this)); 
         this.settingsID_icon = this.settings.connect("changed::icon-name", this.onIconChanged.bind(this)); 
         this.settingsID_comp = this.settings.connect("changed::compact", this.onCompactChanged.bind(this)); 
-    } // enable() //
+    } // constructor(extension) //
 
-    disable() {
+    get_cmds(){
+        return this.cmds;
+    }
+
+    get_settings(){
+        return this.settings;
+    }
+
+    set_settings(s){
+        this.settings = s;
+    }
+
+    get_settings_data(){
+        return this.settings_data;
+    }
+
+    set_settings_data(sd){
+        this.settings_data = sd;
+    }
+
+    get_title(name){
+        let t0 = _("could not run");
+        return `${t0} '${name}'`;
+    }
+
+    get_text(name){
+        let t0 = _("error running");
+        let t1 = _("it may not be installed you may need to install the packages containing");
+        return `${t0} '${name}' ${t1} '${name}'.`;
+    }
+
+    destroy(){
         this.cmds = null;
         //Main.panel.menuManager.removeMenu(this._ext.menu);
         this._ext?._onDestroy();
@@ -624,6 +605,7 @@ export default class Hplip_menu2_Extension extends Extension {
         this.settings.disconnect(this.settingsID_pos);
         this.settings.disconnect(this.settingsID_icon);
         this.settings.disconnect(this.settingsID_comp);
+        Main.panel.statusArea[this._name] = null;
         delete this.appSys;
         delete this.settings;
         delete this.settings_data;
@@ -658,7 +640,7 @@ export default class Hplip_menu2_Extension extends Extension {
             delete this._ext;
         }
         catch(e){
-            console.log(`Error: Hplip_menu2_Extension: ${e}`);
+            LogMessage.log_message(LogMessage.get_prog_id(), `Intermediate::onCompactChanged: Error: ‷${e}‴`, e);
             return;
         }
         if(this.compact){
@@ -670,7 +652,7 @@ export default class Hplip_menu2_Extension extends Extension {
                 Main.panel.addToStatusArea(this._name, this._ext, this.position, this.area);
             }
             catch(e){
-                console.log(`Error: Hplip_menu2_Extension: ${e}`);
+                LogMessage.log_message(LogMessage.get_prog_id(), `Intermediate::onCompactChanged: Error: ‷${e}‴`, e);
                 if(Main.panel.statusArea[this._name]){
                     Main.panel.statusArea[this._name] = null;
                 }
@@ -690,6 +672,25 @@ export default class Hplip_menu2_Extension extends Extension {
         this.settingsID_icon = this.settings.connect("changed::icon-name", this.onIconChanged.bind(this)); 
         this.settingsID_comp = this.settings.connect("changed::compact", this.onCompactChanged.bind(this)); 
         // */
+    } // onCompactChanged() //
+    
+} // class Intermediate //
+
+
+
+export default class Hplip_menu2_Extension extends Extension {
+    constructor(metadata) {
+        super(metadata);
+        this._intermediate           = null;
+    } // constructor(metadata) //
+
+    enable() {
+        this._intermediate           = new Intermediate(this);
+    } // enable() //
+
+    disable() {
+        this._intermediate.destroy();
+        this._intermediate           = null;
     }
 } // export default class Hplip_menu2_Extension extends Extension //
 

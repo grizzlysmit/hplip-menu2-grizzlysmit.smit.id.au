@@ -16,6 +16,7 @@ import GObject from 'gi://GObject';
 import Gdk from 'gi://Gdk';
 
 import * as Config from 'resource:///org/gnome/Shell/Extensions/js/misc/config.js';
+import * as LogMessage from './log_message.js';
 
 class AboutPage extends Adw.PreferencesPage {
     static {
@@ -162,10 +163,7 @@ Gio._promisify(Gtk.FileDialog.prototype, "open", "open_finish");
 export default class HpExtensionPreferences extends ExtensionPreferences {
 
     log_message(id, text, e){
-        if(this._window._settings.get_boolean('show-logs')){
-            console.log(`${id}:${text}: ${e.fileName}:${e.lineNumber}:${e.columnNumber}`);
-        }
-
+        LogMessage.log_message(id, text, e);
     }
 
     _show_logs_box(){
@@ -178,6 +176,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         this.show_logs_switch = show_logs_switch_row.activatable_widget;
         this.show_logs_switch.connect("state-set", (_sw, state) => {
             this._window._settings.set_boolean("show-logs", state);
+            LogMessage.set_show_logs(this._window._settings.get_boolean('show-logs'));
         });
         this._show_logs_switch_row  = show_logs_switch_row;
         return show_logs_switch_row;
@@ -231,7 +230,8 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         row.set_sensitive(!useCustomIcon);
         row.set_selectable(!useCustomIcon);
         this.log_message(
-            'hplip_menu2', `_icon_token_box::changed::use-custom-icon: !useCustomIcon == ${!useCustomIcon}`, new Error()
+            LogMessage.get_prog_id(),
+            `_icon_token_box::changed::use-custom-icon: !useCustomIcon == ${!useCustomIcon}`, new Error()
         );
         return row;
     } // _icon_token_box() //
@@ -248,7 +248,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         customIconRow.connect('notify::enable-expansion', () => {
             this._window._settings.set_boolean('use-custom-icon', customIconRow.enable_expansion);
             this.log_message(
-                'hplip_menu2',
+                LogMessage.get_prog_id(),
                 `_custom_icon_row::notify::enable-expansion: customIconRow.enable_expansion == ${customIconRow.enable_expansion}`,
                 new Error()
             );
@@ -263,7 +263,8 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                 const pos = this.icon_token_box.get_selected();
                 const icon_name = ((pos === Gtk.INVALID_LIST_POSITION) ? 'printer' : ics[pos]);
                 this.log_message(
-                    'hplip_menu2', `_custom_icon_row::changed::use-custom-icon: icon_name == ${icon_name}`, new Error()
+                    LogMessage.get_prog_id(),
+                    `_custom_icon_row::changed::use-custom-icon: icon_name == ${icon_name}`, new Error()
                 );
                 if(this.customIconPreview){
                     this.customIconPreview.set_from_icon_name(icon_name);
@@ -272,7 +273,8 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             }
             customIconRow.set_enable_expansion(useCustomIcon)
             this.log_message(
-                'hplip_menu2', `_custom_icon_row::changed::use-custom-icon: useCustomIcon == ${useCustomIcon}`, new Error()
+                LogMessage.get_prog_id(),
+                `_custom_icon_row::changed::use-custom-icon: useCustomIcon == ${useCustomIcon}`, new Error()
             );
         });
 
@@ -286,7 +288,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         });
 
         this.log_message(
-            'hplip_menu2', `_custom_icon_row::constructor: customIconButton == ${customIconButton}`, new Error()
+            LogMessage.get_prog_id(), `_custom_icon_row::constructor: customIconButton == ${customIconButton}`, new Error()
         );
 
         this.customIconPreview = new Gtk.Image({
@@ -295,7 +297,8 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         });
 
         this.log_message(
-            'hplip_menu2', `_custom_icon_row::constructor: this.customIconPreview == ${this.customIconPreview}`, new Error()
+            LogMessage.get_prog_id(),
+            `_custom_icon_row::constructor: this.customIconPreview == ${this.customIconPreview}`, new Error()
         );
 
         if(this._window._settings.get_string('icon-name')){
@@ -307,7 +310,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                 this.customIconPreview.set_from_icon_name(path);
             }
 
-            this.log_message('hplip_menu2', `_custom_icon_row::constructor: path == ${path}`, new Error());
+            this.log_message(LogMessage.get_prog_id(), `_custom_icon_row::constructor: path == ${path}`, new Error());
         }
 
         customIconButton.connect('clicked', async () => {
@@ -316,12 +319,12 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                     name: "Images",
                 });
                 this.log_message(
-                    'hplip_menu2', `_custom_icon_row::clicked: filter == ${filter}`, new Error()
+                    LogMessage.get_prog_id(), `_custom_icon_row::clicked: filter == ${filter}`, new Error()
                 );
 
                 filter.add_pixbuf_formats();
                 this.log_message(
-                    'hplip_menu2', `_custom_icon_row::clicked: filter == ${filter}`, new Error()
+                    LogMessage.get_prog_id(), `_custom_icon_row::clicked: filter == ${filter}`, new Error()
                 );
 
                 const fileDialog = new Gtk.FileDialog({
@@ -329,18 +332,20 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                     modal: true,
                     default_filter: filter
                 });
-                this.log_message( 'hplip_menu2', `_custom_icon_row::clicked: fileDialog == ${fileDialog}`, new Error());
+                this.log_message(
+                    LogMessage.get_prog_id(), `_custom_icon_row::clicked: fileDialog == ${fileDialog}`, new Error());
 
                 const file = await fileDialog.open(customIconButton.get_root(), null);
-                this.log_message( 'hplip_menu2', `_custom_icon_row::clicked: file == ${file}`, new Error());
+                this.log_message( LogMessage.get_prog_id(), `_custom_icon_row::clicked: file == ${file}`, new Error());
                 if (file) {
                     const filename = file.get_path();
                     this._window._settings.set_string("icon-name", filename);
                     this.customIconPreview.set_from_file(filename);
-                    this.log_message( 'hplip_menu2', `_custom_icon_row::clicked: filename == ${filename}`, new Error());
+                    this.log_message(
+                        LogMessage.get_prog_id(), `_custom_icon_row::clicked: filename == ${filename}`, new Error());
                 }
             } catch (error) {
-                this.log_message( 'hplip_menu2', `_custom_icon_row::clicked: file == ${error}`, error);
+                this.log_message( LogMessage.get_prog_id(), `_custom_icon_row::clicked: file == ${error}`, error);
                 console.error('hplip_menu2::Error selecting custom icon:', error.message);
             }
         });
@@ -447,6 +452,8 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         this.customIconPreview      = null;
         this._window                = window;
 
+        LogMessage.set_prog_id('hplip-menu2');
+        LogMessage.set_show_logs(this._window._settings.get_boolean('show-logs'));
         window._settings = this.getSettings();
         if(window._settings.get_boolean("first-time")){ // grab legacy _settings //
             try {

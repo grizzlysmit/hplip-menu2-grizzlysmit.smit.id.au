@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <schemalist gettext-domain="hplip-menu2">
     <schema path="/org/gnome/shell/extensions/hplip-menu2/" id="org.gnome.shell.extensions.hplip-menu2">
-        <key type="s" name="settings-json">
-            <default>'
-            {
-                "area": "left",
-                "icon_name": "printer",
-                "position": 0,
-            }
-            '</default>
-            <summary>JSON settings</summary>
-            <description>Settings for alternate hplip menu2 configuration (deprecated).</description>
-        </key>
         <key type="s" name="area">
             <default>"left"</default>
             <summary>The panel area to place the button.</summary>
@@ -51,11 +40,6 @@
             <default>false</default>
             <summary>Traditional or Compacted</summary>
             <description>Compacted shortens the menu allowing it to use less vertical space.</description>
-        </key>
-        <key type="b" name="first-time">
-            <default>true</default>
-            <summary>First time used settings.</summary>
-            <description>This is the first time used with the new schema so check for legacy settings-json.</description>
         </key>
         <key name="hplip-menu-toggle-menu" type="as">
             <default>["&lt;Alt&gt;F3"]</default>

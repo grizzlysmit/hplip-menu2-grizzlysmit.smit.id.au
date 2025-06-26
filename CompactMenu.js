@@ -28,6 +28,7 @@ import * as DND from 'resource:///org/gnome/shell/ui/dnd.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+import * as LogMessage from './log_message.js';
 
 
 const APPLICATION_ICON_SIZE = 32;
@@ -95,8 +96,8 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
     } // constructor(button, item) //
 
     launch(action, alt){
-        if(typeof action === 'string'){
-            let path = GLib.find_program_in_path(action);
+        if(typeof action === 'string' || action instanceof String){
+            let path = GLib.find_program_in_path(action.toString());
             if(path === null){
                 if(alt === null){
                     return false;
@@ -105,7 +106,8 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
             }else{
                 return GLib.spawn(path);
             }
-        }else{
+        }else if(Array.isArray(action) && action.every( (elt) => { return elt instanceof String || typeof elt === 'string'})){
+            action = action.map( (elt) => elt.toString() );
             let path = GLib.find_program_in_path(action[0]);
             if(path === null){
                 if(alt === null){
@@ -114,6 +116,7 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
                 return this.launch(alt,  null);
             }
             return GLib.spawn_async(null, action, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
+            return Shell.util_spawn_async(null, action, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
         }
     }
 
@@ -514,10 +517,14 @@ class DesktopTarget extends EventEmitter {
             try {
                 await file.set_attributes_async(info, queryFlags, ioPriority, null);
             } catch (e) {
-                console.log(`Failed to update access time: ${e.message}`);
+                LogMessage.log_message(
+                    LogMessage.get_prog_id(), `DesktopTarget::_markTrusted: Failed to update access time: ‷${e}‴`, e
+                );
             }
         } catch (e) {
-            console.log(`Failed to mark file as trusted: ${e.message}`);
+            LogMessage.log_message(
+                LogMessage.get_prog_id(), `DesktopTarget::_markTrusted: Failed to mark file as trusted: ‷${e}‴`, e
+            );
         }
     }
 
@@ -551,7 +558,9 @@ class DesktopTarget extends EventEmitter {
             src.copy(dst, Gio.FileCopyFlags.OVERWRITE, null, null);
             this._markTrusted(dst);
         } catch (e) {
-            console.log(`Failed to copy to desktop: ${e.message}`);
+            LogMessage.log_message(
+                LogMessage.get_prog_id(), `DesktopTarget::acceptDrop: Failed to copy to desktop: ‷${e}‴`, e
+            );
         }
 
         return true;
@@ -594,10 +603,6 @@ export class ApplicationsButton extends PanelMenu.Button {
         // role ATK_ROLE_MENU like other elements of the panel.
         this.accessible_role = Atk.Role.LABEL;
 
-        if(this._caller.get_settings() === null){
-            this._caller.set_settings(this._caller.getSettings());
-            this._caller.set_settings_data(JSON.parse(this._caller.get_settings().get_string("settings-json")));
-        }
         if (!this._caller.get_settings().get_string("icon-name")) {
             this._caller.icon_name = "printer";
         }
@@ -785,11 +790,17 @@ export class ApplicationsButton extends PanelMenu.Button {
         //let vscroll = this.applicationsScrollBox.get_vscroll_bar();
         /*
         this.applicationsScrollBox.connect('notify::scroll-start', () => {
-            console.log('hplip: applicationsScrollBox->notify::scroll-start');
+            LogMessage.log_message(
+                LogMessage.get_prog_id(),
+                'ApplicationsButton::_createLayout: ‷applicationsScrollBox->notify::scroll-start‴', new Error()
+            );
             this.menu.passEvents = true;
         });
         this.applicationsScrollBox.connect('notify::scroll-stop', () => {
-            console.log('hplip: applicationsScrollBox->notify::scroll-stop');
+            LogMessage.log_message(
+                LogMessage.get_prog_id(),
+                'ApplicationsButton::_createLayout: ‷applicationsScrollBox->notify::scroll-stop‴', new Error()
+            );
             this.menu.passEvents = false;
         });
         // */
@@ -800,11 +811,17 @@ export class ApplicationsButton extends PanelMenu.Button {
         //vscroll = this.categoriesScrollBox.get_vscroll_bar();
         /*
         this.categoriesScrollBox.connect('notify::scroll-start', () => {
-            console.log('hplip: categoriesScrollBox->notify::scroll-start');
+            LogMessage.log_message(
+                LogMessage.get_prog_id(),
+                'ApplicationsButton::_createLayout: ‷categoriesScrollBox->notify::scroll-start‴', new Error()
+            );
             this.menu.passEvents = true
         });
         this.categoriesScrollBox.connect('notify::scroll-stop', () => {
-            console.log('hplip: categoriesScrollBox->notify::scroll-stop');
+            LogMessage.log_message(
+                LogMessage.get_prog_id(),
+                'ApplicationsButton::_createLayout: ‷categoriesScrollBox->notify::scroll-stop‴', new Error()
+            );
             this.menu.passEvents = false
         });
         // */
@@ -922,7 +939,12 @@ export class ApplicationsButton extends PanelMenu.Button {
                     this._applicationsButtons.set(item, menuitem);
                 }
                 catch(e){
-                    console.log(`Error comstucting ApplicationMenuItem ${JSON.stringify(item)}: ${e.message}`)
+                    LogMessage.log_message(
+                        LogMessage.get_prog_id(),
+                        'ApplicationsButton::_displayButtons:'
+                        + ` Error comstucting ApplicationMenuItem ${JSON.stringify(item)}: ‷${e}‴`,
+                        e
+                    );
                 }
             }
             if(top_of_apps && menuitem instanceof PopupMenu.PopupSeparatorMenuItem){
