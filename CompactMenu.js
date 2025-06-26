@@ -225,7 +225,7 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
                     this.callback_desktop(this._button, this, action, alt, errorMessage);
                     break;
                 case "settings":
-                    this._button._caller.openPreferences();
+                    this._button._caller._extension.openPreferences();
                     break;
             } // switch (this._item.type) //
         }

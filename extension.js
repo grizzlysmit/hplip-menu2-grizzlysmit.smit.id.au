@@ -201,7 +201,7 @@ class ExtensionImpl extends PanelMenu.Button {
                     break;
                 case "settings":
                     item         = new ApplicationMenuItem(this, this.cmds[x]);
-                    item.connect("activate", () => { this._caller.openPreferences(); });
+                    item.connect("activate", () => { this._caller._extension.openPreferences(); });
                     this.menu.addMenuItem(item);
                     break;
                 case "separator":
@@ -274,7 +274,7 @@ class ExtensionImpl extends PanelMenu.Button {
     menu_item_settings(cmd) {
         let item = null;
         item = new ApplicationMenuItem(this, cmd);
-        item.connect("activate", () => { this._caller.openPreferences(); });
+        item.connect("activate", () => { this._caller._extension.openPreferences(); });
         return item;
     } // menu_item_settings(cmd) //
 
