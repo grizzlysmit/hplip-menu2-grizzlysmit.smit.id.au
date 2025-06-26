@@ -115,7 +115,7 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
                 }
                 return this.launch(alt,  null);
             }
-            return GLib.spawn_async(null, action, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
+            //return GLib.spawn_async(null, action, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
             return Shell.util_spawn_async(null, action, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
         }
     }

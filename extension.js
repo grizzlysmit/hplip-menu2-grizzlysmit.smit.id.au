@@ -20,7 +20,6 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as LogMessage from './log_message.js';
-import Shell from 'gi://Shell';
 
 const APPLICATION_ICON_SIZE = 32;
 
