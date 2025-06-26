@@ -541,10 +541,10 @@ class Intermediate {
             { type: "settings", text: _("Settings..."),                   action: [] ,                                                                     alt: [] }
         ];
 
+        this.appSys   = Shell.AppSystem.get_default();
+        this.settings = this._extension.getSettings();
         LogMessage.set_prog_id('hplip-menu2');
         LogMessage.set_show_logs(this.settings.get_boolean('show-logs'));
-        this.appSys = Shell.AppSystem.get_default();
-        this.settings = this._extension.getSettings();
         this.settings.set_boolean("compact", this.settings.get_boolean("compact")); // make sure it is saved to dconf db //
         this.area      = this.settings.get_string("area");
         this.icon_name = this.settings.get_string("icon-name");
