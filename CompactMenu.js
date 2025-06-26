@@ -104,7 +104,8 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
                 }
                 return this.launch(alt, null);
             }else{
-                return GLib.spawn(path);
+                const [ok, _out, _err, _status, ] = GLib.spawn_command_line_sync(path);
+                return ok;
             }
         }else if(Array.isArray(action) && action.every( (elt) => { return elt instanceof String || typeof elt === 'string'})){
             action = action.map( (elt) => elt.toString() );
@@ -116,7 +117,9 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
                 return this.launch(alt,  null);
             }
             //return GLib.spawn_async(null, action, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
-            return Shell.util_spawn_async(null, action, null, GLib.SpawnFlags.SEARCH_PATH, function(_userData){});
+            return !!Shell.util_spawn_async(null, action, null, GLib.SpawnFlags.SEARCH_PATH);
+        }else{
+            return false;
         }
     }
 
