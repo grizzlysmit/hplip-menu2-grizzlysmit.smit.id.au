@@ -883,7 +883,9 @@ export class ApplicationsButton extends PanelMenu.Button {
             } // switch (this.cmds[x].type) //
         } // for(let x = 0; x < this.cmds.length; x++) //
 
-        this.categoriesBox.add_child(settingsAndStuffCategoryMenuItem);
+        if(this.applicationsByCategory['Miscellaneous'].filter( (elt) => { return elt.type !== 'separator' } ).length > 0){
+            this.categoriesBox.add_child(settingsAndStuffCategoryMenuItem);
+        }
 
         // Load applications
         this._displayButtons(this._listApplications(null));
