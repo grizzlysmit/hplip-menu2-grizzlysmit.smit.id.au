@@ -538,7 +538,9 @@ class Intermediate {
                                                                                                                                                                                                                           text: _("perhaps you need to install 'gnome-software'")} },
             ] }, 
             { type: "separator" },
-            { type: "settings", text: _("Settings..."),                   action: [] ,                                                                     alt: [] }
+            { type: "submenu", text: _("Settings & Stuff"),                  actions: [
+                { type: "settings", text: _("Settings..."),                   action: [] ,                                                                     alt: [] }
+            ] }
         ];
 
         this.appSys   = Shell.AppSystem.get_default();

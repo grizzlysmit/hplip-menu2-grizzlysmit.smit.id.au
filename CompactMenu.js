@@ -325,7 +325,7 @@ class CategoryMenuItem extends PopupMenu.PopupBaseMenuItem {
         if (this._category)
             name = this._category?.text ?? '<Error no valuefound this._category.text>';
         else
-            name = _('Settings & Stuff');
+            name = _('Miscellaneous');
 
         this.add_child(new St.Label({text: name}));
         this.connect('motion-event', this._onMotionEvent.bind(this));
@@ -744,7 +744,7 @@ export class ApplicationsButton extends PanelMenu.Button {
                     if(categoryId){
                         this.applicationsByCategory[categoryId].push(actions[x]);
                     }else{
-                        this.applicationsByCategory['Settings & Stuff'].push(actions[x]);
+                        this.applicationsByCategory['Miscellaneous'].push(actions[x]);
                     }
                     break;
             } // actions[x].type //
@@ -847,7 +847,7 @@ export class ApplicationsButton extends PanelMenu.Button {
 
         // Load categories
         this.applicationsByCategory = {};
-        this.applicationsByCategory['Settings & Stuff'] = [];
+        this.applicationsByCategory['Miscellaneous'] = [];
         const settingsAndStuffCategoryMenuItem = new CategoryMenuItem(this, null);
         let categoryMenuItem = null;
         let text             = null;
@@ -858,7 +858,7 @@ export class ApplicationsButton extends PanelMenu.Button {
                 case "desktop":
                 case "settings":
                 case "separator":
-                    this._loadCategory('Settings & Stuff', this, [ this.cmds[x] ]);
+                    this._loadCategory('Miscellaneous', this, [ this.cmds[x] ]);
                     break;
                 case "submenu":
                     text = this.cmds[x].text;
@@ -973,7 +973,7 @@ export class ApplicationsButton extends PanelMenu.Button {
         if (categoryMenuId) {
             itemlist = this.applicationsByCategory[categoryMenuId];
         } else {
-            itemlist = this.applicationsByCategory['Settings & Stuff'];
+            itemlist = this.applicationsByCategory['Miscellaneous'];
         }
 
         return itemlist;
