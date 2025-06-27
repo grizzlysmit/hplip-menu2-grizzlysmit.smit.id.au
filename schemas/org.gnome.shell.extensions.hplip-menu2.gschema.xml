@@ -3,8 +3,8 @@
     <enum id="org.gnome.shell.extensions.hplip-menu2.page">
         <value value="0" nick="settings"/>
         <value value="1" nick="about"/>
-        <value value="2" nick="credtsThis"/>
-        <value value="3" nick="credtsOther"/>
+        <value value="2" nick="creditsThis"/>
+        <value value="3" nick="creditsOther"/>
     </enum>
     <schema path="/org/gnome/shell/extensions/hplip-menu2/" id="org.gnome.shell.extensions.hplip-menu2">
         <key type="s" name="area">

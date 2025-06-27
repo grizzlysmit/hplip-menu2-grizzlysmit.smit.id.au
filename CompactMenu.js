@@ -306,7 +306,7 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
                         icon.gicon = gicon;
                         icon.icon_size = 17;
                         return icon;
-                    case 'credits->this':
+                    case 'creditsThis':
                         icon = new St.Icon({
                             style_class: 'icon-dropshadow',
                         });
@@ -314,7 +314,7 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
                         icon.gicon = gicon;
                         icon.icon_size = 17;
                         return icon;
-                    case 'credits->other':
+                    case 'creditsOther':
                         icon = new St.Icon({
                             style_class: 'icon-dropshadow',
                         });

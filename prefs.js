@@ -468,7 +468,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             window._settings.set_boolean("first-time", false); // old _settings obtained or not we don't try again //
         }
         // */
-        this.pages             = ['settings', 'about', 'credtsThis', 'credtsOther', ];
+        this.pages             = ['settings', 'about', 'creditsThis', 'creditsOther', ];
         this.area              = this._window._settings.get_string("area");
         this.icon_name         = this._window._settings.get_string("icon-name");
         this.position          = this._window._settings.get_int("position");
@@ -703,12 +703,18 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                     this._window.set_visible_page(this.page);
                     break;
                 case 'credtsThis':
+                    LogMessage.log_message(LogMessage.get_prog_id(),
+                        'HpExtensionPreferences::fillPreferencesWindow: creditsThis', new Error()
+                    );
                     this.page = this.creditsPage;
                     this._window.set_visible_page(this.page);
                     this.notebook.get_page(this.vboxThisPlugin).set_visible(true);
                     this.notebook.set_current_page(0);
                     break;
                 case 'credtsOther':
+                    LogMessage.log_message(LogMessage.get_prog_id(),
+                        'HpExtensionPreferences::fillPreferencesWindow: credtsOther', new Error()
+                    );
                     this.page = this.creditsPage;
                     this._window.set_visible_page(this.page);
                     this.notebook.get_page(this.vboxOther).set_visible(true);
@@ -731,11 +737,17 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                     this._window.set_visible_page(this.page);
                     break;
                 case 'credtsThis':
+                    LogMessage.log_message(LogMessage.get_prog_id(),
+                        'HpExtensionPreferences::fillPreferencesWindow: creditsThis', new Error()
+                    );
                     this.page = this.creditsPage;
                     this._window.set_visible_page(this.page);
                     this.notebook.set_current_page(0);
                     break;
                 case 'credtsOther':
+                    LogMessage.log_message(LogMessage.get_prog_id(),
+                        'HpExtensionPreferences::fillPreferencesWindow: credtsOther', new Error()
+                    );
                     this.page = this.creditsPage;
                     this._window.set_visible_page(this.page);
                     this.notebook.set_current_page(1);

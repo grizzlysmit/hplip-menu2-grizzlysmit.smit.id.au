@@ -119,7 +119,7 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
                         icon.gicon = gicon;
                         icon.icon_size = 17;
                         return icon;
-                    case 'credits->this':
+                    case 'creditsThis':
                         icon = new St.Icon({
                             style_class: 'icon-dropshadow',
                         });
@@ -127,7 +127,7 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
                         icon.gicon = gicon;
                         icon.icon_size = 17;
                         return icon;
-                    case 'credits->other':
+                    case 'creditsOther':
                         icon = new St.Icon({
                             style_class: 'icon-dropshadow',
                         });
@@ -592,9 +592,9 @@ class Intermediate {
             { type: "submenu", text: _("Settings & Stuff"),           actions: [
                 { type: "settings", text: _("Settings..."),                 action: [],   alt: [], subtype: 'settings' }, 
                 { type: "settings", text: _("About..."),                    action: [],  alt: [],  subtype: 'about' }, 
-                { type: "settings", text: _("Credits->This plugin..."),     action: [],  alt: [],  subtype: 'credtsThis' }, 
+                { type: "settings", text: _("Credits->This plugin..."),     action: [],  alt: [],  subtype: 'creditsThis' }, 
                 { type: "settings", text: _("Credits->Code used from other plugins..."),  action: [] , alt: [],
-                    subtype: 'credtsOther' }
+                    subtype: 'creditsOther' }
             ] }
         ];
 
