@@ -335,8 +335,13 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                 this.log_message(
                     LogMessage.get_prog_id(), `_custom_icon_row::clicked: fileDialog == ${fileDialog}`, new Error());
 
-                const file = await fileDialog.open(customIconButton.get_root(), null);
-                this.log_message( LogMessage.get_prog_id(), `_custom_icon_row::clicked: file == ${file}`, new Error());
+                let file   = null;
+                try {
+                    file = await fileDialog.open(customIconButton.get_root(), null);
+                } catch(e){
+                    this.log_message(LogMessage.get_prog_id(), `silly promise error: ${e}`, e);
+                }
+                this.log_message(LogMessage.get_prog_id(), `_custom_icon_row::clicked: file == ${file}`, new Error());
                 if (file) {
                     const filename = file.get_path();
                     this._window._settings.set_string("icon-name", filename);
