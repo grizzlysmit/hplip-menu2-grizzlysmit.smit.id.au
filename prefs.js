@@ -522,7 +522,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         this.creditsPage = Adw.PreferencesPage.new();
         this.creditsPage.set_title(_("Credits"));
         this.creditsPage.set_name("hplip_menu2_page2");
-        this.creditsPage.set_icon_name("copyright-symbolic");
+        this.creditsPage.set_icon_name("text-x-copying");
 
         // group2
         const group2 = Adw.PreferencesGroup.new();
@@ -713,16 +713,16 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                     );
                     this.page = this.creditsPage;
                     this._window.set_visible_page(this.page);
-                    this.notebook.get_page(this.vboxThisPlugin).set_visible(true);
+                    //this.vboxThisPlugin.set_visible(true);
                     this.notebook.set_current_page(0);
                     break;
                 case 'creditsOther':
                     LogMessage.log_message(LogMessage.get_prog_id(),
-                        'HpExtensionPreferences::fillPreferencesWindow: credtsOther', new Error()
+                        'HpExtensionPreferences::fillPreferencesWindow: creditsOther', new Error()
                     );
                     this.page = this.creditsPage;
                     this._window.set_visible_page(this.page);
-                    this.notebook.get_page(this.vboxOther).set_visible(true);
+                    //this.vboxOther.set_visible(true);
                     this.notebook.set_current_page(1);
                     break;
             }
@@ -756,7 +756,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                     break;
                 case 'creditsOther':
                     LogMessage.log_message(LogMessage.get_prog_id(),
-                        'HpExtensionPreferences::fillPreferencesWindow: credtsOther', new Error()
+                        'HpExtensionPreferences::fillPreferencesWindow: creditsOther', new Error()
                     );
                     this.page = this.creditsPage;
                     this._window.set_visible_page(this.page);

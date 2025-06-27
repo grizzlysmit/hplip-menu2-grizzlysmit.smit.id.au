@@ -310,7 +310,7 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
                         icon = new St.Icon({
                             style_class: 'icon-dropshadow',
                         });
-                        gicon = Gio.icon_new_for_string('copyright');
+                        gicon = Gio.icon_new_for_string('text-x-copying');
                         icon.gicon = gicon;
                         icon.icon_size = 17;
                         return icon;
@@ -318,7 +318,7 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
                         icon = new St.Icon({
                             style_class: 'icon-dropshadow',
                         });
-                        gicon = Gio.icon_new_for_string('copyright');
+                        gicon = Gio.icon_new_for_string('text-x-copying');
                         icon.gicon = gicon;
                         icon.icon_size = 17;
                         return icon;
