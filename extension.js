@@ -323,7 +323,7 @@ class ExtensionImpl extends PanelMenu.Button {
         item = new ApplicationMenuItem(this, cmd);
         item.connect("activate", () => {
             this._caller.settings.set_boolean('goto-page', true);
-            this._caller.settings.set_enum('page', this.pages[this.cmd.subtype]);
+            this._caller.settings.set_enum('page', this.pages[cmd.subtype]);
             this._caller._extension.openPreferences();
         });
         return item;
