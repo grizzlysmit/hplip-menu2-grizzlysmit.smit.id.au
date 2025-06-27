@@ -707,7 +707,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                     this.page = this.aboutPage;
                     this._window.set_visible_page(this.page);
                     break;
-                case 'credtsThis':
+                case 'creditsThis':
                     LogMessage.log_message(LogMessage.get_prog_id(),
                         'HpExtensionPreferences::fillPreferencesWindow: creditsThis', new Error()
                     );
@@ -716,7 +716,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                     this.notebook.get_page(this.vboxThisPlugin).set_visible(true);
                     this.notebook.set_current_page(0);
                     break;
-                case 'credtsOther':
+                case 'creditsOther':
                     LogMessage.log_message(LogMessage.get_prog_id(),
                         'HpExtensionPreferences::fillPreferencesWindow: credtsOther', new Error()
                     );
@@ -746,7 +746,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                     this.page = this.aboutPage;
                     this._window.set_visible_page(this.page);
                     break;
-                case 'credtsThis':
+                case 'creditsThis':
                     LogMessage.log_message(LogMessage.get_prog_id(),
                         'HpExtensionPreferences::fillPreferencesWindow: creditsThis', new Error()
                     );
@@ -754,7 +754,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
                     this._window.set_visible_page(this.page);
                     this.notebook.set_current_page(0);
                     break;
-                case 'credtsOther':
+                case 'creditsOther':
                     LogMessage.log_message(LogMessage.get_prog_id(),
                         'HpExtensionPreferences::fillPreferencesWindow: credtsOther', new Error()
                     );
