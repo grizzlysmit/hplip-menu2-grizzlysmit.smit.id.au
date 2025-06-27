@@ -36,8 +36,8 @@ const HORIZ_FACTOR = 5;
 const MENU_HEIGHT_OFFSET = 132;
 const NAVIGATION_REGION_OVERSHOOT = 50;
 
-Gio._promisify(Gio._LocalFilePrototype, 'query_info_async'/*, 'query_info_finish'*/);
-Gio._promisify(Gio._LocalFilePrototype, 'set_attributes_async'/*, 'set_attributes_finish'*/);
+Gio._promisify(Gio._LocalFilePrototype, 'query_info_async', 'query_info_finish');
+Gio._promisify(Gio._LocalFilePrototype, 'set_attributes_async', 'set_attributes_finish');
 
 class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
     static {
