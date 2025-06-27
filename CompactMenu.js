@@ -232,9 +232,13 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
                     this.callback_desktop(this._button, this, action, alt, errorMessage);
                     break;
                 case "settings":
-                    this._button._caller.settings.set_boolean('goto-page', true);
-                    this._button._caller.settings.set_enum('page', this.pages[this._item.subtype]);
-                    this._button._caller._extension.openPreferences();
+                    try {
+                        this._button._caller.settings.set_boolean('goto-page', true);
+                        this._button._caller.settings.set_enum('page', this.pages[this._item.subtype]);
+                        this._button._caller._extension.openPreferences();
+                    } catch(e){
+                        LogMessage.log_message(LogMessage.get_prog_id(), `trying to eliminate silly promise thing: ${e}`, e);
+                    }
                     break;
             } // switch (this._item.type) //
         }
@@ -243,7 +247,7 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
         super.activate(event);
 
         Main.overview.hide();
-    }
+    } // activate(event) //
 
     setActive(active, params) {
         if (active)
