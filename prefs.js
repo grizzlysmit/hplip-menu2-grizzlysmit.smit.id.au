@@ -693,7 +693,12 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         window.set_default_size(this.properties_width, this.properties_height);
         if(this._window._settings.get_boolean('goto-page')){
             this._window._settings.set_boolean('goto-page', false);
-            switch(this.pages[this._window._settings.get_enum('page')]){
+            const page_indx = this._window._settings.get_enum('page');
+            const page_     = this.pages[page_indx];
+            LogMessage.log_message(LogMessage.get_prog_id(),
+                `HpExtensionPreferences::fillPreferencesWindow: page_indx == ${page_indx}\npage_ == ${page_}`, new Error()
+            );
+            switch(page_){
                 case 'settings':
                     this.page = this.settingsPage;
                     this._window.set_visible_page(this.page);
@@ -727,7 +732,12 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
     onPageChanged(){
         if(this._window._settings.get_boolean('goto-page')){
             this._window._settings.set_boolean('goto-page', false);
-            switch(this.pages[this._window._settings.get_enum('page')]){
+            const page_indx = this._window._settings.get_enum('page');
+            const page_     = this.pages[page_indx];
+            LogMessage.log_message(LogMessage.get_prog_id(),
+                `HpExtensionPreferences::fillPreferencesWindow: page_indx == ${page_indx}\npage_ == ${page_}`, new Error()
+            );
+            switch(page_){
                 case 'settings':
                     this.page = this.settingsPage;
                     this._window.set_visible_page(this.page);
