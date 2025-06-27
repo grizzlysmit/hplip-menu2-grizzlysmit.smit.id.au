@@ -553,12 +553,27 @@ class DesktopTarget extends EventEmitter {
         let ioPriority = GLib.PRIORITY_DEFAULT;
 
         try {
-            let info = await file.query_info_async(modeAttr, queryFlags, ioPriority, null);
+            let info = null;
+            try {
+                info = await file.query_info_async(modeAttr, queryFlags, ioPriority, null);
+            } catch(e){
+                LogMessage.log_message(
+                    LogMessage.get_prog_id(), `DesktopTarget::_markTrusted: silly promise bug: ‷${e}‴`, e
+                );
+                return;
+            }
 
             let mode = info.get_attribute_uint32(modeAttr) | 0o100;
             info.set_attribute_uint32(modeAttr, mode);
             info.set_attribute_string(trustedAttr, 'yes');
-            await file.set_attributes_async(info, queryFlags, ioPriority, null);
+            try {
+                await file.set_attributes_async(info, queryFlags, ioPriority, null);
+            } catch(e){
+                LogMessage.log_message(
+                    LogMessage.get_prog_id(), `DesktopTarget::_markTrusted: silly promise bug: ‷${e}‴`, e
+                );
+                return;
+            }
 
             // Hack: force nautilus to reload file info
             info = new Gio.FileInfo();
