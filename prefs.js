@@ -582,7 +582,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         this.vboxThisPlugin.append(row3);
         let close_row_credits0 = this._close_row();
         this.vboxThisPlugin.append(close_row_credits0);
-        this.notebook.append_page(this.vboxThisPlugin, new Gtk.Label({ label: _("This plugin"), }));
+        this.notebook.append_page(this.vboxThisPlugin, new Gtk.Label({ label: _("© This plugin"), }));
 
         /*********************************************************
          *                                                       *
@@ -655,7 +655,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         this.vboxOther.append(row10);
         let close_row_credits1 = this._close_row();
         this.vboxOther.append(close_row_credits1);
-        this.notebook.append_page(this.vboxOther, new Gtk.Label({ label: _("Code used from other plugins"), } ));
+        this.notebook.append_page(this.vboxOther, new Gtk.Label({ label: _("© Code used from other plugins"), } ));
         group2.add(this.notebook);
         const hbox1 = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, vexpand: true, hexpand: true, });
         const bottom_spacer1 = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: true, hexpand: true });
