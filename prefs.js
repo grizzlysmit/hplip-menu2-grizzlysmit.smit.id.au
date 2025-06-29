@@ -203,7 +203,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
             title,
             model: panelPositions,
             selected: cur,
-            use_subtitle: true, 
+            use_subtitle: false, 
         });
         row.connect('notify::selected', this.area_dropdown_clicked.bind(this));
         return row;
@@ -544,7 +544,7 @@ export default class HpExtensionPreferences extends ExtensionPreferences {
         this.vboxThisPlugin    = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, vexpand: false, hexpand: true });
 
         let title = null;
-        title = _("Copyright") + ": ©2022, ©2023 &amp; ©2024 Francis Grizzly Smit:";
+        title = _("Copyright") + ": ©2022, ©2023, ©2024 &amp; ©2025 Francis Grizzly Smit:";
         const row0 = new Adw.ActionRow({ title });
         const licence = new Gtk.LinkButton({uri: "https://www.gnu.org/licenses/gpl-2.0.en.html", label: "Licence GPL v2+" });
         licence.set_use_underline(true);

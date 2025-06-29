@@ -505,8 +505,9 @@ class Intermediate {
         this.settingsID    = null;
         this.cmds          = null;
         const id = this._extension.uuid;
-        const indx = id.indexOf('@');
-        this._name = id.substr(0, indx);
+        //const indx = id.indexOf('@');
+        //this._name = id.substr(0, indx);
+        this._name = id;
 
         this.cmds = [
             { type: "submenu", text: _("Printers..."),                  actions: [
